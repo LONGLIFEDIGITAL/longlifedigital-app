@@ -54,12 +54,21 @@ body {
   margin: 0;
 }
 
+.ham-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .ham-btn {
+    display: block !important;
+  }
+  .nav-links-wrap {
+    display: none !important;
+  }
+}
+
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
+  width: 100%;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
