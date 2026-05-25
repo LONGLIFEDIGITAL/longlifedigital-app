@@ -1,0 +1,15 @@
+import s from '../constants/styles';
+import { fmtPrice, catLabel } from '../utils/helpers';
+import { CATS } from '../constants/data';
+
+export default function CartDrawer({ cart, setShowCart, rmCart, setPage, openCheckout, setCart }) {
+ const cartTotal = cart.reduce((sum, p) => sum + Number(p.price), 0);
+ return (
+  <div style={s.cartOverlay} onClick={()=>setShowCart(false)}>
+   <div style={s.cartDrawer} onClick={e=>e.stopPropagation()}>
+    <div style={s.cartHeader}><h3 style={s.cartTitle}>Your Cart ({cart.length})</h3><button className="btn-h" style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#374151"}} onClick={()=>setShowCart(false)}>✕</button></div>
+    {cart.length===0?(<div style={s.cartEmpty}><div style={{fontSize:48,marginBottom:12}}>🛒</div><p style={{color:"#9CA3AF",marginBottom:20}}>Your cart is empty</p><button className="btn-h" style={s.btnPrimary} onClick={()=>{setShowCart(false);setPage("shop");}}>Browse Products</button></div>):(<div style={s.cartContent}><div style={s.cartItems}>{cart.map(item=>(<div key={item.id} style={s.cartItem}><div style={s.cartItemIcon}>{CATS.find(c=>c.id===item.cat)?.icon||"📦"}</div><div style={{flex:1}}><div style={s.cartItemName}>{item.name}</div><div style={s.cartItemCat}>{catLabel(item.cat)}</div></div><div style={{textAlign:"right"}}><div style={s.cartItemPrice}>{fmtPrice(item.price)}</div><button style={{...s.delBtnSm,fontSize:10,padding:"2px 8px"}} onClick={()=>rmCart(item.id)}>Remove</button></div></div>))}</div><div style={s.cartFooter}><div style={{height:1,background:"linear-gradient(90deg,transparent,rgba(201,150,63,0.3),transparent)",marginBottom:16}}/><div style={s.cartTotalRow}><span style={{fontWeight:"700",color:"#374151",fontSize:15}}>Order Total</span><span style={{...s.cartTotalVal,color:"#9333EA"}}>{fmtPrice(cartTotal)}</span></div><p style={{fontSize:12,color:"#9CA3AF",margin:"8px 0 16px",lineHeight:1.5}}>Secure checkout powered by Stripe. Google Pay & Apple Pay accepted.</p><div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>{["💳 Card","🔵 Google Pay","🍎 Apple Pay","🔒 Stripe"].map(b=>(<span key={b} style={{fontSize:10,background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:6,padding:"3px 8px",color:"#6B7280"}}>{b}</span>))}</div>{cart.length===1?(<button className="btn-h" style={{...s.btnPrimary,width:"100%",padding:"14px",fontSize:14,marginBottom:8}} onClick={()=>{setShowCart(false);openCheckout(cart[0]);}}>✦ Checkout — {fmtPrice(cart[0].price)}</button>):(<div style={{display:"flex",flexDirection:"column",gap:8}}>{cart.map(item=>(<button key={item.id} className="btn-h" style={{...s.btnPrimary,fontSize:12,padding:"10px",textAlign:"left",display:"flex",justifyContent:"space-between"}} onClick={()=>{setShowCart(false);openCheckout(item);}}><span>{item.name}</span><span>{fmtPrice(item.price)}</span></button>))}</div>)}<button className="btn-h" style={{...s.btnOutline,width:"100%",marginTop:10,fontSize:12}} onClick={()=>setCart([])}>Clear Cart</button></div></div>)}
+   </div>
+  </div>
+ );
+}
