@@ -11,6 +11,7 @@ import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import Toast from './components/Toast';
 import LoginModal from './components/LoginModal';
+import AIChat from './components/AIChat';
 
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
@@ -226,6 +227,7 @@ export default function App() {
     setCart={setCart} fire={fire} setPage={setPage}
     orderNum={orderNum} setOrderNum={setOrderNum}
    />
+  <AIChat />
   </div>
  );
 }
