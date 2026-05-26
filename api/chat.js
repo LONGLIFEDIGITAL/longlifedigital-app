@@ -10,7 +10,7 @@ Longlife Digital offers:
 - Premium Domain Names for sale (brandable, local business, AI-related, marketing, real estate domains)
 - Digital Products: eBooks, templates, marketing tools, AI tools
 
-Promo: 10% off first order with code WELCOME10. Instant digital delivery. Phone: +1 (210) 742-4957. Email: support@longlifedigital.co
+Promo: 10% off first order with code WELCOME10. Instant digital delivery. Email: support@longlifedigital.co
 
 Help visitors find the right service or product, answer questions about pricing or offerings, and guide them toward making a purchase. Keep responses short (2-4 sentences max). If asked about specific pricing, tell them to contact us directly or check the relevant product page.`;
 
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(200).json({ reply: "Hi! Our AI assistant is being set up. In the meantime, reach us at +1 (210) 742-4957 or browse our services above. 😊" });
+    return res.status(200).json({ reply: "Hi! Our AI assistant is being set up. In the meantime, email us at support@longlifedigital.co or browse our services above. 😊" });
   }
 
   const { messages } = req.body;

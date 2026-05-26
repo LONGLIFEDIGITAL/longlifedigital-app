@@ -17,7 +17,7 @@ export default function Nav({
 }) {
  return (
   <>
-  <div style={{...s.annBar,transform:annBarHidden?"translateY(-100%)":"translateY(0)"}}><span>🎉 Get <strong>10% off</strong> your first order — Code: <strong>WELCOME10</strong> &nbsp;|&nbsp; ⚡ Instant Digital Delivery &nbsp;|&nbsp; 📞 +1 (210) 742-4957</span></div>
+  <div style={{...s.annBar,transform:annBarHidden?"translateY(-100%)":"translateY(0)"}}><span>🎉 Get <strong>10% off</strong> your first order — Code: <strong>WELCOME10</strong> &nbsp;|&nbsp; ⚡ Instant Digital Delivery &nbsp;|&nbsp; 📧 support@lldhome.com</span></div>
   <nav style={{...s.nav,boxShadow:scrolled?"0 2px 20px rgba(0,0,0,0.1)":"none",top:annBarHidden?"0":"36px",transition:"top 0.3s ease"}} onMouseLeave={()=>setActiveDropdown(null)}>
    <div style={s.navInner}>
     <div style={s.brand} onClick={()=>{setPage("home");setMenuOpen(false);setActiveDropdown(null);}}><LDLogo size={36}/><div><div style={s.brandName}>Longlife Digital</div><div style={s.brandSub}>Premium Digital Store</div></div></div>

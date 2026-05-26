@@ -1,4 +1,4 @@
-export const DEFAULT_CONTACT = { email:"support@lldhome.com", phone:"+1 (210) 742-4957", social:"@longlifedigital", website:"longlifedigital.co" };
+export const DEFAULT_CONTACT = { email:"support@lldhome.com", social:"@longlifedigital", website:"longlifedigital.co" };
 
 export const CATS = [
  { id:"all", label:"All Products", icon:"✦" },
