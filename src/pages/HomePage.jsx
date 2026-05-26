@@ -12,7 +12,51 @@ export default function HomePage({
 }) {
  return (
   <div>
-   <section style={s.hero}><div style={s.heroContent}><div style={s.heroText}><p style={s.heroEyebrow}>Premium Digital Products</p><h1 style={s.heroH1}>Beautifully Crafted<br/><span style={s.heroAccent}>Digital Products</span><br/>for Life & Business</h1><p style={s.heroSub}>Instant download ebooks, courses, marketing tools and premium domains — everything you need to grow online.</p><div style={s.heroBtns}><button className="btn-h" style={s.btnPrimary} onClick={()=>setPage("shop")}>Shop Now</button><button className="btn-h" style={s.btnSecondary} onClick={()=>setPage("about")}>Learn More</button></div></div><div style={s.heroVisual}><div style={s.heroCard}><div style={s.heroCardBadge}>⭐ Best Seller</div><div style={s.heroCardIcon}>🚀</div><div style={s.heroCardName}>AI Wealth Accelerator Bundle</div><div style={s.heroCardPriceRow}><span style={s.heroCardPrice}>$497</span><span style={s.heroCardOld}>$997</span><span style={s.heroCardSave}>Save 50%</span></div><div style={s.heroCardRating}><span style={{color:"#F59E0B"}}>★★★★★</span> <span style={{color:"#6B7280",fontSize:12}}>4.9 (128 reviews)</span></div><button className="btn-h" style={{...s.btnPrimary,width:"100%",marginTop:12}} onClick={()=>goProduct(products[0])}>View Details →</button></div></div></div></section>
+   <section style={{...s.hero,background:"linear-gradient(135deg,#0a001e 0%,#1a0533 35%,#2d0f6b 65%,#1a0533 100%)",position:"relative",overflow:"hidden",minHeight:"70vh"}}>
+     {/* Glowing orbs */}
+     <div style={{position:"absolute",width:"700px",height:"700px",top:"-250px",right:"-150px",background:"radial-gradient(circle,rgba(147,51,234,0.35) 0%,transparent 70%)",borderRadius:"50%",pointerEvents:"none"}}/>
+     <div style={{position:"absolute",width:"500px",height:"500px",bottom:"-200px",left:"-100px",background:"radial-gradient(circle,rgba(201,150,63,0.18) 0%,transparent 70%)",borderRadius:"50%",pointerEvents:"none"}}/>
+     <div style={{position:"absolute",width:"350px",height:"350px",top:"30%",left:"35%",background:"radial-gradient(circle,rgba(147,51,234,0.12) 0%,transparent 70%)",borderRadius:"50%",pointerEvents:"none"}}/>
+     {/* Gold top bar */}
+     <div style={{position:"absolute",top:0,left:0,right:0,height:"3px",background:"linear-gradient(90deg,#7C3AED,#C9963F,#E8C97A,#C9963F,#7C3AED)",pointerEvents:"none"}}/>
+     {/* Subtle grid overlay */}
+     <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)",backgroundSize:"60px 60px",pointerEvents:"none"}}/>
+     <div style={{...s.heroContent,position:"relative",zIndex:1}}>
+       <div style={s.heroText}>
+         <p style={{...s.heroEyebrow,color:"#E8C97A",background:"rgba(201,150,63,0.12)",border:"1px solid rgba(201,150,63,0.3)",borderRadius:30,display:"inline-block",padding:"5px 16px",marginBottom:20}}>✦ Premium Digital Products</p>
+         <h1 style={{...s.heroH1,color:"#ffffff"}}>Beautifully Crafted<br/><span style={{background:"linear-gradient(135deg,#C084FC,#E8C97A)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>Digital Products</span><br/>for Life & Business</h1>
+         <p style={{...s.heroSub,color:"rgba(255,255,255,0.72)"}}>Instant download ebooks, courses, marketing tools and premium domains — everything you need to grow online.</p>
+         <div style={s.heroBtns}>
+           <button className="btn-h" style={{...s.btnGold,padding:"14px 32px",fontSize:15}} onClick={()=>setPage("shop")}>Shop Now</button>
+           <button className="btn-h" style={{background:"rgba(255,255,255,0.08)",color:"#fff",border:"1px solid rgba(255,255,255,0.2)",borderRadius:8,padding:"14px 32px",fontSize:15,fontWeight:600,cursor:"pointer",backdropFilter:"blur(8px)"}} onClick={()=>setPage("about")}>Learn More</button>
+         </div>
+         <div style={{display:"flex",gap:24,marginTop:32,flexWrap:"wrap"}}>
+           {[["500+","Happy Customers"],["11+","Digital Products"],["4.9★","Avg Rating"]].map(([val,lbl])=>(
+             <div key={lbl} style={{textAlign:"center"}}>
+               <div style={{fontSize:20,fontWeight:800,color:"#E8C97A",fontFamily:"'Playfair Display',serif"}}>{val}</div>
+               <div style={{fontSize:11,color:"rgba(255,255,255,0.45)",marginTop:2}}>{lbl}</div>
+             </div>
+           ))}
+         </div>
+       </div>
+       <div style={s.heroVisual}>
+         <div style={{...s.heroCard,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",backdropFilter:"blur(24px)",boxShadow:"0 24px 80px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.1)"}}>
+           <div style={{...s.heroCardBadge,background:"rgba(201,150,63,0.2)",border:"1px solid rgba(201,150,63,0.4)",color:"#E8C97A"}}>⭐ Best Seller</div>
+           <div style={s.heroCardIcon}>🚀</div>
+           <div style={{...s.heroCardName,color:"#fff"}}>AI Wealth Accelerator Bundle</div>
+           <div style={s.heroCardPriceRow}>
+             <span style={{...s.heroCardPrice,color:"#E8C97A"}}>$497</span>
+             <span style={{...s.heroCardOld,color:"rgba(255,255,255,0.35)"}}>$997</span>
+             <span style={s.heroCardSave}>Save 50%</span>
+           </div>
+           <div style={s.heroCardRating}>
+             <span style={{color:"#F59E0B"}}>★★★★★</span> <span style={{color:"rgba(255,255,255,0.5)",fontSize:12}}>4.9 (128 reviews)</span>
+           </div>
+           <button className="btn-h" style={{...s.btnGold,width:"100%",marginTop:12}} onClick={()=>goProduct(products[0])}>View Details →</button>
+         </div>
+       </div>
+     </div>
+   </section>
    <div style={s.catStrip}><div style={s.catStripInner}>{CATS.filter(c=>c.id!=="all").map(cat=>(<div key={cat.id} className="btn-h" style={s.catStripItem} onClick={()=>{setFilterCat(cat.id);setPage("shop");}}><span style={{fontSize:28,display:"block",marginBottom:6}}>{cat.icon}</span><span style={s.catStripLabel}>{cat.label}</span><span style={s.catStripCount}>{products.filter(p=>p.cat===cat.id).length} items</span></div>))}</div></div>
    <section style={s.section}><div style={s.inner}><div style={s.sectionTop}><div><h2 style={s.sectionH2}>Featured Products</h2><p style={s.sectionSub}>Handpicked for quality and results</p></div><button className="btn-h" style={s.btnOutline} onClick={()=>setPage("shop")}>View All →</button></div><div style={s.productGrid}>{products.filter(p=>p.featured).map(p=><ProductCard key={p.id} p={p} addCart={addCart} goProduct={goProduct} fire={fire} isAdmin={isAdmin} openEdit={openEdit} openDel={openDel}/>)}</div>{isAdmin&&<div style={{textAlign:"center",marginTop:28}}><button className="btn-h" style={s.btnPrimary} onClick={openAdd}>+ Add Product</button></div>}</div></section>
    <div style={s.promoBanner}><div style={s.promoInner}><div style={s.promoText}><h3 style={s.promoH3}>🔥 Limited Time Offer</h3><p style={s.promoSub}>AI Wealth Accelerator Bundle — 50% off. Was $997, now just $497.</p></div><button className="btn-h" style={s.promoBtn} onClick={()=>goProduct(products[0])}>Shop This Deal</button></div></div>
