@@ -1,0 +1,17 @@
+{
+  "name": "Longlife Digital",
+  "short_name": "LLD",
+  "description": "Premium digital products, courses, AI tools, ebooks, and marketing templates.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a001e",
+  "theme_color": "#7C3AED",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
