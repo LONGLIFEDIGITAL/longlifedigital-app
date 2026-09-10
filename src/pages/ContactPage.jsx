@@ -1,23 +1,366 @@
+import { Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
 import { useState } from 'react';
-import s from '../constants/styles';
-
 export default function ContactPage({ fire }) {
- const [cf,setCf]=useState({name:"",email:"",service:"",message:""});
- const [sent,setSent]=useState(false);
- return (
-  <div>
-   <div style={s.shopHero}><div style={s.inner}><div style={s.secLabel}>✦ GET IN TOUCH ✦</div><h1 style={s.shopH1}>Contact Us</h1><p style={s.shopSub}>We respond within 24 hours — let us know how we can help</p></div></div>
-   <div style={{...s.inner,padding:"60px 24px"}}>
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1.4fr",gap:48,alignItems:"start"}}>
-     <div>
-      <div style={{background:"linear-gradient(135deg,#1a0533,#2d1066)",borderRadius:20,padding:"36px",border:"1px solid rgba(201,150,63,0.2)"}}><h3 style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:"#fff",marginBottom:28}}>Contact Information</h3>{[{icon:"✉",label:"Email",val:"support@lldhome.com",link:"mailto:support@lldhome.com"},{icon:"◎",label:"Social",val:"@longlifedigital",link:"https://instagram.com/longlifedigital"},{icon:"🌐",label:"Website",val:"longlifedigital.co",link:"https://longlifedigital.co"}].map(({icon,label,val,link})=>(<a key={label} href={link} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",gap:14,marginBottom:20,textDecoration:"none"}}><div style={{width:42,height:42,borderRadius:"50%",background:"linear-gradient(135deg,#C9963F,#E8C97A)",display:"flex",alignItems:"center",justifyContent:"center",color:"#1a0533",fontSize:16,flexShrink:0}}>{icon}</div><div><div style={{fontSize:10,letterSpacing:2,color:"#6D28D9",textTransform:"uppercase",marginBottom:3}}>{label}</div><div style={{fontSize:14,color:"#DDD6FE",fontWeight:500}}>{val}</div></div></a>))}<div style={{marginTop:28,paddingTop:20,borderTop:"1px solid rgba(201,150,63,0.15)"}}><div style={{fontSize:11,color:"#E8C97A",letterSpacing:1,marginBottom:8}}>⏱ RESPONSE TIME</div><div style={{fontSize:13,color:"#C084FC"}}>We reply to all messages within 24 hours, Monday through Saturday.</div></div></div>
-     </div>
-     <div style={{background:"#fff",borderRadius:20,padding:"36px",border:"1px solid rgba(201,150,63,0.15)",boxShadow:"0 8px 40px rgba(147,51,234,0.08)",position:"relative"}}>
-      <div style={{position:"absolute",inset:0,borderRadius:20,border:"1.5px solid transparent",background:"linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,#C9963F,#E8C97A,#9333EA,#C084FC) border-box",pointerEvents:"none"}}/>
-      {sent?(<div style={{textAlign:"center",padding:"40px 0"}}><div style={{fontSize:48,marginBottom:16}}>✦</div><h3 style={{fontFamily:"'Playfair Display',serif",fontSize:24,color:"#9333EA",marginBottom:12}}>Message Sent!</h3><p style={{color:"#9CA3AF",marginBottom:24}}>Thank you! We will reply within 24 hours.</p><button className="btn-h" style={s.btnPrimary} onClick={()=>setSent(false)}>Send Another</button></div>):(<div style={{position:"relative"}}><h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:"#1a0533",marginBottom:20}}>Send Us a Message</h3><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}><div><label style={s.lbl}>Your Name *</label><input className="inp-f" style={s.inp} placeholder="John Smith" value={cf.name} onChange={e=>setCf({...cf,name:e.target.value})}/></div><div><label style={s.lbl}>Email *</label><input className="inp-f" style={s.inp} placeholder="john@email.com" value={cf.email} onChange={e=>setCf({...cf,email:e.target.value})}/></div></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}><div><label style={s.lbl}>Service Interested In</label><select className="inp-f" style={s.inp} value={cf.service} onChange={e=>setCf({...cf,service:e.target.value})}><option value="">Select a service...</option>{["Affiliate Marketing","SEO","LLC Formation","Website Design","Social Media Management","Google Business","Facebook & Google Ads","AI Automation","Branding & Design","Digital Product Creation","Domain Purchase","Other"].map(sv=><option key={sv} value={sv}>{sv}</option>)}</select></div></div><label style={s.lbl}>Message *</label><textarea className="inp-f" style={{...s.inp,height:120,resize:"vertical"}} placeholder="Tell us about your project or question..." value={cf.message} onChange={e=>setCf({...cf,message:e.target.value})}/><button className="btn-h" style={{...s.btnPrimary,width:"100%",marginTop:16,padding:"14px"}} onClick={()=>{if(cf.name&&cf.email&&cf.message){setSent(true);fire("Message sent! We will reply within 24 hours. ✦");}else{fire("Please fill all required fields.","err");}}}>✦ Send Message</button></div>)}
-     </div>
+  const [cf, setCf] = useState({
+    name: '',
+    email: '',
+    service: '',
+    message: '',
+  });
+  const [sent, setSent] = useState(false);
+  return (
+    <div>
+      <Box
+        py={{
+          base: 32,
+          sm: 40,
+        }}
+        bg="#F9FAFB"
+        style={{
+          borderBottom: '1px solid #F3F4F6',
+        }}
+      >
+        <Container>
+          <Box c="#9333EA" fz={11} fw="600" lts={2} tt="uppercase" mb={8}>
+            ✦ GET IN TOUCH ✦
+          </Box>
+          <Title
+            order={1}
+            c="#111827"
+            fz="clamp(28px,5vw,48px)"
+            fw="700"
+            ff="'Playfair Display',serif"
+            mb={8}
+          >
+            Contact Us
+          </Title>
+          <Text component="p" inherit c="#9CA3AF" fz={15}>
+            We respond within 24 hours — let us know how we can help
+          </Text>
+        </Container>
+      </Box>
+      <Container p="60px 24px">
+        <SimpleGrid
+          cols={{
+            base: 1,
+            md: 2,
+          }}
+          spacing={{
+            base: 24,
+            md: 48,
+          }}
+          style={{
+            alignItems: 'start',
+          }}
+        >
+          <div>
+            <Box
+              bg="linear-gradient(135deg,#1a0533,#2d1066)"
+              p="36px"
+              style={{
+                borderRadius: 20,
+                border: '1px solid rgba(201,150,63,0.2)',
+              }}
+            >
+              <Title order={3} c="#fff" fz={22} ff="'Playfair Display',serif" mb={28}>
+                Contact Information
+              </Title>
+              {[
+                {
+                  icon: '✉',
+                  label: 'Email',
+                  val: 'support@lldhome.com',
+                  link: 'mailto:support@lldhome.com',
+                },
+                {
+                  icon: '◎',
+                  label: 'Social',
+                  val: '@longlifedigital',
+                  link: 'https://instagram.com/longlifedigital',
+                },
+                {
+                  icon: '🌐',
+                  label: 'Website',
+                  val: 'longlifedigital.co',
+                  link: 'https://longlifedigital.co',
+                },
+              ].map(({ icon, label, val, link }) => (
+                <a
+                  key={label}
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 14,
+                    marginBottom: 20,
+                    textDecoration: 'none',
+                  }}
+                >
+                  <Flex
+                    align="center"
+                    justify="center"
+                    wrap="wrap"
+                    c="#1a0533"
+                    bg="linear-gradient(135deg,#C9963F,#E8C97A)"
+                    fz={16}
+                    w={42}
+                    h={42}
+                    style={{
+                      borderRadius: '50%',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {icon}
+                  </Flex>
+                  <div>
+                    <Box c="#6D28D9" fz={10} lts={2} tt="uppercase" mb={3}>
+                      {label}
+                    </Box>
+                    <Box c="#DDD6FE" fz={14} fw={500}>
+                      {val}
+                    </Box>
+                  </div>
+                </a>
+              ))}
+              <Box
+                mt={28}
+                pt={20}
+                style={{
+                  borderTop: '1px solid rgba(201,150,63,0.15)',
+                }}
+              >
+                <Box c="#E8C97A" fz={11} lts={1} mb={8}>
+                  ⏱ RESPONSE TIME
+                </Box>
+                <Box c="#C084FC" fz={13}>
+                  We reply to all messages within 24 hours, Monday through Saturday.
+                </Box>
+              </Box>
+            </Box>
+          </div>
+          <Box
+            bg="#fff"
+            p="36px"
+            pos="relative"
+            style={{
+              borderRadius: 20,
+              border: '1px solid rgba(201,150,63,0.15)',
+              boxShadow: '0 8px 40px rgba(147,51,234,0.08)',
+            }}
+          >
+            <Box
+              bg="linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,#C9963F,#E8C97A,#9333EA,#C084FC) border-box"
+              pos="absolute"
+              style={{
+                inset: 0,
+                borderRadius: 20,
+                border: '1.5px solid transparent',
+                pointerEvents: 'none',
+              }}
+            />
+            {sent ? (
+              <Box ta="center" p="40px 0">
+                <Box fz={48} mb={16}>
+                  ✦
+                </Box>
+                <Title order={3} c="#9333EA" fz={24} ff="'Playfair Display',serif" mb={12}>
+                  Message Sent!
+                </Title>
+                <Text component="p" inherit c="#9CA3AF" mb={24}>
+                  Thank you! We will reply within 24 hours.
+                </Text>
+                <Button
+                  className="btn-h"
+                  onClick={() => setSent(false)}
+                  variant="filled"
+                  color="brand"
+                  px="lg"
+                  type="button"
+                >
+                  Send Another
+                </Button>
+              </Box>
+            ) : (
+              <Box pos="relative">
+                <Title order={3} c="#1a0533" fz={20} ff="'Playfair Display',serif" mb={20}>
+                  Send Us a Message
+                </Title>
+                <SimpleGrid
+                  cols={{
+                    base: 1,
+                    sm: 2,
+                  }}
+                  spacing={12}
+                >
+                  <div>
+                    <Box
+                      component="label"
+                      c="#9CA3AF"
+                      fz={11}
+                      lts={1}
+                      tt="uppercase"
+                      mt={10}
+                      mb={5}
+                      style={{
+                        display: 'block',
+                      }}
+                    >
+                      Your Name *
+                    </Box>
+                    <Input
+                      className="inp-f"
+                      placeholder="John Smith"
+                      value={cf.name}
+                      onChange={(e) =>
+                        setCf({
+                          ...cf,
+                          name: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Box
+                      component="label"
+                      c="#9CA3AF"
+                      fz={11}
+                      lts={1}
+                      tt="uppercase"
+                      mt={10}
+                      mb={5}
+                      style={{
+                        display: 'block',
+                      }}
+                    >
+                      Email *
+                    </Box>
+                    <Input
+                      className="inp-f"
+                      placeholder="john@email.com"
+                      value={cf.email}
+                      onChange={(e) =>
+                        setCf({
+                          ...cf,
+                          email: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </SimpleGrid>
+                <SimpleGrid
+                  cols={{
+                    base: 1,
+                    sm: 2,
+                  }}
+                  spacing={12}
+                >
+                  <div>
+                    <Box
+                      component="label"
+                      c="#9CA3AF"
+                      fz={11}
+                      lts={1}
+                      tt="uppercase"
+                      mt={10}
+                      mb={5}
+                      style={{
+                        display: 'block',
+                      }}
+                    >
+                      Service Interested In
+                    </Box>
+                    <Input
+                      className="inp-f"
+                      value={cf.service}
+                      onChange={(e) =>
+                        setCf({
+                          ...cf,
+                          service: e.target.value,
+                        })
+                      }
+                      component="select"
+                    >
+                      <option value="">Select a service...</option>
+                      {[
+                        'Affiliate Marketing',
+                        'SEO',
+                        'LLC Formation',
+                        'Website Design',
+                        'Social Media Management',
+                        'Google Business',
+                        'Facebook & Google Ads',
+                        'AI Automation',
+                        'Branding & Design',
+                        'Digital Product Creation',
+                        'Domain Purchase',
+                        'Other',
+                      ].map((sv) => (
+                        <option key={sv} value={sv}>
+                          {sv}
+                        </option>
+                      ))}
+                    </Input>
+                  </div>
+                </SimpleGrid>
+                <Box
+                  component="label"
+                  c="#9CA3AF"
+                  fz={11}
+                  lts={1}
+                  tt="uppercase"
+                  mt={10}
+                  mb={5}
+                  style={{
+                    display: 'block',
+                  }}
+                >
+                  Message *
+                </Box>
+                <Input
+                  className="inp-f"
+                  placeholder="Tell us about your project or question..."
+                  value={cf.message}
+                  onChange={(e) =>
+                    setCf({
+                      ...cf,
+                      message: e.target.value,
+                    })
+                  }
+                  component="textarea"
+                  styles={{
+                    input: {
+                      height: 120,
+                      resize: 'vertical',
+                    },
+                  }}
+                />
+                <Button
+                  className="btn-h"
+                  onClick={() => {
+                    if (cf.name && cf.email && cf.message) {
+                      setSent(true);
+                      fire('Message sent! We will reply within 24 hours. ✦');
+                    } else {
+                      fire('Please fill all required fields.', 'err');
+                    }
+                  }}
+                  variant="filled"
+                  color="brand"
+                  px="lg"
+                  type="button"
+                  w="100%"
+                  mt={16}
+                  p="14px"
+                >
+                  ✦ Send Message
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </SimpleGrid>
+      </Container>
     </div>
-   </div>
-  </div>
- );
+  );
 }

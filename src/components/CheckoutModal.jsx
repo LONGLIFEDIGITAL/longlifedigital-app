@@ -1,32 +1,300 @@
-import s from '../constants/styles';
+import ResponsiveModal from './ResponsiveModal';
+import { ActionIcon, Box, Button, Flex, Input, Text, Title } from '@mantine/core';
 import { fmtPrice } from '../utils/helpers';
 import { CATS } from '../constants/data';
 import { StripeCheckout } from '../payments';
-
 export default function CheckoutModal({
-  showCheckout, checkoutItem, setShowCheckout,
-  checkoutStep, setCheckoutStep,
-  orderInfo, setOrderInfo,
-  stripeLoading, stripeError, clientSecret,
-  createPaymentIntent, resetStripe,
-  setCart, fire, setPage,
-  orderNum, setOrderNum,
+  showCheckout,
+  checkoutItem,
+  setShowCheckout,
+  checkoutStep,
+  setCheckoutStep,
+  orderInfo,
+  setOrderInfo,
+  stripeLoading,
+  stripeError,
+  clientSecret,
+  createPaymentIntent,
+  resetStripe,
+  setCart,
+  fire,
+  setPage,
+  orderNum,
+  setOrderNum,
 }) {
- if (!showCheckout || !checkoutItem) return null;
- return (
-  <div style={{position:"fixed",inset:0,background:"rgba(10,0,30,0.85)",backdropFilter:"blur(16px)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setShowCheckout(false)}>
-   <div style={{background:"#fff",borderRadius:20,width:"100%",maxWidth:420,overflow:"hidden",boxShadow:"0 24px 60px rgba(0,0,0,0.4)",position:"relative"}} onClick={e=>e.stopPropagation()}>
-    <div style={{height:4,background:"linear-gradient(90deg,#7C3AED,#C9963F,#E8C97A)"}}/>
-    <div style={{padding:"28px 28px 24px"}}>
-     <button style={{position:"absolute",top:16,right:16,background:"#F3F4F6",border:"none",color:"#374151",width:28,height:28,borderRadius:"50%",cursor:"pointer",fontSize:13}} onClick={()=>setShowCheckout(false)}>✕</button>
-     <div style={{textAlign:"center",marginBottom:20}}>
-      <div style={{width:52,height:52,borderRadius:12,background:"linear-gradient(135deg,#1a0533,#2d1066)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,margin:"0 auto 12px"}}>{CATS.find(c=>c.id===checkoutItem.cat)?.icon||"📦"}</div>
-      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:"#1a0533",marginBottom:4}}>{checkoutItem.name}</h3>
-      <div style={{fontFamily:"'Playfair Display',serif",fontSize:28,fontWeight:700,color:"#9333EA"}}>${checkoutItem.price}</div>
-     </div>
-     {checkoutStep===3?(<div style={{textAlign:"center"}}><div style={{width:52,height:52,borderRadius:"50%",background:"linear-gradient(135deg,#059669,#10B981)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 14px"}}>✓</div><h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:"#1a0533",marginBottom:8}}>Payment Successful!</h3><p style={{fontSize:13,color:"#6B7280",marginBottom:16}}>Thank you {orderInfo.name}! Check {orderInfo.email} for your download link.</p>{checkoutItem?.pdfFile&&<a href={checkoutItem.pdfFile} download={checkoutItem.pdfName||"product.pdf"} style={{display:"block",background:"linear-gradient(135deg,#059669,#10B981)",borderRadius:10,padding:"12px",textAlign:"center",color:"#fff",fontWeight:700,fontSize:13,textDecoration:"none",marginBottom:12}}>⬇ Download Now</a>}<button className="btn-h" style={{...s.btnPrimary,width:"100%"}} onClick={()=>{setShowCheckout(false);setPage("shop");}}>Continue Shopping</button></div>):checkoutStep===2?(<div style={{padding:"4px 0"}}>{stripeLoading&&<div style={{textAlign:"center",padding:"40px 0",color:"#9333EA",fontSize:13}}>Setting up secure payment…</div>}{stripeError&&<div style={{padding:"10px 14px",background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,color:"#ef4444",fontSize:13,marginBottom:12}}>{stripeError}</div>}{clientSecret&&!stripeLoading&&<StripeCheckout clientSecret={clientSecret} productName={checkoutItem.name} amount={checkoutItem.price} onSuccess={(pi)=>{setOrderNum("LD-"+pi.id.slice(-6).toUpperCase());setCheckoutStep(3);setCart(prev=>prev.filter(i=>i.id!==checkoutItem?.id));fire("Payment successful! ✦");}} onError={(msg)=>fire(msg,"err")}/>}<button style={{background:"none",border:"none",color:"#9333EA",fontSize:12,cursor:"pointer",width:"100%",marginTop:10}} onClick={()=>{setCheckoutStep(1);resetStripe();}}>← Back</button></div>):(<div><label style={s.lbl}>Full Name *</label><input className="inp-f" style={{...s.inp,marginBottom:10}} placeholder="John Smith" value={orderInfo.name} onChange={e=>setOrderInfo({...orderInfo,name:e.target.value})}/><label style={s.lbl}>Email * (download sent here)</label><input className="inp-f" style={s.inp} placeholder="john@email.com" value={orderInfo.email} onChange={e=>setOrderInfo({...orderInfo,email:e.target.value})}/><button className="btn-h" style={{...s.btnPrimary,width:"100%",padding:"13px",marginTop:14}} onClick={()=>{if(!orderInfo.name||!orderInfo.email||!orderInfo.email.includes("@")){fire("Fill name and email","err");return;}createPaymentIntent({amount:checkoutItem.price,productName:checkoutItem.name,customerEmail:orderInfo.email,customerName:orderInfo.name});setCheckoutStep(2);}}>Continue to Payment →</button><p style={{textAlign:"center",fontSize:11,color:"#9CA3AF",marginTop:10}}>🔒 Secured by Stripe</p></div>)}
-    </div>
-   </div>
-  </div>
- );
+  if (!showCheckout || !checkoutItem) return null;
+  return (
+    <ResponsiveModal
+      onClose={() => setShowCheckout(false)}
+      size={420}
+      zIndex={500}
+      label="Secure checkout"
+    >
+      <Box
+        onClick={(e) => e.stopPropagation()}
+        bg="#fff"
+        w="100%"
+        maw={420}
+        pos="relative"
+        style={{
+          borderRadius: 20,
+          overflow: 'hidden',
+          boxShadow: '0 24px 60px rgba(0,0,0,0.4)',
+        }}
+      >
+        <Box bg="linear-gradient(90deg,#7C3AED,#C9963F,#E8C97A)" h={4} />
+        <Box p="28px 28px 24px">
+          <ActionIcon
+            onClick={() => setShowCheckout(false)}
+            variant="transparent"
+            color="dark"
+            px={0}
+            type="button"
+            c="#374151"
+            bg="#F3F4F6"
+            fz={13}
+            w={28}
+            h={28}
+            pos="absolute"
+            top={16}
+            right={16}
+            style={{
+              border: 'none',
+              borderRadius: '50%',
+              cursor: 'pointer',
+            }}
+            aria-label="Close dialog"
+          >
+            ✕
+          </ActionIcon>
+          <Box ta="center" mb={20}>
+            <Flex
+              align="center"
+              justify="center"
+              wrap="wrap"
+              bg="linear-gradient(135deg,#1a0533,#2d1066)"
+              fz={22}
+              w={52}
+              h={52}
+              m="0 auto 12px"
+              style={{
+                borderRadius: 12,
+              }}
+            >
+              {CATS.find((c) => c.id === checkoutItem.cat)?.icon || '📦'}
+            </Flex>
+            <Title order={3} c="#1a0533" fz={18} ff="'Playfair Display',serif" mb={4}>
+              {checkoutItem.name}
+            </Title>
+            <Box c="#9333EA" fz={28} fw={700} ff="'Playfair Display',serif">
+              ${checkoutItem.price}
+            </Box>
+          </Box>
+          {checkoutStep === 3 ? (
+            <Box ta="center">
+              <Flex
+                align="center"
+                justify="center"
+                wrap="wrap"
+                bg="linear-gradient(135deg,#059669,#10B981)"
+                fz={24}
+                w={52}
+                h={52}
+                m="0 auto 14px"
+                style={{
+                  borderRadius: '50%',
+                }}
+              >
+                ✓
+              </Flex>
+              <Title order={3} c="#1a0533" fz={20} ff="'Playfair Display',serif" mb={8}>
+                Payment Successful!
+              </Title>
+              <Text component="p" inherit c="#6B7280" fz={13} mb={16}>
+                Thank you {orderInfo.name}! Check {orderInfo.email} for your download link.
+              </Text>
+              {checkoutItem?.pdfFile && (
+                <a
+                  href={checkoutItem.pdfFile}
+                  download={checkoutItem.pdfName || 'product.pdf'}
+                  style={{
+                    display: 'block',
+                    background: 'linear-gradient(135deg,#059669,#10B981)',
+                    borderRadius: 10,
+                    padding: '12px',
+                    textAlign: 'center',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    textDecoration: 'none',
+                    marginBottom: 12,
+                  }}
+                >
+                  ⬇ Download Now
+                </a>
+              )}
+              <Button
+                className="btn-h"
+                onClick={() => {
+                  setShowCheckout(false);
+                  setPage('shop');
+                }}
+                variant="filled"
+                color="brand"
+                px="lg"
+                type="button"
+                w="100%"
+              >
+                Continue Shopping
+              </Button>
+            </Box>
+          ) : checkoutStep === 2 ? (
+            <Box p="4px 0">
+              {stripeLoading && (
+                <Box c="#9333EA" fz={13} ta="center" p="40px 0">
+                  Setting up secure payment…
+                </Box>
+              )}
+              {stripeError && (
+                <Box
+                  c="#ef4444"
+                  bg="rgba(239,68,68,0.12)"
+                  fz={13}
+                  mb={12}
+                  p="10px 14px"
+                  style={{
+                    border: '1px solid rgba(239,68,68,0.3)',
+                    borderRadius: 8,
+                  }}
+                >
+                  {stripeError}
+                </Box>
+              )}
+              {clientSecret && !stripeLoading && (
+                <StripeCheckout
+                  clientSecret={clientSecret}
+                  productName={checkoutItem.name}
+                  amount={checkoutItem.price}
+                  onSuccess={(pi) => {
+                    setOrderNum('LD-' + pi.id.slice(-6).toUpperCase());
+                    setCheckoutStep(3);
+                    setCart((prev) => prev.filter((i) => i.id !== checkoutItem?.id));
+                    fire('Payment successful! ✦');
+                  }}
+                  onError={(msg) => fire(msg, 'err')}
+                />
+              )}
+              <Button
+                onClick={() => {
+                  setCheckoutStep(1);
+                  resetStripe();
+                }}
+                variant="transparent"
+                color="dark"
+                px={0}
+                type="button"
+                c="#9333EA"
+                bg="none"
+                fz={12}
+                w="100%"
+                mt={10}
+                style={{
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                ← Back
+              </Button>
+            </Box>
+          ) : (
+            <div>
+              <Box
+                component="label"
+                c="#9CA3AF"
+                fz={11}
+                lts={1}
+                tt="uppercase"
+                mt={10}
+                mb={5}
+                style={{
+                  display: 'block',
+                }}
+              >
+                Full Name *
+              </Box>
+              <Input
+                className="inp-f"
+                placeholder="John Smith"
+                value={orderInfo.name}
+                onChange={(e) =>
+                  setOrderInfo({
+                    ...orderInfo,
+                    name: e.target.value,
+                  })
+                }
+                styles={{
+                  input: {
+                    marginBottom: 10,
+                  },
+                }}
+              />
+              <Box
+                component="label"
+                c="#9CA3AF"
+                fz={11}
+                lts={1}
+                tt="uppercase"
+                mt={10}
+                mb={5}
+                style={{
+                  display: 'block',
+                }}
+              >
+                Email * (download sent here)
+              </Box>
+              <Input
+                className="inp-f"
+                placeholder="john@email.com"
+                value={orderInfo.email}
+                onChange={(e) =>
+                  setOrderInfo({
+                    ...orderInfo,
+                    email: e.target.value,
+                  })
+                }
+              />
+              <Button
+                className="btn-h"
+                onClick={() => {
+                  if (!orderInfo.name || !orderInfo.email || !orderInfo.email.includes('@')) {
+                    fire('Fill name and email', 'err');
+                    return;
+                  }
+                  createPaymentIntent({
+                    amount: checkoutItem.price,
+                    productName: checkoutItem.name,
+                    customerEmail: orderInfo.email,
+                    customerName: orderInfo.name,
+                  });
+                  setCheckoutStep(2);
+                }}
+                variant="filled"
+                color="brand"
+                px="lg"
+                type="button"
+                w="100%"
+                mt={14}
+                p="13px"
+              >
+                Continue to Payment →
+              </Button>
+              <Text component="p" inherit c="#9CA3AF" fz={11} ta="center" mt={10}>
+                🔒 Secured by Stripe
+              </Text>
+            </div>
+          )}
+        </Box>
+      </Box>
+    </ResponsiveModal>
+  );
 }
