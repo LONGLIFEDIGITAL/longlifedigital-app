@@ -206,13 +206,12 @@ export default function HomePage({
                 onClick={() => setPage('about')}
                 variant="transparent"
                 color="dark"
-                px={0}
                 type="button"
                 c="#fff"
                 bg="rgba(255,255,255,0.08)"
                 fz={15}
                 fw={600}
-                p="14px 32px"
+                p="14px 20px"
                 style={{
                   border: '1px solid rgba(255,255,255,0.2)',
                   borderRadius: 8,
