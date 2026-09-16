@@ -121,6 +121,7 @@ export default function Nav({
   setSearch,
   setFilterCat,
   isAdmin,
+  cmsManaged,
   logout,
   setShowLogin,
   setShowDashboard,
@@ -289,37 +290,38 @@ export default function Nav({
                 value={search}
                 onChange={updateSearch}
               />
-              {isAdmin ? (
-                <>
-                  <ActionIcon
-                    size="lg"
-                    variant="light"
-                    onClick={() => setShowDashboard(true)}
-                    aria-label="Open dashboard"
-                    title="Dashboard"
-                  >
-                    ⚡
-                  </ActionIcon>
-                  <ActionIcon
-                    size="lg"
-                    variant="light"
-                    color="red"
-                    onClick={logout}
-                    aria-label="Logout"
-                    title="Logout"
-                  >
-                    ↪
-                  </ActionIcon>
-                </>
-              ) : (
-                <UnstyledButton
-                  w={8}
-                  h={24}
-                  opacity={0}
-                  aria-label="Admin login"
-                  onClick={() => setShowLogin(true)}
-                />
-              )}
+              {!cmsManaged &&
+                (isAdmin ? (
+                  <>
+                    <ActionIcon
+                      size="lg"
+                      variant="light"
+                      onClick={() => setShowDashboard(true)}
+                      aria-label="Open dashboard"
+                      title="Dashboard"
+                    >
+                      ⚡
+                    </ActionIcon>
+                    <ActionIcon
+                      size="lg"
+                      variant="light"
+                      color="red"
+                      onClick={logout}
+                      aria-label="Logout"
+                      title="Logout"
+                    >
+                      ↪
+                    </ActionIcon>
+                  </>
+                ) : (
+                  <UnstyledButton
+                    w={8}
+                    h={24}
+                    opacity={0}
+                    aria-label="Admin login"
+                    onClick={() => setShowLogin(true)}
+                  />
+                ))}
               <Indicator label={cart.length} disabled={!cart.length} size={18} offset={3}>
                 <ActionIcon
                   size="lg"

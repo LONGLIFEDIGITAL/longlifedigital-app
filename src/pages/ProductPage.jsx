@@ -1,6 +1,7 @@
-import { Box, Button, Container, Flex, SimpleGrid, Text, Title } from '@mantine/core';
+import { Box, Button, Container, Flex, Image, SimpleGrid, Text, Title } from '@mantine/core';
 import { stars, fmtPrice, catLabel, getProdTheme } from '../utils/helpers';
 import ProductCard from '../components/ProductCard';
+import classes from './ProductPage.module.css';
 export default function ProductPage({
   selProduct,
   products,
@@ -88,6 +89,17 @@ export default function ProductPage({
                 overflow: 'hidden',
               }}
             >
+              {p.image && (
+                <Image
+                  src={p.image}
+                  alt={p.imageAlt || p.name}
+                  pos="absolute"
+                  inset={0}
+                  w="100%"
+                  h="100%"
+                  fit="contain"
+                />
+              )}
               <Box
                 bg={`radial-gradient(circle,${getProdTheme(p.id).orb1} 0%,transparent 70%)`}
                 w="70%"
@@ -133,16 +145,18 @@ export default function ProductPage({
                   {p.tag}
                 </Box>
               )}
-              <Box
-                fz={120}
-                opacity={0.1}
-                style={{
-                  pointerEvents: 'none',
-                  userSelect: 'none',
-                }}
-              >
-                {getProdTheme(p.id).icon}
-              </Box>
+              {!p.image && (
+                <Box
+                  fz={120}
+                  opacity={0.1}
+                  style={{
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                  }}
+                >
+                  {getProdTheme(p.id).icon}
+                </Box>
+              )}
               <Flex
                 align="center"
                 gap={12}
@@ -161,12 +175,12 @@ export default function ProductPage({
                   ff="'Playfair Display',serif"
                   lh={1}
                 >
-                  ${p.price}
+                  {fmtPrice(p.price, p.currency, p.minorUnit)}
                 </Box>
                 {p.oldPrice && (
                   <>
                     <Box c="rgba(255,255,255,0.4)" fz={16} td="line-through">
-                      ${p.oldPrice}
+                      {fmtPrice(p.oldPrice, p.currency, p.minorUnit)}
                     </Box>
                     <Box
                       c="#E8C97A"
@@ -188,7 +202,7 @@ export default function ProductPage({
           </div>
           <div>
             <Box c="#9333EA" fz={12} fw="600" lts={1.5} tt="uppercase" mb={10}>
-              {catLabel(p.cat)}
+              {p.categoryLabel || catLabel(p.cat)}
             </Box>
             <Title
               order={1}
@@ -220,11 +234,11 @@ export default function ProductPage({
                 fw="700"
                 ff="'Playfair Display',serif"
               >
-                {fmtPrice(p.price)}
+                {fmtPrice(p.price, p.currency, p.minorUnit)}
               </Text>
               {p.oldPrice && (
                 <Text component="span" inherit c="#9CA3AF" fz={20} td="line-through">
-                  {fmtPrice(p.oldPrice)}
+                  {fmtPrice(p.oldPrice, p.currency, p.minorUnit)}
                 </Text>
               )}
               {discount > 0 && (
@@ -244,45 +258,60 @@ export default function ProductPage({
                 </Text>
               )}
             </Flex>
-            <Text component="p" inherit c="#6B7280" fz={15} lh={1.85} mb={20}>
-              {p.desc}
-            </Text>
-            <Flex
-              direction="column"
-              gap={8}
-              wrap="nowrap"
-              bg="#F9FAFB"
-              mb={20}
-              p="16px"
-              style={{
-                borderRadius: 10,
-              }}
-            >
-              {p.level && (
-                <Flex gap={8} wrap="wrap" c="#374151" fz={13}>
-                  <Text component="span" inherit c="#111827" fw="600" miw={80}>
-                    Level:
-                  </Text>
-                  <span>{p.level}</span>
-                </Flex>
-              )}
-              {p.duration && (
-                <Flex gap={8} wrap="wrap" c="#374151" fz={13}>
-                  <Text component="span" inherit c="#111827" fw="600" miw={80}>
-                    Duration:
-                  </Text>
-                  <span>{p.duration}</span>
-                </Flex>
-              )}
-              {p.includes && (
-                <Flex gap={8} wrap="wrap" c="#374151" fz={13}>
-                  <Text component="span" inherit c="#111827" fw="600" miw={80}>
-                    Includes:
-                  </Text>
-                  <span>{p.includes}</span>
-                </Flex>
-              )}
-            </Flex>
+            {p.descriptionHtml ? (
+              <Box
+                component="section"
+                aria-label="Product description"
+                className={classes.description}
+                dangerouslySetInnerHTML={{ __html: p.descriptionHtml }}
+              />
+            ) : (
+              <Box
+                component="section"
+                aria-label="Product description"
+                className={classes.description}
+              >
+                <p className={classes.plainDescription}>{p.desc}</p>
+              </Box>
+            )}
+            {(p.level || p.duration || p.includes) && (
+              <Flex
+                direction="column"
+                gap={8}
+                wrap="nowrap"
+                bg="#F9FAFB"
+                mb={20}
+                p="16px"
+                style={{
+                  borderRadius: 10,
+                }}
+              >
+                {p.level && (
+                  <Flex gap={8} wrap="wrap" c="#374151" fz={13}>
+                    <Text component="span" inherit c="#111827" fw="600" miw={80}>
+                      Level:
+                    </Text>
+                    <span>{p.level}</span>
+                  </Flex>
+                )}
+                {p.duration && (
+                  <Flex gap={8} wrap="wrap" c="#374151" fz={13}>
+                    <Text component="span" inherit c="#111827" fw="600" miw={80}>
+                      Duration:
+                    </Text>
+                    <span>{p.duration}</span>
+                  </Flex>
+                )}
+                {p.includes && (
+                  <Flex gap={8} wrap="wrap" c="#374151" fz={13}>
+                    <Text component="span" inherit c="#111827" fw="600" miw={80}>
+                      Includes:
+                    </Text>
+                    <span>{p.includes}</span>
+                  </Flex>
+                )}
+              </Flex>
+            )}
             <Flex
               gap={12}
               wrap="wrap"
@@ -295,6 +324,7 @@ export default function ProductPage({
             >
               <Button
                 className="btn-h"
+                disabled={p.canAddToCart === false}
                 onClick={() => addCart(p)}
                 variant="filled"
                 color="brand"
@@ -308,6 +338,7 @@ export default function ProductPage({
               </Button>
               <Button
                 className="btn-h"
+                disabled={p.source === 'woocommerce'}
                 onClick={() =>
                   p.payhipUrl
                     ? window.open(p.payhipUrl, '_blank')
@@ -327,9 +358,14 @@ export default function ProductPage({
                 p="14px"
                 flex={1}
               >
-                Buy Now
+                {p.source === 'woocommerce' ? 'Checkout coming soon' : 'Buy Now'}
               </Button>
             </Flex>
+            {p.availability && (
+              <Text size="sm" c="dimmed" mb="md">
+                {p.availability}
+              </Text>
+            )}
             {p.stripeUrl && (
               <Button
                 className="btn-h"
@@ -363,12 +399,15 @@ export default function ProductPage({
                 borderTop: '1px solid #F3F4F6',
               }}
             >
-              {[
-                '⚡ Instant Download',
-                '🔒 Secure Payment',
-                '♾️ Lifetime Access',
-                '💬 24hr Support',
-              ].map((t) => (
+              {(p.source === 'woocommerce'
+                ? []
+                : [
+                    '⚡ Instant Download',
+                    '🔒 Secure Payment',
+                    '♾️ Lifetime Access',
+                    '💬 24hr Support',
+                  ]
+              ).map((t) => (
                 <Text
                   key={t}
                   component="span"

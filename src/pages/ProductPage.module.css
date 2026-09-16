@@ -1,0 +1,114 @@
+.description {
+  margin-bottom: 20px;
+  color: #374151;
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.description :where(p, ul, ol, blockquote, pre, figure, table, hr) {
+  margin: 0 0 1em;
+}
+
+.description :where(ul, ol) {
+  padding-inline-start: 1.5em;
+  list-style-position: outside;
+}
+
+.description ul {
+  list-style-type: disc;
+}
+
+.description ol {
+  list-style-type: decimal;
+}
+
+.description li {
+  margin: 0;
+  padding: 0;
+}
+
+.description li > p {
+  margin-bottom: 0.35em;
+}
+
+.description li > :last-child {
+  margin-bottom: 0;
+}
+
+.description li > :where(ul, ol) {
+  margin-block: 0.35em;
+}
+
+.description :where(h2, h3, h4, h5, h6) {
+  margin: 1.25em 0 0.5em;
+  color: #111827;
+  line-height: 1.3;
+}
+
+.description h2 {
+  font-size: 1.5em;
+}
+
+.description h3 {
+  font-size: 1.25em;
+}
+
+.description :where(h4, h5, h6) {
+  font-size: 1.1em;
+}
+
+.description a {
+  color: var(--mantine-color-brand-7);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.description blockquote {
+  padding-inline-start: 1em;
+  border-inline-start: 3px solid var(--mantine-color-brand-3);
+}
+
+.description pre {
+  overflow-x: auto;
+  padding: 1em;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.description img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.description figcaption {
+  margin-top: 0.5em;
+  font-size: 0.9em;
+}
+
+.description table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.description :where(th, td) {
+  padding: 0.5em 0.75em;
+  border: 1px solid #e5e7eb;
+  text-align: start;
+}
+
+.description > :first-child {
+  margin-top: 0;
+}
+
+.description > :last-child {
+  margin-bottom: 0;
+}
+
+.plainDescription {
+  white-space: pre-line;
+}

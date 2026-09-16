@@ -1,10 +1,17 @@
-import { Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
-import { CATS, BLOG_POSTS } from '../constants/data';
+import { Box, Button, Container, Flex, Image, Input, SimpleGrid, Text, Title } from '@mantine/core';
+import { BLOG_POSTS } from '../constants/data';
+import { fmtPrice, getProdTheme, stars } from '../utils/helpers';
+import { matchesCategory } from '../services/catalog';
+import CatalogStatus from '../components/CatalogStatus';
 import LDLogo from '../components/LDLogo';
 import ProductCard from '../components/ProductCard';
 import classes from './HomePage.module.css';
 export default function HomePage({
   products,
+  categories,
+  catalogStatus,
+  retryCatalog,
+  cmsManaged,
   setPage,
   setFilterCat,
   goProduct,
@@ -25,6 +32,12 @@ export default function HomePage({
   setSubscribers,
   contact,
 }) {
+  const featured = products.filter((product) => product.featured);
+  const highlighted = featured[0] || products[0];
+  const saleProduct = products.find((product) => product.oldPrice);
+  const homeProducts = featured.length ? featured : products.slice(0, 4);
+  const money = (product, amount = product.price) =>
+    fmtPrice(amount, product.currency, product.minorUnit);
   return (
     <div>
       <Flex
@@ -223,11 +236,14 @@ export default function HomePage({
               </Button>
             </Flex>
             <Flex gap={24} wrap="wrap" mt={32}>
-              {[
-                ['500+', 'Happy Customers'],
-                ['11+', 'Digital Products'],
-                ['4.9★', 'Avg Rating'],
-              ].map(([val, lbl]) => (
+              {(cmsManaged
+                ? [[String(products.length), 'Digital Products']]
+                : [
+                    ['500+', 'Happy Customers'],
+                    ['11+', 'Digital Products'],
+                    ['4.9★', 'Avg Rating'],
+                  ]
+              ).map(([val, lbl]) => (
                 <Box key={lbl} ta="center">
                   <Box c="#E8C97A" fz={20} fw={800} ff="'Playfair Display',serif">
                     {val}
@@ -240,99 +256,119 @@ export default function HomePage({
             </Flex>
           </Box>
           <Box miw={0}>
-            <Box
-              bg="rgba(255,255,255,0.06)"
-              p="24px"
-              style={{
-                borderRadius: 16,
-                boxShadow: '0 24px 80px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                backdropFilter: 'blur(24px)',
-              }}
-            >
+            {highlighted ? (
               <Box
-                c="#E8C97A"
-                bg="rgba(201,150,63,0.2)"
-                fz={11}
-                fw="700"
-                mb={16}
-                p="4px 12px"
-                style={{
-                  borderRadius: 20,
-                  display: 'inline-block',
-                  border: '1px solid rgba(201,150,63,0.4)',
-                }}
+                className={classes.featuredCard}
+                data-with-image={highlighted.image ? true : undefined}
               >
-                ⭐ Best Seller
+                {highlighted.image && (
+                  <Image
+                    className={classes.featuredImage}
+                    src={highlighted.image}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                )}
+                <Box className={classes.featuredContent}>
+                  <Box
+                    c="#E8C97A"
+                    bg="rgba(201,150,63,0.2)"
+                    fz={11}
+                    fw="700"
+                    mb={16}
+                    p="4px 12px"
+                    style={{
+                      borderRadius: 20,
+                      display: 'inline-block',
+                      border: '1px solid rgba(201,150,63,0.4)',
+                    }}
+                  >
+                    {highlighted.tag ||
+                      (highlighted.featured ? 'Featured Product' : 'Explore Our Products')}
+                  </Box>
+                  <Box
+                    className={highlighted.image ? classes.featuredImageSpace : undefined}
+                    aria-hidden="true"
+                    fz={56}
+                    mb={12}
+                  >
+                    {!highlighted.image && getProdTheme(highlighted.id).icon}
+                  </Box>
+                  <Box c="#fff" fz={18} fw="700" ff="'Playfair Display',serif" lh={1.3} mb={12}>
+                    {highlighted.name}
+                  </Box>
+                  <Flex align="center" gap={10} wrap="wrap" mb={10}>
+                    <Text
+                      component="span"
+                      inherit
+                      c="#E8C97A"
+                      fz={28}
+                      fw="700"
+                      ff="'Playfair Display',serif"
+                    >
+                      {money(highlighted)}
+                    </Text>
+                    {highlighted.oldPrice && (
+                      <>
+                        <Text
+                          component="span"
+                          inherit
+                          c="rgba(255,255,255,0.7)"
+                          fz={16}
+                          td="line-through"
+                        >
+                          {money(highlighted, highlighted.oldPrice)}
+                        </Text>
+                        <Text
+                          component="span"
+                          inherit
+                          c="#92400E"
+                          bg="#FEF3C7"
+                          fz={11}
+                          fw="700"
+                          p="3px 10px"
+                          style={{
+                            borderRadius: 20,
+                          }}
+                        >
+                          Save {Math.round((1 - highlighted.price / highlighted.oldPrice) * 100)}%
+                        </Text>
+                      </>
+                    )}
+                  </Flex>
+                  {highlighted.reviews > 0 && (
+                    <Box fz={13} mb={4}>
+                      <Text component="span" inherit c="#F59E0B">
+                        {stars(highlighted.rating)}
+                      </Text>{' '}
+                      <Text component="span" inherit c="rgba(255,255,255,0.5)" fz={12}>
+                        {highlighted.rating} ({highlighted.reviews} reviews)
+                      </Text>
+                    </Box>
+                  )}
+                  <Button
+                    className="btn-h"
+                    onClick={() => goProduct(highlighted)}
+                    variant="gradient"
+                    color="brand"
+                    px="lg"
+                    gradient={{
+                      from: '#C9963F',
+                      to: '#E8C97A',
+                      deg: 135,
+                    }}
+                    c="#1a0533"
+                    type="button"
+                    w="100%"
+                    mt={12}
+                  >
+                    View Details →
+                  </Button>
+                </Box>
               </Box>
-              <Box
-                fz={56}
-                mb={12}
-                style={{
-                  display: 'block',
-                }}
-              >
-                🚀
-              </Box>
-              <Box c="#fff" fz={18} fw="700" ff="'Playfair Display',serif" lh={1.3} mb={12}>
-                AI Wealth Accelerator Bundle
-              </Box>
-              <Flex align="center" gap={10} wrap="wrap" mb={10}>
-                <Text
-                  component="span"
-                  inherit
-                  c="#E8C97A"
-                  fz={28}
-                  fw="700"
-                  ff="'Playfair Display',serif"
-                >
-                  $497
-                </Text>
-                <Text component="span" inherit c="rgba(255,255,255,0.35)" fz={16} td="line-through">
-                  $997
-                </Text>
-                <Text
-                  component="span"
-                  inherit
-                  c="#92400E"
-                  bg="#FEF3C7"
-                  fz={11}
-                  fw="700"
-                  p="3px 10px"
-                  style={{
-                    borderRadius: 20,
-                  }}
-                >
-                  Save 50%
-                </Text>
-              </Flex>
-              <Box fz={13} mb={4}>
-                <Text component="span" inherit c="#F59E0B">
-                  ★★★★★
-                </Text>{' '}
-                <Text component="span" inherit c="rgba(255,255,255,0.5)" fz={12}>
-                  4.9 (128 reviews)
-                </Text>
-              </Box>
-              <Button
-                className="btn-h"
-                onClick={() => goProduct(products[0])}
-                variant="gradient"
-                color="brand"
-                px="lg"
-                gradient={{
-                  from: '#C9963F',
-                  to: '#E8C97A',
-                  deg: 135,
-                }}
-                c="#1a0533"
-                type="button"
-                w="100%"
-                mt={12}
-              >
-                View Details →
-              </Button>
-            </Box>
+            ) : (
+              <CatalogStatus status={catalogStatus} retry={retryCatalog} empty />
+            )}
           </Box>
         </SimpleGrid>
       </Flex>
@@ -345,47 +381,49 @@ export default function HomePage({
         }}
       >
         <Flex justify="center" gap={16} wrap="wrap" maw={1280} m="0 auto">
-          {CATS.filter((c) => c.id !== 'all').map((cat) => (
-            <Flex
-              key={cat.id}
-              className="btn-h"
-              onClick={() => {
-                setFilterCat(cat.id);
-                setPage('shop');
-              }}
-              align="center"
-              direction="column"
-              gap={4}
-              wrap="nowrap"
-              bg="#fff"
-              miw={100}
-              p="16px 20px"
-              style={{
-                border: '1px solid #F3F4F6',
-                borderRadius: 12,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              <Text
-                component="span"
-                inherit
-                fz={28}
-                mb={6}
+          {categories
+            .filter((c) => c.id !== 'all')
+            .map((cat) => (
+              <Flex
+                key={cat.id}
+                className="btn-h"
+                onClick={() => {
+                  setFilterCat(cat.id);
+                  setPage('shop');
+                }}
+                align="center"
+                direction="column"
+                gap={4}
+                wrap="nowrap"
+                bg="#fff"
+                miw={100}
+                p="16px 20px"
                 style={{
-                  display: 'block',
+                  border: '1px solid #F3F4F6',
+                  borderRadius: 12,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
                 }}
               >
-                {cat.icon}
-              </Text>
-              <Text component="span" inherit c="#374151" fz={12} fw="600">
-                {cat.label}
-              </Text>
-              <Text component="span" inherit c="#9CA3AF" fz={10}>
-                {products.filter((p) => p.cat === cat.id).length} items
-              </Text>
-            </Flex>
-          ))}
+                <Text
+                  component="span"
+                  inherit
+                  fz={28}
+                  mb={6}
+                  style={{
+                    display: 'block',
+                  }}
+                >
+                  {cat.icon}
+                </Text>
+                <Text component="span" inherit c="#374151" fz={12} fw="600">
+                  {cat.label}
+                </Text>
+                <Text component="span" inherit c="#9CA3AF" fz={10}>
+                  {products.filter((p) => matchesCategory(p, cat.id)).length} items
+                </Text>
+              </Flex>
+            ))}
         </Flex>
       </Box>
       <Box
@@ -406,10 +444,12 @@ export default function HomePage({
                 ff="'Playfair Display',serif"
                 mb={4}
               >
-                Featured Products
+                {featured.length ? 'Featured Products' : 'Explore Our Products'}
               </Title>
               <Text component="p" inherit c="#9CA3AF" fz={14}>
-                Handpicked for quality and results
+                {featured.length
+                  ? 'Handpicked for quality and results'
+                  : 'Discover our latest digital products'}
               </Text>
             </div>
             <Button
@@ -424,20 +464,18 @@ export default function HomePage({
             </Button>
           </Flex>
           <SimpleGrid minColWidth="min(100%, 260px)" spacing={20}>
-            {products
-              .filter((p) => p.featured)
-              .map((p) => (
-                <ProductCard
-                  key={p.id}
-                  p={p}
-                  addCart={addCart}
-                  goProduct={goProduct}
-                  fire={fire}
-                  isAdmin={isAdmin}
-                  openEdit={openEdit}
-                  openDel={openDel}
-                />
-              ))}
+            {homeProducts.map((p) => (
+              <ProductCard
+                key={p.id}
+                p={p}
+                addCart={addCart}
+                goProduct={goProduct}
+                fire={fire}
+                isAdmin={isAdmin}
+                openEdit={openEdit}
+                openDel={openDel}
+              />
+            ))}
           </SimpleGrid>
           {isAdmin && (
             <Box ta="center" mt={28}>
@@ -455,40 +493,43 @@ export default function HomePage({
           )}
         </Container>
       </Box>
-      <Box bg="linear-gradient(135deg,#9333EA,#7C3AED)" p="32px 24px">
-        <Flex align="center" justify="space-between" gap={20} wrap="wrap" maw={1280} m="0 auto">
-          <div>
-            <Title order={3} c="#fff" fz={22} fw="700" ff="'Playfair Display',serif" mb={6}>
-              🔥 Limited Time Offer
-            </Title>
-            <Text component="p" inherit c="rgba(255,255,255,0.85)" fz={15}>
-              AI Wealth Accelerator Bundle — 50% off. Was $997, now just $497.
-            </Text>
-          </div>
-          <Button
-            className="btn-h"
-            onClick={() => goProduct(products[0])}
-            variant="transparent"
-            color="dark"
-            px={0}
-            type="button"
-            c="#9333EA"
-            bg="#fff"
-            fz={14}
-            fw="700"
-            ff="'Inter',sans-serif"
-            p="13px 28px"
-            style={{
-              border: 'none',
-              borderRadius: 8,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Shop This Deal
-          </Button>
-        </Flex>
-      </Box>
+      {saleProduct && (
+        <Box bg="linear-gradient(135deg,#9333EA,#7C3AED)" p="32px 24px">
+          <Flex align="center" justify="space-between" gap={20} wrap="wrap" maw={1280} m="0 auto">
+            <div>
+              <Title order={3} c="#fff" fz={22} fw="700" ff="'Playfair Display',serif" mb={6}>
+                Special Offer
+              </Title>
+              <Text component="p" inherit c="rgba(255,255,255,0.85)" fz={15}>
+                {saleProduct.name} — Was {money(saleProduct, saleProduct.oldPrice)}, now{' '}
+                {money(saleProduct)}.
+              </Text>
+            </div>
+            <Button
+              className="btn-h"
+              onClick={() => goProduct(saleProduct)}
+              variant="transparent"
+              color="dark"
+              px={0}
+              type="button"
+              c="#9333EA"
+              bg="#fff"
+              fz={14}
+              fw="700"
+              ff="'Inter',sans-serif"
+              p="13px 28px"
+              style={{
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Shop This Deal
+            </Button>
+          </Flex>
+        </Box>
+      )}
       <Box
         py={{
           base: 32,
@@ -508,10 +549,12 @@ export default function HomePage({
                 ff="'Playfair Display',serif"
                 mb={4}
               >
-                Best-Selling Products
+                {cmsManaged ? 'More to Explore' : 'Best-Selling Products'}
               </Title>
               <Text component="p" inherit c="#9CA3AF" fz={14}>
-                Our most loved digital products
+                {cmsManaged
+                  ? 'Browse our digital product collection'
+                  : 'Our most loved digital products'}
               </Text>
             </div>
             <Button
@@ -1065,25 +1108,27 @@ export default function HomePage({
                 <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>
                   Shop
                 </Box>
-                {CATS.filter((c) => c.id !== 'all').map((cat) => (
-                  <Box
-                    key={cat.id}
-                    className="nav-a"
-                    onClick={() => {
-                      setFilterCat(cat.id);
-                      setPage('shop');
-                    }}
-                    c="#6B7280"
-                    fz={13}
-                    mb={10}
-                    style={{
-                      cursor: 'pointer',
-                      transition: 'color 0.2s',
-                    }}
-                  >
-                    {cat.label}
-                  </Box>
-                ))}
+                {categories
+                  .filter((c) => c.id !== 'all')
+                  .map((cat) => (
+                    <Box
+                      key={cat.id}
+                      className="nav-a"
+                      onClick={() => {
+                        setFilterCat(cat.id);
+                        setPage('shop');
+                      }}
+                      c="#6B7280"
+                      fz={13}
+                      mb={10}
+                      style={{
+                        cursor: 'pointer',
+                        transition: 'color 0.2s',
+                      }}
+                    >
+                      {cat.label}
+                    </Box>
+                  ))}
               </div>
               <div>
                 <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>

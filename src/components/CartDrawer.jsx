@@ -3,6 +3,7 @@ import { fmtPrice, catLabel } from '../utils/helpers';
 import { CATS } from '../constants/data';
 export default function CartDrawer({ cart, setShowCart, rmCart, setPage, openCheckout, setCart }) {
   const cartTotal = cart.reduce((sum, p) => sum + Number(p.price), 0);
+  const checkoutPending = cart.some((item) => item.source === 'woocommerce');
   return (
     <Drawer.Root
       opened
@@ -134,12 +135,12 @@ export default function CartDrawer({ cart, setShowCart, rmCart, setPage, openChe
                           {item.name}
                         </Box>
                         <Box c="#9CA3AF" fz={11}>
-                          {catLabel(item.cat)}
+                          {item.categoryLabel || catLabel(item.cat)}
                         </Box>
                       </Box>
                       <Box ta="right">
                         <Box c="#111827" fz={16} fw="700" ff="'Playfair Display',serif" mb={4}>
-                          {fmtPrice(item.price)}
+                          {fmtPrice(item.price, item.currency, item.minorUnit)}
                         </Box>
                         <Button
                           onClick={() => rmCart(item.id)}
@@ -170,7 +171,7 @@ export default function CartDrawer({ cart, setShowCart, rmCart, setPage, openChe
                   />
                   <Flex align="center" justify="space-between" wrap="wrap" mb={6}>
                     <Text component="span" inherit c="#374151" fz={15} fw="700">
-                      Order Total
+                      {checkoutPending ? 'Subtotal' : 'Order Total'}
                     </Text>
                     <Text
                       component="span"
@@ -180,14 +181,19 @@ export default function CartDrawer({ cart, setShowCart, rmCart, setPage, openChe
                       fw="700"
                       ff="'Playfair Display',serif"
                     >
-                      {fmtPrice(cartTotal)}
+                      {fmtPrice(cartTotal, cart[0]?.currency, cart[0]?.minorUnit)}
                     </Text>
                   </Flex>
                   <Text component="p" inherit c="#9CA3AF" fz={12} lh={1.5} m="8px 0 16px">
-                    Secure checkout powered by Stripe. Google Pay & Apple Pay accepted.
+                    {checkoutPending
+                      ? 'Checkout is not available yet.'
+                      : 'Secure checkout powered by Stripe. Google Pay & Apple Pay accepted.'}
                   </Text>
                   <Flex gap={6} wrap="wrap" mb={16}>
-                    {['💳 Card', '🔵 Google Pay', '🍎 Apple Pay', '🔒 Stripe'].map((b) => (
+                    {(checkoutPending
+                      ? []
+                      : ['💳 Card', '🔵 Google Pay', '🍎 Apple Pay', '🔒 Stripe']
+                    ).map((b) => (
                       <Text
                         key={b}
                         component="span"
@@ -208,6 +214,7 @@ export default function CartDrawer({ cart, setShowCart, rmCart, setPage, openChe
                   {cart.length === 1 ? (
                     <Button
                       className="btn-h"
+                      disabled={checkoutPending}
                       onClick={() => {
                         setShowCart(false);
                         openCheckout(cart[0]);
@@ -221,7 +228,9 @@ export default function CartDrawer({ cart, setShowCart, rmCart, setPage, openChe
                       mb={8}
                       p="14px"
                     >
-                      ✦ Checkout — {fmtPrice(cart[0].price)}
+                      {checkoutPending
+                        ? 'Checkout coming soon'
+                        : `✦ Checkout — ${fmtPrice(cart[0].price)}`}
                     </Button>
                   ) : (
                     <Flex direction="column" gap={8} wrap="nowrap">
@@ -229,6 +238,7 @@ export default function CartDrawer({ cart, setShowCart, rmCart, setPage, openChe
                         <Button
                           key={item.id}
                           className="btn-h"
+                          disabled={checkoutPending}
                           onClick={() => {
                             setShowCart(false);
                             openCheckout(item);
@@ -246,7 +256,7 @@ export default function CartDrawer({ cart, setShowCart, rmCart, setPage, openChe
                           }}
                         >
                           <span>{item.name}</span>
-                          <span>{fmtPrice(item.price)}</span>
+                          <span>{fmtPrice(item.price, item.currency, item.minorUnit)}</span>
                         </Button>
                       ))}
                     </Flex>

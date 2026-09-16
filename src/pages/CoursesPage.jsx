@@ -1,7 +1,11 @@
 import { Box, Container, SimpleGrid, Text, Title } from '@mantine/core';
 import ProductCard from '../components/ProductCard';
+import CatalogStatus from '../components/CatalogStatus';
+import { matchesCategory } from '../services/catalog';
 export default function CoursesPage({
   products,
+  catalogStatus,
+  retryCatalog,
   addCart,
   goProduct,
   fire,
@@ -9,7 +13,7 @@ export default function CoursesPage({
   openEdit,
   openDel,
 }) {
-  const courses = products.filter((p) => p.cat === 'course');
+  const courses = products.filter((p) => matchesCategory(p, 'course'));
   return (
     <div>
       <Box
@@ -42,7 +46,9 @@ export default function CoursesPage({
         </Container>
       </Box>
       <Container p="60px 24px">
-        {courses.length === 0 ? (
+        {catalogStatus !== 'ready' ? (
+          <CatalogStatus status={catalogStatus} retry={retryCatalog} />
+        ) : courses.length === 0 ? (
           <Box ta="center" p="60px 20px">
             <Text component="p" inherit c="#9CA3AF">
               Courses coming soon!
@@ -80,7 +86,7 @@ export default function CoursesPage({
           </Title>
           <SimpleGrid minColWidth="min(100%, 250px)" spacing={20}>
             {products
-              .filter((p) => p.cat !== 'course')
+              .filter((p) => !matchesCategory(p, 'course'))
               .slice(0, 4)
               .map((p) => (
                 <ProductCard

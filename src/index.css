@@ -82,7 +82,7 @@ img {
   height: 100%;
 }
 .pcard .quick-add {
-  opacity: 1;
+  display: none;
 }
 .inp-f:focus {
   border-color: var(--mantine-color-brand-6);
@@ -110,6 +110,7 @@ img {
     transform: translateY(-3px);
   }
   .pcard .quick-add {
+    display: block;
     opacity: 0;
     transition: opacity 0.2s;
   }

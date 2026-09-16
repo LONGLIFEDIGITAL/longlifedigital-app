@@ -6,7 +6,9 @@ import NewsletterPopup from './components/NewsletterPopup';
 import { Box } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { useStripePayment } from './payments';
-import { INIT_PRODUCTS, EMPTY_FORM, DEFAULT_CONTACT } from './constants/data';
+import { EMPTY_FORM, DEFAULT_CONTACT } from './constants/data';
+import useCatalog from './hooks/useCatalog';
+import { matchesCategory } from './services/catalog';
 import Nav from './components/Nav';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
@@ -28,7 +30,14 @@ import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 export default function App() {
   const [page, setPage] = useState('home');
-  const [products, setProducts] = useState(INIT_PRODUCTS);
+  const {
+    products,
+    setProducts,
+    status: catalogStatus,
+    retry: retryCatalog,
+    managed: cmsManaged,
+    categories,
+  } = useCatalog();
   const [selProduct, setSelProduct] = useState(null);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
@@ -187,6 +196,7 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [page]);
   useEffect(() => {
+    if (cmsManaged) return;
     let count = 0;
     let timer = null;
     const handler = (e) => {
@@ -205,7 +215,7 @@ export default function App() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [isAdmin]);
+  }, [isAdmin, cmsManaged]);
   useEffect(() => {
     const t = setTimeout(() => {
       if (!subscribed && !popupDone) setShowPopup(true);
@@ -220,6 +230,14 @@ export default function App() {
     setTimeout(() => setToast(null), 3000);
   };
   const addCart = (p) => {
+    if (p.canAddToCart === false) {
+      fire(p.availability || 'This product is currently unavailable.', 'info');
+      return;
+    }
+    if (cart.some((item) => (item.currency || 'USD') !== (p.currency || 'USD'))) {
+      fire('Please use separate carts for different currencies.', 'info');
+      return;
+    }
     if (cart.find((i) => i.id === p.id)) {
       fire('Already in cart!', 'info');
       return;
@@ -252,6 +270,7 @@ export default function App() {
     fire('Logged out.', 'info');
   };
   const guard = (fn) => {
+    if (cmsManaged) return;
     if (!isAdmin) {
       setShowLogin(true);
       return;
@@ -336,6 +355,10 @@ export default function App() {
     setPage('product');
   };
   const openCheckout = (p) => {
+    if (p.source === 'woocommerce') {
+      fire('Checkout is not available yet.', 'info');
+      return;
+    }
     setCheckoutItem(p);
     setCheckoutStep(1);
     setOrderInfo({
@@ -355,7 +378,7 @@ export default function App() {
   const STRIPE_KEY =
     'pk_live_51TYT5WFUxxwF6THk5f6W6lnpuySIg76odRKfr78vYHPWeXmDPfxMRhVJrhq0Gp1BghRnjM2E8Lm41eoccOj33HIw00SuUZ07j5';
   const filtered = products
-    .filter((p) => filterCat === 'all' || p.cat === filterCat)
+    .filter((p) => matchesCategory(p, filterCat))
     .filter((p) => !search || p.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) =>
       sortBy === 'price-asc'
@@ -364,12 +387,13 @@ export default function App() {
           ? b.price - a.price
           : sortBy === 'name'
             ? a.name.localeCompare(b.name)
-            : 0,
+            : Number(b.featured) - Number(a.featured),
     );
   return (
     <Box c="#111827" bg="#fff" ff="'Inter',sans-serif" mih="100vh">
       <Toast toast={toast} />
       <Nav
+        cmsManaged={cmsManaged}
         page={page}
         setPage={setPage}
         annBarHidden={annBarHidden}
@@ -392,6 +416,10 @@ export default function App() {
         {page === 'home' && (
           <HomePage
             products={products}
+            categories={categories}
+            catalogStatus={catalogStatus}
+            retryCatalog={retryCatalog}
+            cmsManaged={cmsManaged}
             setPage={setPage}
             setFilterCat={setFilterCat}
             goProduct={goProduct}
@@ -416,6 +444,9 @@ export default function App() {
         {page === 'shop' && (
           <ShopPage
             products={products}
+            categories={categories}
+            catalogStatus={catalogStatus}
+            retryCatalog={retryCatalog}
             filtered={filtered}
             filterCat={filterCat}
             setFilterCat={setFilterCat}
@@ -456,6 +487,8 @@ export default function App() {
         {page === 'courses' && (
           <CoursesPage
             products={products}
+            catalogStatus={catalogStatus}
+            retryCatalog={retryCatalog}
             addCart={addCart}
             goProduct={goProduct}
             fire={fire}

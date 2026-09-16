@@ -1,18 +1,12 @@
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  Input,
-  NativeSelect,
-  SimpleGrid,
-  Text,
-  Title,
-} from '@mantine/core';
-import { CATS } from '../constants/data';
+import { Box, Button, Container, Flex, NativeSelect, SimpleGrid, Text, Title } from '@mantine/core';
+import CatalogStatus from '../components/CatalogStatus';
+import { matchesCategory } from '../services/catalog';
 import ProductCard from '../components/ProductCard';
 export default function ShopPage({
   products,
+  categories,
+  catalogStatus,
+  retryCatalog,
   filtered,
   filterCat,
   setFilterCat,
@@ -60,9 +54,9 @@ export default function ShopPage({
             label="Category"
             value={filterCat}
             onChange={(event) => setFilterCat(event.currentTarget.value)}
-            data={CATS.map((cat) => ({
+            data={categories.map((cat) => ({
               value: cat.id,
-              label: `${cat.icon} ${cat.lab}`,
+              label: `${cat.icon} ${cat.label}`,
             }))}
           />
           {isAdmin && (
@@ -102,7 +96,7 @@ export default function ShopPage({
             <Box c="#111827" fz={13} fw="700" lts={1} tt="uppercase" mb={12}>
               Categories
             </Box>
-            {CATS.map((cat) => (
+            {categories.map((cat) => (
               <Flex
                 key={cat.id}
                 className="btn-h"
@@ -124,12 +118,12 @@ export default function ShopPage({
               >
                 <span>{cat.icon}</span>
                 <Text component="span" inherit flex={1}>
-                  {cat.lab}
+                  {cat.label}
                 </Text>
                 <Text component="span" inherit c="#9CA3AF" fz={11} ml="auto">
                   {cat.id === 'all'
                     ? products.length
-                    : products.filter((p) => p.cat === cat.id).length}
+                    : products.filter((p) => matchesCategory(p, cat.id)).length}
                 </Text>
               </Flex>
             ))}
@@ -149,29 +143,28 @@ export default function ShopPage({
             )}
           </Box>
           <Box flex={1}>
-            <Flex align="center" justify="space-between" wrap="wrap" mb={20}>
+            <Flex align="center" justify="space-between" gap="sm" wrap="wrap" mb={20}>
               <Text component="span" inherit c="#9CA3AF" fz={13}>
                 {filtered.length} product{filtered.length !== 1 ? 's' : ''}
               </Text>
-              <Input
+              <NativeSelect
+                aria-label="Sort products"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                component="select"
-                styles={{
-                  input: {
-                    padding: '8px 14px',
-                    color: '#374151',
-                    cursor: 'pointer',
-                  },
-                }}
+                size="md"
+                w={220}
+                maw="100%"
+                ml="auto"
               >
                 <option value="default">Sort by: Featured</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
                 <option value="name">Name: A-Z</option>
-              </Input>
+              </NativeSelect>
             </Flex>
-            {filtered.length === 0 ? (
+            {catalogStatus !== 'ready' ? (
+              <CatalogStatus status={catalogStatus} retry={retryCatalog} />
+            ) : filtered.length === 0 ? (
               <Box ta="center" p="60px 20px">
                 <Text component="p" inherit c="#9CA3AF" fz={16}>
                   No products found.

@@ -30,7 +30,7 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
           <>
             <img
               src={p.image}
-              alt={p.name}
+              alt={p.imageAlt || p.name}
               style={{
                 width: '100%',
                 height: '100%',
@@ -75,7 +75,7 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
               }}
             >
               <Box c="#fff" fz={26} fw={700} ff="'Playfair Display',serif" lh={1}>
-                ${p.price}
+                {fmtPrice(p.price, p.currency, p.minorUnit)}
               </Box>
               {p.oldPrice && (
                 <Box
@@ -139,7 +139,7 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
                 zIndex: 2,
               }}
             >
-              {getProdTheme(p.id).icon} {catLabel(p.cat).toUpperCase()}
+              {getProdTheme(p.id).icon} {(p.categoryLabel || catLabel(p.cat)).toUpperCase()}
             </Box>
             {p.tag && (
               <Box
@@ -194,12 +194,12 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
                 ff="'Playfair Display',serif"
                 lh={1}
               >
-                ${p.price}
+                {fmtPrice(p.price, p.currency, p.minorUnit)}
               </Box>
               <Flex align="center" gap={6} wrap="wrap">
                 {p.oldPrice && (
                   <Box c="rgba(255,255,255,0.35)" fz={11} td="line-through">
-                    ${p.oldPrice}
+                    {fmtPrice(p.oldPrice, p.currency, p.minorUnit)}
                   </Box>
                 )}
                 {p.oldPrice && (
@@ -231,6 +231,7 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
           bottom={0}
         >
           <Button
+            disabled={p.canAddToCart === false}
             onClick={(e) => {
               e.stopPropagation();
               addCart(p);
@@ -259,7 +260,7 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
       <Box p="16px">
         <Flex align="center" gap={6} wrap="wrap" mb={4}>
           <Box c="#9333EA" fz={11} fw="600" lts={1.5} tt="uppercase" mb={6}>
-            {catLabel(p.cat)}
+            {p.categoryLabel || catLabel(p.cat)}
           </Box>
           {p.pdfFile && (
             <Text
@@ -305,17 +306,18 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
         )}
         <Flex align="center" gap={8} wrap="wrap" mb={12}>
           <Text component="span" inherit c="#111827" fz={20} fw="700" ff="'Playfair Display',serif">
-            {fmtPrice(p.price)}
+            {fmtPrice(p.price, p.currency, p.minorUnit)}
           </Text>
           {p.oldPrice && (
             <Text component="span" inherit c="#9CA3AF" fz={14} td="line-through">
-              {fmtPrice(p.oldPrice)}
+              {fmtPrice(p.oldPrice, p.currency, p.minorUnit)}
             </Text>
           )}
         </Flex>
         <SimpleGrid cols={2} spacing={8}>
           <Button
             className="btn-h"
+            disabled={p.canAddToCart === false}
             onClick={() => addCart(p)}
             variant="filled"
             color="dark"
@@ -328,9 +330,11 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
           <Button
             className="btn-h"
             onClick={() =>
-              p.payhipUrl
-                ? window.open(p.payhipUrl, '_blank')
-                : fire('Payhip link coming soon!', 'info')
+              p.source === 'woocommerce'
+                ? goProduct(p)
+                : p.payhipUrl
+                  ? window.open(p.payhipUrl, '_blank')
+                  : fire('Payhip link coming soon!', 'info')
             }
             variant="filled"
             color="brand"
@@ -338,9 +342,14 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
             size="sm"
             type="button"
           >
-            Buy Now
+            {p.source === 'woocommerce' ? 'View Details' : 'Buy Now'}
           </Button>
         </SimpleGrid>
+        {p.availability && (
+          <Text size="xs" c="dimmed" mt="sm">
+            {p.availability}
+          </Text>
+        )}
         {isAdmin && (
           <Flex
             gap={8}
