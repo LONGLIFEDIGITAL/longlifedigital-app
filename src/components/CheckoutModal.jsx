@@ -1,6 +1,7 @@
 import ResponsiveModal from './ResponsiveModal';
 import { ActionIcon, Box, Button, Flex, Input, Text, Title } from '@mantine/core';
 import { fmtPrice } from '../utils/helpers';
+import { getItemQuantity, getLineTotal } from '../utils/cart';
 import { CATS } from '../constants/data';
 import { StripeCheckout } from '../payments';
 export default function CheckoutModal({
@@ -23,6 +24,9 @@ export default function CheckoutModal({
   setOrderNum,
 }) {
   if (!showCheckout || !checkoutItem) return null;
+  const quantity = getItemQuantity(checkoutItem);
+  const total = getLineTotal(checkoutItem);
+  const productName = quantity > 1 ? `${checkoutItem.name} × ${quantity}` : checkoutItem.name;
   return (
     <ResponsiveModal
       onClose={() => setShowCheckout(false)}
@@ -87,8 +91,14 @@ export default function CheckoutModal({
               {checkoutItem.name}
             </Title>
             <Box c="#9333EA" fz={28} fw={700} ff="'Playfair Display',serif">
-              ${checkoutItem.price}
+              {fmtPrice(total, checkoutItem.currency, checkoutItem.minorUnit)}
             </Box>
+            {quantity > 1 && (
+              <Text size="sm" c="dimmed" mt={4}>
+                {quantity} ×{' '}
+                {fmtPrice(checkoutItem.price, checkoutItem.currency, checkoutItem.minorUnit)} each
+              </Text>
+            )}
           </Box>
           {checkoutStep === 3 ? (
             <Box ta="center">
@@ -173,8 +183,8 @@ export default function CheckoutModal({
               {clientSecret && !stripeLoading && (
                 <StripeCheckout
                   clientSecret={clientSecret}
-                  productName={checkoutItem.name}
-                  amount={checkoutItem.price}
+                  productName={productName}
+                  amount={total}
                   onSuccess={(pi) => {
                     setOrderNum('LD-' + pi.id.slice(-6).toUpperCase());
                     setCheckoutStep(3);
@@ -271,8 +281,8 @@ export default function CheckoutModal({
                     return;
                   }
                   createPaymentIntent({
-                    amount: checkoutItem.price,
-                    productName: checkoutItem.name,
+                    amount: total,
+                    productName,
                     customerEmail: orderInfo.email,
                     customerName: orderInfo.name,
                   });

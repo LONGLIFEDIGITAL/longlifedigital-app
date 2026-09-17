@@ -81,9 +81,6 @@ img {
 .pcard {
   height: 100%;
 }
-.pcard .quick-add {
-  display: none;
-}
 .inp-f:focus {
   border-color: var(--mantine-color-brand-6);
   box-shadow: 0 0 0 3px #9333ea1a;
@@ -108,15 +105,6 @@ img {
   .pcard:hover {
     box-shadow: 0 8px 40px #0000001f;
     transform: translateY(-3px);
-  }
-  .pcard .quick-add {
-    display: block;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  .pcard:hover .quick-add,
-  .pcard:focus-within .quick-add {
-    opacity: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {

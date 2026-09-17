@@ -1,46 +1,44 @@
-import { Box, Button, Flex, SimpleGrid, Text } from '@mantine/core';
+import { Box, Button, Flex, Text } from '@mantine/core';
 import { stars, fmtPrice, catLabel, getProdTheme } from '../utils/helpers';
-export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, openEdit, openDel }) {
+import classes from './ProductCard.module.css';
+
+export default function ProductCard({
+  p,
+  addCart,
+  goProduct,
+  isAdmin,
+  openEdit,
+  openDel,
+  compact = false,
+}) {
+  const summary = p.summary || p.desc;
   return (
     <Box
-      className="pcard"
-      bg="#fff"
-      style={{
-        border: '1px solid #F3F4F6',
-        borderRadius: 12,
-        overflow: 'hidden',
-        transition: 'all 0.3s',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-      }}
+      component="article"
+      className={`pcard ${classes.card}`}
+      data-compact={compact || undefined}
     >
       <Flex
-        onClick={() => goProduct(p)}
         align="center"
         justify="center"
         wrap="wrap"
         bg={p.image ? 'transparent' : getProdTheme(p.id).bg}
-        h={220}
-        pos="relative"
-        style={{
-          cursor: 'pointer',
-          overflow: 'hidden',
-        }}
+        className={classes.media}
       >
         {p.image ? (
           <>
             <img
               src={p.image}
               alt={p.imageAlt || p.name}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                display: 'block',
-              }}
+              className={classes.image}
+              draggable={false}
+              loading="lazy"
+              decoding="async"
             />
             <Box bg={getProdTheme(p.id).bar} h={3} pos="absolute" top={0} left={0} right={0} />
             {p.tag && (
               <Box
+                className={classes.tag}
                 c="#E8C97A"
                 bg="rgba(0,0,0,0.55)"
                 fz={9}
@@ -61,6 +59,7 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
               </Box>
             )}
             <Flex
+              className={classes.imagePrice}
               align="center"
               justify="space-between"
               wrap="wrap"
@@ -122,6 +121,7 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
             />
             <Box bg={getProdTheme(p.id).bar} h={3} pos="absolute" top={0} left={0} right={0} />
             <Box
+              className={classes.imageCategory}
               c={getProdTheme(p.id).tagColor}
               bg="rgba(0,0,0,0.4)"
               fz={9}
@@ -143,6 +143,7 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
             </Box>
             {p.tag && (
               <Box
+                className={classes.tag}
                 c="#E8C97A"
                 bg="rgba(0,0,0,0.4)"
                 fz={9}
@@ -174,6 +175,7 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
               {getProdTheme(p.id).icon}
             </Box>
             <Flex
+              className={classes.imagePrice}
               align="center"
               justify="space-between"
               wrap="wrap"
@@ -221,145 +223,73 @@ export default function ProductCard({ p, addCart, goProduct, fire, isAdmin, open
             </Flex>
           </>
         )}
-        <Box
-          className="quick-add"
-          bg="rgba(17,24,39,0.9)"
-          p="12px"
-          pos="absolute"
-          left={0}
-          right={0}
-          bottom={0}
-        >
-          <Button
-            disabled={p.canAddToCart === false}
-            onClick={(e) => {
-              e.stopPropagation();
-              addCart(p);
-            }}
-            variant="transparent"
-            color="dark"
-            px={0}
-            type="button"
-            c="#111827"
-            bg="#fff"
-            fz={13}
-            fw="600"
-            ff="'Inter',sans-serif"
-            w="100%"
-            p="8px"
-            style={{
-              border: 'none',
-              borderRadius: 6,
-              cursor: 'pointer',
-            }}
-          >
-            + Add to Cart
-          </Button>
-        </Box>
       </Flex>
-      <Box p="16px">
-        <Flex align="center" gap={6} wrap="wrap" mb={4}>
-          <Box c="#9333EA" fz={11} fw="600" lts={1.5} tt="uppercase" mb={6}>
+      <Box className={classes.details}>
+        <Flex className={classes.categoryRow} align="center" gap={6} wrap="wrap">
+          <Text component="p" className={classes.category}>
             {p.categoryLabel || catLabel(p.cat)}
-          </Box>
+          </Text>
           {p.pdfFile && (
-            <Text
-              component="span"
-              inherit
-              c="#DC2626"
-              bg="rgba(239,68,68,0.08)"
-              fz={9}
-              fw={700}
-              lts={0.5}
-              p="2px 6px"
-              style={{
-                border: '1px solid rgba(239,68,68,0.15)',
-                borderRadius: 10,
-              }}
-            >
+            <Text component="span" className={classes.fileBadge}>
               📄 PDF READY
             </Text>
           )}
         </Flex>
-        <Box
-          onClick={() => goProduct(p)}
-          c="#111827"
-          fz={15}
-          fw="600"
-          lh={1.3}
-          mb={8}
-          style={{
-            cursor: 'pointer',
-          }}
-        >
-          {p.name}
-        </Box>
+        <h3 className={classes.title}>
+          <button
+            type="button"
+            className={classes.productLink}
+            aria-label={`View ${p.name}`}
+            onClick={() => goProduct(p)}
+          >
+            <span className={classes.productName}>{p.name}</span>
+          </button>
+        </h3>
+        {summary && (
+          <Text component="p" className={classes.summary} lineClamp={3}>
+            {summary}
+          </Text>
+        )}
         {p.reviews > 0 && (
-          <Flex align="center" gap={6} wrap="wrap" mb={10}>
+          <Flex className={classes.reviews} align="center" gap={6} wrap="wrap">
             <Text component="span" inherit c="#F59E0B" fz={12}>
               {stars(p.rating).slice(0, 5)}
             </Text>
-            <Text component="span" inherit c="#9CA3AF" fz={12}>
+            <Text component="span" className={classes.reviewCount}>
               {p.rating} ({p.reviews})
             </Text>
           </Flex>
         )}
-        <Flex align="center" gap={8} wrap="wrap" mb={12}>
-          <Text component="span" inherit c="#111827" fz={20} fw="700" ff="'Playfair Display',serif">
+        <Flex align="center" gap={8} wrap="wrap">
+          <Text component="span" className={classes.price}>
             {fmtPrice(p.price, p.currency, p.minorUnit)}
           </Text>
           {p.oldPrice && (
-            <Text component="span" inherit c="#9CA3AF" fz={14} td="line-through">
+            <Text component="span" className={classes.oldPrice}>
               {fmtPrice(p.oldPrice, p.currency, p.minorUnit)}
             </Text>
           )}
         </Flex>
-        <SimpleGrid cols={2} spacing={8}>
+        {p.availability && <Text className={classes.availability}>{p.availability}</Text>}
+        <Box className={classes.actions}>
           <Button
-            className="btn-h"
+            className={`btn-h ${classes.addButton}`}
             disabled={p.canAddToCart === false}
-            onClick={() => addCart(p)}
-            variant="filled"
-            color="dark"
-            px="lg"
-            size="sm"
+            onClick={(event) => {
+              event.stopPropagation();
+              addCart(p);
+            }}
+            variant="gradient"
+            gradient={{ from: '#C9963F', to: '#E8C97A', deg: 135 }}
+            c="#24113d"
+            fullWidth
             type="button"
           >
             Add to Cart
           </Button>
-          <Button
-            className="btn-h"
-            onClick={() =>
-              p.source === 'woocommerce'
-                ? goProduct(p)
-                : p.payhipUrl
-                  ? window.open(p.payhipUrl, '_blank')
-                  : fire('Payhip link coming soon!', 'info')
-            }
-            variant="filled"
-            color="brand"
-            px="lg"
-            size="sm"
-            type="button"
-          >
-            {p.source === 'woocommerce' ? 'View Details' : 'Buy Now'}
-          </Button>
-        </SimpleGrid>
-        {p.availability && (
-          <Text size="xs" c="dimmed" mt="sm">
-            {p.availability}
-          </Text>
-        )}
+        </Box>
         {isAdmin && (
-          <Flex
-            gap={8}
-            wrap="wrap"
-            mt={10}
-            pt={10}
-            style={{
-              borderTop: '1px solid #F3F4F6',
-            }}
-          >
+          <Flex className={classes.adminActions} gap={8} wrap="wrap" mt={10} pt={10}>
             <Button
               onClick={() => openEdit(p)}
               variant="light"

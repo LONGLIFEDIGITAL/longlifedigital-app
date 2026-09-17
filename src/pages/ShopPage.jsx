@@ -1,7 +1,7 @@
-import { Box, Button, Container, Flex, NativeSelect, SimpleGrid, Text, Title } from '@mantine/core';
+import { Box, Button, Container, Flex, NativeSelect, Text, Title } from '@mantine/core';
 import CatalogStatus from '../components/CatalogStatus';
 import { matchesCategory } from '../services/catalog';
-import ProductCard from '../components/ProductCard';
+import ProductCollection from '../components/ProductCollection';
 export default function ShopPage({
   products,
   categories,
@@ -16,7 +16,6 @@ export default function ShopPage({
   openAdd,
   addCart,
   goProduct,
-  fire,
   openEdit,
   openDel,
 }) {
@@ -171,20 +170,15 @@ export default function ShopPage({
                 </Text>
               </Box>
             ) : (
-              <SimpleGrid minColWidth="min(100%, 250px)" spacing={20}>
-                {filtered.map((p) => (
-                  <ProductCard
-                    key={p.id}
-                    p={p}
-                    addCart={addCart}
-                    goProduct={goProduct}
-                    fire={fire}
-                    isAdmin={isAdmin}
-                    openEdit={openEdit}
-                    openDel={openDel}
-                  />
-                ))}
-              </SimpleGrid>
+              <ProductCollection
+                products={filtered}
+                label="All Products"
+                addCart={addCart}
+                goProduct={goProduct}
+                isAdmin={isAdmin}
+                openEdit={openEdit}
+                openDel={openDel}
+              />
             )}
           </Box>
         </Flex>

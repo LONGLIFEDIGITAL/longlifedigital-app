@@ -4,7 +4,7 @@ import { fmtPrice, getProdTheme, stars } from '../utils/helpers';
 import { matchesCategory } from '../services/catalog';
 import CatalogStatus from '../components/CatalogStatus';
 import LDLogo from '../components/LDLogo';
-import ProductCard from '../components/ProductCard';
+import ProductCollection from '../components/ProductCollection';
 import classes from './HomePage.module.css';
 export default function HomePage({
   products,
@@ -35,7 +35,7 @@ export default function HomePage({
   const featured = products.filter((product) => product.featured);
   const highlighted = featured[0] || products[0];
   const saleProduct = products.find((product) => product.oldPrice);
-  const homeProducts = featured.length ? featured : products.slice(0, 4);
+  const homeProducts = featured.length ? featured : products;
   const money = (product, amount = product.price) =>
     fmtPrice(amount, product.currency, product.minorUnit);
   return (
@@ -463,20 +463,17 @@ export default function HomePage({
               View All →
             </Button>
           </Flex>
-          <SimpleGrid minColWidth="min(100%, 260px)" spacing={20}>
-            {homeProducts.map((p) => (
-              <ProductCard
-                key={p.id}
-                p={p}
-                addCart={addCart}
-                goProduct={goProduct}
-                fire={fire}
-                isAdmin={isAdmin}
-                openEdit={openEdit}
-                openDel={openDel}
-              />
-            ))}
-          </SimpleGrid>
+          <ProductCollection
+            products={homeProducts}
+            label={featured.length ? 'Featured Products' : 'Explore Our Products'}
+            desktopLimit={featured.length ? undefined : 4}
+            minColWidth={260}
+            addCart={addCart}
+            goProduct={goProduct}
+            isAdmin={isAdmin}
+            openEdit={openEdit}
+            openDel={openDel}
+          />
           {isAdmin && (
             <Box ta="center" mt={28}>
               <Button
@@ -510,14 +507,13 @@ export default function HomePage({
               onClick={() => goProduct(saleProduct)}
               variant="transparent"
               color="dark"
-              px={0}
               type="button"
               c="#9333EA"
               bg="#fff"
               fz={14}
               fw="700"
               ff="'Inter',sans-serif"
-              p="13px 28px"
+              p="13px 20px"
               style={{
                 border: 'none',
                 borderRadius: 8,
@@ -568,23 +564,17 @@ export default function HomePage({
               View All →
             </Button>
           </Flex>
-          <SimpleGrid minColWidth="min(100%, 260px)" spacing={20}>
-            {[...products]
-              .sort((a, b) => b.reviews - a.reviews)
-              .slice(0, 4)
-              .map((p) => (
-                <ProductCard
-                  key={p.id}
-                  p={p}
-                  addCart={addCart}
-                  goProduct={goProduct}
-                  fire={fire}
-                  isAdmin={isAdmin}
-                  openEdit={openEdit}
-                  openDel={openDel}
-                />
-              ))}
-          </SimpleGrid>
+          <ProductCollection
+            products={[...products].sort((a, b) => b.reviews - a.reviews)}
+            label={cmsManaged ? 'More to Explore' : 'Best-Selling Products'}
+            desktopLimit={4}
+            minColWidth={260}
+            addCart={addCart}
+            goProduct={goProduct}
+            isAdmin={isAdmin}
+            openEdit={openEdit}
+            openDel={openDel}
+          />
         </Container>
       </Box>
       <Box
@@ -1232,7 +1222,7 @@ export default function HomePage({
               maw={1280}
               m="0 auto"
             >
-              <span>© 2024 Longlife Digital · longlifedigital.co</span>
+              <span>© {new Date().getFullYear()} Longlife Digital · longlifedigital.co</span>
               <Flex gap={8} wrap="wrap">
                 {['Visa', 'Mastercard', 'PayPal', 'Stripe', 'Apple Pay'].map((p) => (
                   <Text

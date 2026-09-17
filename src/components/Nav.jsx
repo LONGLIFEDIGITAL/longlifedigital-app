@@ -18,6 +18,7 @@ import {
 } from '@mantine/core';
 import { useResizeObserver } from '@mantine/hooks';
 import LDLogo from './LDLogo';
+import { getCartCount } from '../utils/cart';
 import classes from './Nav.module.css';
 const SERVICES = [
   {
@@ -134,6 +135,7 @@ export default function Nav({
 }) {
   const [headerRef, headerRect] = useResizeObserver();
   const [announcementRef, announcementRect] = useResizeObserver();
+  const cartCount = getCartCount(cart);
   const navigate = (id) => {
     setPage(id);
     setMenuOpen(false);
@@ -322,13 +324,13 @@ export default function Nav({
                     onClick={() => setShowLogin(true)}
                   />
                 ))}
-              <Indicator label={cart.length} disabled={!cart.length} size={18} offset={3}>
+              <Indicator label={cartCount} disabled={!cartCount} size={18} offset={3}>
                 <ActionIcon
                   size="lg"
                   variant="filled"
                   color="dark"
                   onClick={() => setShowCart(true)}
-                  aria-label={`Open cart (${cart.length})`}
+                  aria-label={`Open cart (${cartCount})`}
                 >
                   🛒
                 </ActionIcon>
@@ -387,7 +389,7 @@ export default function Nav({
           ))}
           <NavLink
             component="button"
-            label={`Cart (${cart.length})`}
+            label={`Cart (${cartCount})`}
             onClick={() => {
               setShowCart(true);
               setMenuOpen(false);

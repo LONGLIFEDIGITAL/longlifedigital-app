@@ -9,6 +9,7 @@ import { useStripePayment } from './payments';
 import { EMPTY_FORM, DEFAULT_CONTACT } from './constants/data';
 import useCatalog from './hooks/useCatalog';
 import { matchesCategory } from './services/catalog';
+import { addCartItem, adjustCartQuantity, getItemQuantity, getQuantityLimits } from './utils/cart';
 import Nav from './components/Nav';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
@@ -238,15 +239,17 @@ export default function App() {
       fire('Please use separate carts for different currencies.', 'info');
       return;
     }
-    if (cart.find((i) => i.id === p.id)) {
-      fire('Already in cart!', 'info');
+    const existing = cart.find((item) => item.id === p.id);
+    if (existing && getItemQuantity(existing) >= getQuantityLimits(existing).maximum) {
+      fire('The maximum quantity is already in your cart.', 'info');
       return;
     }
-    setCart((prev) => [...prev, p]);
-    fire(`"${p.name}" added to cart!`);
+    setCart((prev) => addCartItem(prev, p));
+    fire(existing ? `Quantity updated for "${p.name}".` : `"${p.name}" added to cart!`);
   };
   const rmCart = (id) => setCart((prev) => prev.filter((i) => i.id !== id));
-  const cartTotal = cart.reduce((sum, p) => sum + Number(p.price), 0);
+  const changeCartQuantity = (id, direction) =>
+    setCart((prev) => adjustCartQuantity(prev, id, direction));
   const login = () => {
     const role = Object.keys(ROLE_PASSWORDS).find((r) => ROLE_PASSWORDS[r] === loginPass);
     if (role) {
@@ -509,6 +512,7 @@ export default function App() {
           cart={cart}
           setShowCart={setShowCart}
           rmCart={rmCart}
+          changeCartQuantity={changeCartQuantity}
           setPage={setPage}
           openCheckout={openCheckout}
           setCart={setCart}

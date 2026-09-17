@@ -86,10 +86,14 @@ test('mobile navigation, search, cart and checkout retain their behavior', async
   await page.getByRole('button', { name: 'View search results' }).click();
   await expect(page.locator('main')).toContainText('1 product');
   await page.getByRole('button', { name: 'Add to Cart', exact: true }).click();
-  await expect(page.getByRole('status')).toContainText('added to cart');
+  await expect(page.getByRole('status').filter({ hasText: 'added to cart' })).toBeVisible();
   await page.getByRole('button', { name: 'Open cart (1)', exact: true }).click();
   const cart = page.getByRole('dialog', { name: 'Shopping cart' });
   await expect(cart).toContainText('Migraine & Headache Tracker');
+  await cart
+    .getByRole('button', { name: 'Increase quantity of Migraine & Headache Tracker' })
+    .click();
+  await expect(cart.getByLabel('Cart subtotal', { exact: true })).toHaveText('$24');
   await expectFits(page);
   await cart.getByRole('button', { name: /Checkout —/ }).click();
   const checkout = page.getByRole('dialog', { name: 'Secure checkout' });
@@ -110,12 +114,14 @@ test('mobile navigation, search, cart and checkout retain their behavior', async
   await checkout.getByRole('button', { name: 'Continue to Payment →' }).click();
   await expect(checkout).toContainText('Test payment unavailable');
   expect(requested).toBeTruthy();
+  expect(requested.amount).toBe(24);
+  expect(requested.productName).toBe('Migraine & Headache Tracker × 2');
   await checkout.getByRole('button', { name: '← Back' }).click();
   await expect(checkout.getByPlaceholder('John Smith')).toHaveValue('Responsive Test');
   await page.keyboard.press('Escape');
   await expect(checkout).toHaveCount(0);
-  await page.getByRole('button', { name: 'Open cart (1)', exact: true }).click();
-  await cart.getByRole('button', { name: 'Remove', exact: true }).click();
+  await page.getByRole('button', { name: 'Open cart (2)', exact: true }).click();
+  await cart.getByRole('button', { name: 'Remove Migraine & Headache Tracker from cart' }).click();
   await expect(cart).toContainText('Your cart is empty');
 });
 
@@ -177,8 +183,11 @@ test('product create, edit and delete keep working in a scrollable phone dialog'
     .fill('A temporary product for this browser test.');
   await editor.getByRole('button', { name: 'Publish Product' }).click();
   await expect(editor).toHaveCount(0);
-  await expect(page.getByRole('status')).toContainText('Product published');
+  await expect(page.getByRole('status').filter({ hasText: 'Product published' })).toBeVisible();
   await navigate(page, 'Digital Products');
+  // The new item is at the end of the paged mobile catalog.
+  await page.getByRole('region', { name: 'All Products', exact: true }).focus();
+  await page.keyboard.press('End');
   const card = page.locator('.pcard').filter({ hasText: 'Responsive test product' });
   await expect(card).toHaveCount(1);
   await card.getByRole('button', { name: 'Edit', exact: true }).click();
@@ -238,9 +247,18 @@ test('announcement follows scrolling without covering navigation or moving it re
   await page.goto('/');
   const nav = page.getByRole('navigation', { name: 'Main navigation' });
   await page.evaluate(() => window.scrollTo(0, 600));
-  await expect.poll(() => page.locator('header').evaluate((header) =>
-    Math.abs(header.getBoundingClientRect().top + header.firstElementChild.getBoundingClientRect().height)
-  )).toBeLessThan(0.1);
+  await expect
+    .poll(() =>
+      page
+        .locator('header')
+        .evaluate((header) =>
+          Math.abs(
+            header.getBoundingClientRect().top +
+              header.firstElementChild.getBoundingClientRect().height,
+          ),
+        ),
+    )
+    .toBeLessThan(0.1);
   const first = await nav.boundingBox();
   await page.getByRole('button', { name: 'Open cart (0)' }).click();
   await expect(page.getByRole('dialog', { name: 'Shopping cart' })).toBeVisible();

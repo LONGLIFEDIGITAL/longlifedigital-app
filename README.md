@@ -50,6 +50,11 @@ fulfillment are connected. They never use the old standalone Stripe flow.
 The React admin entry points are hidden in CMS mode; edit these products in
 WordPress. Other page content and backend integrations still await migration.
 
+The local cart supports quantity controls, repeated additions and immediate
+removal. Item totals, the subtotal and navigation badge update together.
+Quantity controls respect the minimum, maximum, increment and sold-individually
+limits supplied by WooCommerce. Cart contents remain in memory until page reload.
+
 ```sh
 npm run test:catalog
 ```
@@ -64,6 +69,13 @@ The app uses React, Vite, and Mantine. Brand colors, typography, and shared
 component defaults live in `src/theme.js`; `src/main.jsx` installs the provider.
 Pages use Mantine containers, grids, flex layouts, buttons, and inputs. Custom
 gradients and decorative effects remain in component styles and CSS modules.
+
+Below the Mantine `sm` breakpoint, the homepage product sections and shop use
+`ProductCollection`: Mantine Carousel/Embla pages with two columns and two rows.
+Cards show compact images, titles, prices and cart buttons; descriptions remain
+on the product page. Touch swipes, arrow buttons and keyboard navigation move
+between groups of four, and filtering/sorting resets to the first group. Desktop
+grids retain their existing layout. Styles live in the collection and card CSS modules.
 
 The navigation measures its header and announcement heights and uses a drawer
 below the desktop breakpoint. Mobile category filters, scrollable dialogs, and

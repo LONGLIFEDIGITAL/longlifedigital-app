@@ -77,6 +77,12 @@ export function normalizeProduct(product, featuredIds = new Set()) {
     rating: Math.max(0, Math.min(5, Number(product.average_rating) || 0)),
     reviews: Math.max(0, Number(product.review_count) || 0),
     featured: featuredIds.has(product.id),
+    soldIndividually: product.sold_individually === true,
+    quantityLimits: {
+      minimum: product.add_to_cart?.minimum,
+      maximum: product.add_to_cart?.maximum,
+      multipleOf: product.add_to_cart?.multiple_of,
+    },
     canAddToCart:
       price !== null &&
       product.is_purchasable === true &&

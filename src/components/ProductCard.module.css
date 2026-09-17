@@ -1,0 +1,224 @@
+.card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(120, 75, 153, 0.18);
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(38, 15, 63, 0.1);
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(202, 146, 207, 0.2), transparent 65%),
+    linear-gradient(
+      150deg,
+      rgba(94, 43, 129, 0.92),
+      rgba(49, 21, 83, 0.97) 65%,
+      rgba(31, 12, 61, 0.98)
+    );
+  color: #faf5ff;
+}
+
+.media {
+  position: relative;
+  flex-shrink: 0;
+  height: 220px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.category {
+  color: #ecd1f5;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.fileBadge {
+  padding: 2px 6px;
+  border: 1px solid rgba(232, 201, 122, 0.4);
+  border-radius: 10px;
+  background: rgba(232, 201, 122, 0.12);
+  color: #f6dfa3;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.title {
+  margin: 0;
+  color: #fff;
+  font-family: var(--mantine-font-family);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.productLink {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+
+/* Extend the title's native button across the card, below the cart/admin controls. */
+.productLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.productLink:focus-visible {
+  outline: none;
+}
+
+.productLink:focus-visible::after {
+  outline: 3px solid #e8c97a;
+  outline-offset: -3px;
+}
+
+.summary {
+  color: #eadff2;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.reviewCount {
+  color: #dac9e5;
+  font-size: 12px;
+}
+
+.price {
+  color: #f1d68f;
+  font-family: var(--mantine-font-family-headings);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.oldPrice {
+  color: #cfbbdd;
+  font-size: 14px;
+  text-decoration: line-through;
+}
+
+.availability {
+  color: #f6dfa3;
+  font-size: 12px;
+}
+
+.actions,
+.adminActions {
+  position: relative;
+  z-index: 4;
+}
+
+.actions {
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.addButton:focus-visible {
+  outline-color: #fff;
+}
+
+.addButton {
+  padding-inline: 16px;
+}
+
+.adminActions {
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* The mobile collection supplies a compact card for its two-column pages. */
+.card[data-compact] .media {
+  height: auto;
+  aspect-ratio: 8 / 5;
+}
+
+.card[data-compact] .details {
+  gap: 6px;
+  padding: 10px;
+}
+
+.card[data-compact] .categoryRow {
+  flex-wrap: nowrap;
+}
+
+.card[data-compact] .category {
+  overflow: hidden;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.card[data-compact] .title {
+  min-height: 2.8em;
+  font-size: 13px;
+}
+
+.card[data-compact] .productName {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.card[data-compact] .summary,
+.card[data-compact] .reviews,
+.card[data-compact] .imagePrice,
+.card[data-compact] .imageCategory,
+.card[data-compact] .fileBadge {
+  display: none;
+}
+
+.card[data-compact] .tag {
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.card[data-compact] .price {
+  font-size: 20px;
+}
+
+.card[data-compact] .oldPrice,
+.card[data-compact] .availability {
+  font-size: 11px;
+}
+
+.card[data-compact] .actions {
+  padding-top: 0;
+}
+
+.card[data-compact] .addButton {
+  padding-inline: 4px;
+  font-size: 12px;
+}

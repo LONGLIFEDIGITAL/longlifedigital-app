@@ -52,6 +52,53 @@ async function mockCatalog(page, products = [product]) {
   );
 }
 
+for (const width of [393, 1440]) {
+  test(`card opens product details and keeps cart actions separate at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await mockCatalog(page);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Shop Now', exact: true }).click();
+    const card = page.getByRole('article').filter({ hasText: product.name });
+    const addButton = card.getByRole('button', { name: 'Add to Cart', exact: true });
+    await expect(addButton).toHaveCount(1);
+    await expect(card.getByRole('button', { name: 'View Details', exact: true })).toHaveCount(0);
+    await expect(card).toContainText('A practical spreadsheet toolkit.');
+
+    const cardBox = await card.boundingBox();
+    const buttonBox = await addButton.boundingBox();
+    const leftInset = buttonBox.x - cardBox.x;
+    const rightInset = cardBox.x + cardBox.width - buttonBox.x - buttonBox.width;
+    expect(leftInset).toBeGreaterThanOrEqual(width < 768 ? 10 : 16);
+    expect(rightInset).toBeGreaterThanOrEqual(width < 768 ? 10 : 16);
+    expect(Math.abs(leftInset - rightInset)).toBeLessThanOrEqual(1);
+    expect(buttonBox.width).toBeGreaterThan(cardBox.width - 64);
+
+    await addButton.click();
+    await expect(page.getByRole('heading', { name: 'All Products', exact: true })).toBeVisible();
+    await expect(page.getByRole('status').filter({ hasText: 'added to cart' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Open cart (1)' })).toBeVisible();
+    await card.screenshot({ path: `test-results/product-card-${width}.png` });
+
+    // Both the image and padding around the lower details open the product page.
+    for (const point of [
+      { x: 12, y: 12 },
+      { x: 5, y: cardBox.height - 5 },
+    ]) {
+      await card.click({ position: point });
+      await expect(page.getByRole('heading', { level: 1, name: product.name })).toBeVisible();
+      await page.getByRole('button', { name: 'Longlife Digital home', exact: true }).click();
+      await page.getByRole('button', { name: 'Shop Now', exact: true }).click();
+    }
+
+    // The same card navigation is accessible without a pointer.
+    await card.getByRole('button', { name: `View ${product.name}`, exact: true }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { level: 1, name: product.name })).toBeVisible();
+  });
+}
+
 for (const width of [320, 393, 1440]) {
   test(`CMS product, description, category and cart work at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
@@ -94,7 +141,7 @@ for (const width of [320, 393, 1440]) {
     await expect(cart).toContainText(product.name);
     await expect(cart).toContainText('$29');
     await expect(cart.getByRole('button', { name: 'Checkout coming soon' })).toBeDisabled();
-    await cart.getByRole('button', { name: 'Remove', exact: true }).click();
+    await cart.getByRole('button', { name: `Remove ${product.name} from cart` }).click();
     await expect(cart).toContainText('Your cart is empty');
     await page.keyboard.press('Escape');
     await expect
@@ -103,6 +150,334 @@ for (const width of [320, 393, 1440]) {
     await page.screenshot({ path: `test-results/catalog-product-${width}.png`, fullPage: true });
   });
 }
+
+for (const [width, height] of [
+  [320, 568],
+  [393, 852],
+  [1440, 900],
+]) {
+  test(`cart quantities, totals and removal update immediately at ${width}px`, async ({ page }) => {
+    const secondProduct = {
+      ...product,
+      id: 16,
+      name: 'Business Budget Planner',
+      prices: { ...product.prices, price: '1299', regular_price: '1299' },
+    };
+    await page.setViewportSize({ width, height });
+    await mockCatalog(page, [product, secondProduct]);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Shop Now', exact: true }).click();
+    const addFirst = page
+      .getByRole('article')
+      .filter({ hasText: product.name })
+      .getByRole('button', { name: 'Add to Cart', exact: true });
+    await addFirst.click();
+    await addFirst.click();
+    await page
+      .getByRole('article')
+      .filter({ hasText: secondProduct.name })
+      .getByRole('button', { name: 'Add to Cart', exact: true })
+      .click();
+    await page.getByRole('button', { name: 'Open cart (3)', exact: true }).click();
+    const cart = page.getByRole('dialog', { name: 'Shopping cart' });
+    const quantity = cart.getByLabel(`Quantity for ${product.name}`, { exact: true });
+    const subtotal = cart.getByLabel('Cart subtotal', { exact: true });
+    const plus = cart.getByRole('button', { name: `Increase quantity of ${product.name}` });
+    const minus = cart.getByRole('button', { name: `Decrease quantity of ${product.name}` });
+    await expect(cart.getByRole('listitem')).toHaveCount(2);
+    await expect(quantity).toHaveText('2');
+    await expect(subtotal).toHaveText('$70.99');
+    await plus.focus();
+    await page.keyboard.press('Enter');
+    // Consecutive events in the same tick must not lose quantity updates.
+    await plus.evaluate((button) => {
+      button.click();
+      button.click();
+    });
+    await expect(quantity).toHaveText('5');
+    await expect(cart.getByLabel(`Total for ${product.name}`, { exact: true })).toHaveText('$145');
+    await expect(subtotal).toHaveText('$157.99');
+    await expect(page.locator('button[aria-label="Open cart (6)"]')).toHaveCount(1);
+    await minus.click();
+    await expect(quantity).toHaveText('4');
+    await expect(subtotal).toHaveText('$128.99');
+    await expect(cart.getByLabel(`Quantity for ${secondProduct.name}`, { exact: true })).toHaveText(
+      '1',
+    );
+    await expect(
+      cart.getByRole('button', { name: `Decrease quantity of ${secondProduct.name}` }),
+    ).toBeDisabled();
+    await expect(cart.getByRole('button', { name: 'Checkout coming soon' })).toBeDisabled();
+    await expect
+      .poll(() => cart.evaluate((element) => element.scrollWidth - element.clientWidth))
+      .toBeLessThanOrEqual(1);
+    await cart.screenshot({ path: `test-results/cart-${width}.png` });
+
+    // Closing the drawer preserves quantities; removing a line leaves the other item intact.
+    await cart.getByRole('button', { name: 'Close cart', exact: true }).click();
+    await page.getByRole('button', { name: 'Open cart (5)', exact: true }).click();
+    await expect(quantity).toHaveText('4');
+    await cart.getByRole('button', { name: `Remove ${product.name} from cart` }).click();
+    await expect(cart.getByRole('listitem')).toHaveCount(1);
+    await expect(subtotal).toHaveText('$12.99');
+    await expect(page.locator('button[aria-label="Open cart (1)"]')).toHaveCount(1);
+    await cart.getByRole('button', { name: 'Clear Cart', exact: true }).click();
+    await expect(
+      cart.getByRole('heading', { name: 'Your cart is empty', exact: true }),
+    ).toBeVisible();
+    await expect(page.locator('button[aria-label="Open cart (0)"]')).toHaveCount(1);
+  });
+}
+
+for (const soldIndividually of [false, true]) {
+  test(`cart respects WooCommerce quantity limits (sold individually: ${soldIndividually})`, async ({
+    page,
+  }) => {
+    await mockCatalog(page, [
+      {
+        ...product,
+        sold_individually: soldIndividually,
+        add_to_cart: { minimum: 2, maximum: 6, multiple_of: 2 },
+      },
+    ]);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Shop Now', exact: true }).click();
+    const add = page.getByRole('button', { name: 'Add to Cart', exact: true });
+    await add.click();
+    await page
+      .getByRole('button', { name: `Open cart (${soldIndividually ? 1 : 2})`, exact: true })
+      .click();
+    const cart = page.getByRole('dialog', { name: 'Shopping cart' });
+    const quantity = cart.getByLabel(`Quantity for ${product.name}`, { exact: true });
+    const minus = cart.getByRole('button', { name: `Decrease quantity of ${product.name}` });
+    const plus = cart.getByRole('button', { name: `Increase quantity of ${product.name}` });
+    await expect(minus).toBeDisabled();
+    await expect(quantity).toHaveText(soldIndividually ? '1' : '2');
+    if (!soldIndividually) {
+      await plus.click();
+      await expect(quantity).toHaveText('4');
+      await minus.click();
+      await expect(quantity).toHaveText('2');
+      await expect(minus).toBeDisabled();
+      await plus.click();
+      await plus.click();
+      await expect(quantity).toHaveText('6');
+    }
+    await expect(plus).toBeDisabled();
+    await cart.getByRole('button', { name: 'Close cart', exact: true }).click();
+    await add.click();
+    await expect(page.getByRole('status').filter({ hasText: 'maximum quantity' })).toBeVisible();
+    await page
+      .getByRole('button', { name: `Open cart (${soldIndividually ? 1 : 6})`, exact: true })
+      .click();
+    await expect(quantity).toHaveText(soldIndividually ? '1' : '6');
+  });
+}
+
+const collectionProducts = [
+  'Business Spreadsheet Toolkit',
+  'Monthly Budget Planner',
+  'Social Media Templates',
+  'Client Welcome Kit',
+  'Content Calendar',
+  'Business Startup Course',
+  'Goal Planner',
+  'Invoice Bundle',
+  'Business Reporting Dashboard',
+].map((name, index) => ({
+  ...product,
+  id: 100 + index,
+  name,
+  images: index === 2 ? [] : product.images,
+  prices: {
+    ...product.prices,
+    price: String((index + 1) * 1000),
+    regular_price: String((index + 2) * 1000),
+  },
+  categories: index < 4 ? product.categories : [{ id: 2, name: 'Courses', slug: 'courses' }],
+}));
+
+async function swipeCollection(page, region, direction, overControl) {
+  await region.scrollIntoViewIfNeeded();
+  if (overControl) await overControl.scrollIntoViewIfNeeded();
+  const box = await region.boundingBox();
+  const from = box.x + box.width * (direction === 'next' ? 0.85 : 0.15);
+  const to = box.x + box.width * (direction === 'next' ? 0.15 : 0.85);
+  const controlBox = overControl && (await overControl.boundingBox());
+  const y = controlBox ? controlBox.y + controlBox.height / 2 : Math.max(box.y + 60, 220);
+  const session = await page.context().newCDPSession(page);
+  const point = (x) => [{ x, y, id: 1 }];
+  try {
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: point(from),
+    });
+    for (let step = 1; step <= 12; step++) {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: point(from + ((to - from) * step) / 12),
+      });
+      await page.evaluate(() => new Promise(requestAnimationFrame));
+    }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  } finally {
+    await session.detach();
+  }
+}
+
+test.describe('mobile product collections', () => {
+  test.use({ hasTouch: true });
+
+  for (const width of [320, 393, 430]) {
+    test(`all three product collections show compact 2 by 2 pages and swipe at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 852 });
+      await mockCatalog(page, collectionProducts);
+      await page.goto('/');
+      for (const label of ['Explore Our Products', 'More to Explore', 'All Products']) {
+        if (label === 'All Products') {
+          await page.getByRole('button', { name: 'Longlife Digital home', exact: true }).click();
+          await page.getByRole('button', { name: 'Shop Now', exact: true }).click();
+        }
+        const region = page.getByRole('region', { name: label, exact: true });
+        const firstPage = region.getByRole('group', { name: 'Product page 1 of 3', exact: true });
+        await expect(firstPage.getByRole('article')).toHaveCount(4);
+        await expect(region.getByRole('article')).toHaveCount(4);
+        await region.scrollIntoViewIfNeeded();
+        const boxes = await firstPage.getByRole('article').evaluateAll((cards) =>
+          cards.map((card) => {
+            const { x, y, width, height } = card.getBoundingClientRect();
+            return { x, y, width, height };
+          }),
+        );
+        expect(Math.abs(boxes[0].y - boxes[1].y)).toBeLessThan(1);
+        expect(Math.abs(boxes[2].y - boxes[3].y)).toBeLessThan(1);
+        expect(Math.abs(boxes[0].x - boxes[2].x)).toBeLessThan(1);
+        expect(boxes[1].x).toBeGreaterThan(boxes[0].x + boxes[0].width);
+        expect(boxes[2].y).toBeGreaterThan(boxes[0].y + boxes[0].height);
+        for (const box of boxes) {
+          expect(box.height).toBeLessThan(310);
+          expect(box.height / box.width).toBeLessThan(2.2);
+        }
+        const firstCard = firstPage.getByRole('article').first();
+        await expect(
+          firstCard.getByText('A practical spreadsheet toolkit.', { exact: true }),
+        ).toBeHidden();
+        const buttonBox = await firstCard
+          .getByRole('button', { name: 'Add to Cart', exact: true })
+          .boundingBox();
+        expect(buttonBox.height).toBeGreaterThanOrEqual(44);
+        expect(buttonBox.width).toBeGreaterThan(boxes[0].width - 32);
+        await expect(
+          page.getByRole('button', { name: `Previous products in ${label}`, exact: true }),
+        ).toBeDisabled();
+        await region.locator('..').screenshot({
+          path: `test-results/collection-${label.replaceAll(' ', '-')}-${width}.png`,
+        });
+
+        await swipeCollection(page, region, 'next');
+        const secondPage = region.getByRole('group', { name: 'Product page 2 of 3', exact: true });
+        await expect(secondPage).toBeInViewport();
+        await expect(region.getByRole('status')).toHaveText('Slide 2 of 3');
+        await expect(firstPage).toHaveCount(0);
+        await swipeCollection(page, region, 'previous');
+        await expect(firstPage).toBeInViewport();
+        await expect(region.getByRole('status')).toHaveText('Slide 1 of 3');
+        await expect(
+          page.getByRole('button', { name: 'Open cart (0)', exact: true }),
+        ).toBeVisible();
+
+        // Native keyboard navigation reaches the partial last page without stretching its card.
+        await region.focus();
+        await page.keyboard.press('End');
+        const lastPage = region.getByRole('group', { name: 'Product page 3 of 3', exact: true });
+        await expect(lastPage).toBeInViewport();
+        await expect(region.getByRole('article')).toHaveCount(1);
+        const lastBox = await lastPage.getByRole('article').boundingBox();
+        expect(Math.abs(lastBox.width - boxes[0].width)).toBeLessThan(1);
+        await expect(
+          page.getByRole('button', { name: `Next products in ${label}`, exact: true }),
+        ).toBeDisabled();
+        await page
+          .getByRole('button', { name: `Previous products in ${label}`, exact: true })
+          .click();
+        await expect(secondPage).toBeInViewport();
+        await expect
+          .poll(() => page.evaluate(() => document.documentElement.scrollWidth - innerWidth))
+          .toBeLessThanOrEqual(1);
+      }
+    });
+  }
+
+  test('sorting, filtering and card actions work after swiping', async ({ page }) => {
+    await page.setViewportSize({ width: 393, height: 852 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await mockCatalog(page, collectionProducts);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Shop Now', exact: true }).click();
+    const region = page.getByRole('region', { name: 'All Products', exact: true });
+    await swipeCollection(
+      page,
+      region,
+      'next',
+      region.getByRole('button', { name: 'Add to Cart', exact: true }).nth(1),
+    );
+    await expect(page.getByRole('button', { name: 'Open cart (0)', exact: true })).toBeVisible();
+    const card = region.getByRole('article').filter({ hasText: 'Content Calendar' });
+    await card.getByRole('button', { name: 'Add to Cart', exact: true }).tap();
+    await expect(page.getByRole('button', { name: 'Open cart (1)', exact: true })).toBeVisible();
+    await expect(region).toBeVisible();
+    await card.getByRole('button', { name: 'View Content Calendar', exact: true }).tap();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Content Calendar', exact: true }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Longlife Digital home', exact: true }).click();
+    await page.getByRole('button', { name: 'Shop Now', exact: true }).click();
+    await region.focus();
+    await page.keyboard.press('End');
+    await page.getByLabel('Sort products', { exact: true }).selectOption('price-desc');
+    await expect(region.getByRole('status')).toHaveText('Slide 1 of 3');
+    await expect(region.getByRole('article').first()).toContainText('Business Reporting Dashboard');
+    await page.getByRole('button', { name: 'Next products in All Products', exact: true }).click();
+    await expect(region.getByRole('status')).toHaveText('Slide 2 of 3');
+    await page.getByLabel('Category', { exact: true }).selectOption('business-startup-toolkits');
+    await expect(region.getByRole('status')).toHaveText('Slide 1 of 1');
+    await expect(region.getByRole('article')).toHaveCount(4);
+    await expect(
+      page.getByRole('button', { name: 'Next products in All Products', exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Open cart (1)', exact: true })).toBeVisible();
+  });
+});
+
+test('desktop grids remain full size and resizing replaces rather than duplicates collections', async ({
+  page,
+}) => {
+  await mockCatalog(page, collectionProducts);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/');
+  const explore = page.getByRole('region', { name: 'Explore Our Products', exact: true });
+  const more = page.getByRole('region', { name: 'More to Explore', exact: true });
+  await expect(explore.getByRole('article')).toHaveCount(4);
+  await expect(more.getByRole('article')).toHaveCount(4);
+  await expect(
+    explore
+      .getByRole('article')
+      .first()
+      .getByText('A practical spreadsheet toolkit.', { exact: true }),
+  ).toBeVisible();
+  await page.setViewportSize({ width: 393, height: 852 });
+  await expect(explore).toHaveAttribute('aria-roledescription', 'carousel');
+  await expect(explore.locator('article')).toHaveCount(9);
+  await expect(explore.getByRole('article')).toHaveCount(4);
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await expect(explore.locator('article')).toHaveCount(4);
+  await expect(page.getByRole('button', { name: /Next products in/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Shop Now', exact: true }).click();
+  const shop = page.getByRole('region', { name: 'All Products', exact: true });
+  await expect(shop.getByRole('article')).toHaveCount(9);
+});
 
 test('rich descriptions preserve structure and remove unsafe HTML and pasted styles', async ({
   page,
