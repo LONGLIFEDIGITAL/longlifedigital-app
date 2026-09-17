@@ -1,4 +1,5 @@
-import { ActionIcon, Button, Drawer, Image } from '@mantine/core';
+import { ActionIcon, Button, Drawer } from '@mantine/core';
+import LoadingImage from './LoadingImage';
 import { fmtPrice, catLabel } from '../utils/helpers';
 import {
   getCartCount,
@@ -112,7 +113,7 @@ export default function CartDrawer({
                         <li key={item.id} className={classes.item} aria-label={item.name}>
                           <div className={classes.itemInfo}>
                             {item.thumbnail || item.image ? (
-                              <Image
+                              <LoadingImage
                                 src={item.thumbnail || item.image}
                                 alt=""
                                 className={classes.thumbnail}

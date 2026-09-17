@@ -1,0 +1,25 @@
+:where(.root) {
+  position: relative;
+}
+
+.root {
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.image,
+.placeholder,
+.fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fallback {
+  display: grid;
+  place-items: center;
+  color: #9271a7;
+  background: #f2ebf7;
+}

@@ -1,13 +1,8 @@
-import { Alert, Button, Group, Loader, Text } from '@mantine/core';
+import { Alert, Button, Text } from '@mantine/core';
+import ProductGridSkeleton from './skeletons/ProductGridSkeleton';
 
-export default function CatalogStatus({ status, retry, empty = false }) {
-  if (status === 'loading')
-    return (
-      <Group role="status" justify="center" py="xl">
-        <Loader size="sm" />
-        <Text>Loading products…</Text>
-      </Group>
-    );
+export default function CatalogStatus({ status, retry, empty = false, loading }) {
+  if (status === 'loading') return loading ?? <ProductGridSkeleton />;
   if (status === 'error')
     return (
       <Alert color="red" title="Products are temporarily unavailable" role="alert" my="lg">

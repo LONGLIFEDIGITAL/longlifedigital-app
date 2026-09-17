@@ -102,7 +102,9 @@ test('opening a product URL waits for the CMS, then survives reload', async ({ p
   });
   await mockCatalog(page, ready);
   await page.goto('/products/16');
-  await expect(page.getByText('Loading products…', { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('status', { name: 'Loading product details', exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Product not found' })).toHaveCount(0);
   release();
   await expectProduct(page, products[1]);

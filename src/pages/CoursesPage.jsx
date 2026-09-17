@@ -1,6 +1,7 @@
 import { Box, Container, SimpleGrid, Text, Title } from '@mantine/core';
 import ProductCard from '../components/ProductCard';
 import CatalogStatus from '../components/CatalogStatus';
+import ProductGridSkeleton from '../components/skeletons/ProductGridSkeleton';
 import { matchesCategory } from '../services/catalog';
 export default function CoursesPage({
   products,
@@ -47,7 +48,11 @@ export default function CoursesPage({
       </Box>
       <Container p="60px 24px">
         {catalogStatus !== 'ready' ? (
-          <CatalogStatus status={catalogStatus} retry={retryCatalog} />
+          <CatalogStatus
+            status={catalogStatus}
+            retry={retryCatalog}
+            loading={<ProductGridSkeleton label="Loading courses" compactMobile={false} />}
+          />
         ) : courses.length === 0 ? (
           <Box ta="center" p="60px 20px">
             <Text component="p" inherit c="#9CA3AF">
@@ -84,23 +89,27 @@ export default function CoursesPage({
           >
             Also Available
           </Title>
-          <SimpleGrid minColWidth="min(100%, 250px)" spacing={20}>
-            {products
-              .filter((p) => !matchesCategory(p, 'course'))
-              .slice(0, 4)
-              .map((p) => (
-                <ProductCard
-                  key={p.id}
-                  p={p}
-                  addCart={addCart}
-                  goProduct={goProduct}
-                  fire={fire}
-                  isAdmin={isAdmin}
-                  openEdit={openEdit}
-                  openDel={openDel}
-                />
-              ))}
-          </SimpleGrid>
+          {catalogStatus === 'loading' ? (
+            <ProductGridSkeleton label="Loading other products" compactMobile={false} />
+          ) : (
+            <SimpleGrid minColWidth="min(100%, 250px)" spacing={20}>
+              {products
+                .filter((p) => !matchesCategory(p, 'course'))
+                .slice(0, 4)
+                .map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    p={p}
+                    addCart={addCart}
+                    goProduct={goProduct}
+                    fire={fire}
+                    isAdmin={isAdmin}
+                    openEdit={openEdit}
+                    openDel={openDel}
+                  />
+                ))}
+            </SimpleGrid>
+          )}
         </Box>
       </Container>
     </div>

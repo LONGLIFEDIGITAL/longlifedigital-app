@@ -1,10 +1,15 @@
-import { Box, Button, Container, Flex, Image, Input, SimpleGrid, Text, Title } from '@mantine/core';
+import { Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
+import LoadingImage from '../components/LoadingImage';
 import { BLOG_POSTS } from '../constants/data';
 import { fmtPrice, getProdTheme, stars } from '../utils/helpers';
 import { matchesCategory } from '../services/catalog';
 import CatalogStatus from '../components/CatalogStatus';
 import LDLogo from '../components/LDLogo';
 import ProductCollection from '../components/ProductCollection';
+import FeaturedProductSkeleton from '../components/skeletons/FeaturedProductSkeleton';
+import CategorySkeleton from '../components/skeletons/CategorySkeleton';
+import SkeletonBlock from '../components/skeletons/SkeletonBlock';
+import SkeletonRegion from '../components/skeletons/SkeletonRegion';
 import classes from './HomePage.module.css';
 export default function HomePage({
   products,
@@ -32,6 +37,7 @@ export default function HomePage({
   setSubscribers,
   contact,
 }) {
+  const loading = catalogStatus === 'loading';
   const featured = products.filter((product) => product.featured);
   const highlighted = featured[0] || products[0];
   const saleProduct = products.find((product) => product.oldPrice);
@@ -246,7 +252,13 @@ export default function HomePage({
               ).map(([val, lbl]) => (
                 <Box key={lbl} ta="center">
                   <Box c="#E8C97A" fz={20} fw={800} ff="'Playfair Display',serif">
-                    {val}
+                    {loading ? (
+                      <SkeletonRegion label="Loading product count">
+                        <SkeletonBlock tone="light" height={25} width={48} mx="auto" />
+                      </SkeletonRegion>
+                    ) : (
+                      val
+                    )}
                   </Box>
                   <Box c="rgba(255,255,255,0.45)" fz={11} mt={2}>
                     {lbl}
@@ -262,7 +274,7 @@ export default function HomePage({
                 data-with-image={highlighted.image ? true : undefined}
               >
                 {highlighted.image && (
-                  <Image
+                  <LoadingImage
                     className={classes.featuredImage}
                     src={highlighted.image}
                     alt=""
@@ -367,7 +379,12 @@ export default function HomePage({
                 </Box>
               </Box>
             ) : (
-              <CatalogStatus status={catalogStatus} retry={retryCatalog} empty />
+              <CatalogStatus
+                status={catalogStatus}
+                retry={retryCatalog}
+                empty
+                loading={<FeaturedProductSkeleton />}
+              />
             )}
           </Box>
         </SimpleGrid>
@@ -380,51 +397,55 @@ export default function HomePage({
           borderBottom: '1px solid #F3F4F6',
         }}
       >
-        <Flex justify="center" gap={16} wrap="wrap" maw={1280} m="0 auto">
-          {categories
-            .filter((c) => c.id !== 'all')
-            .map((cat) => (
-              <Flex
-                key={cat.id}
-                className="btn-h"
-                onClick={() => {
-                  setFilterCat(cat.id);
-                  setPage('shop');
-                }}
-                align="center"
-                direction="column"
-                gap={4}
-                wrap="nowrap"
-                bg="#fff"
-                miw={100}
-                p="16px 20px"
-                style={{
-                  border: '1px solid #F3F4F6',
-                  borderRadius: 12,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <Text
-                  component="span"
-                  inherit
-                  fz={28}
-                  mb={6}
+        {loading ? (
+          <CategorySkeleton variant="tiles" label="Loading product categories" />
+        ) : (
+          <Flex justify="center" gap={16} wrap="wrap" maw={1280} m="0 auto">
+            {categories
+              .filter((c) => c.id !== 'all')
+              .map((cat) => (
+                <Flex
+                  key={cat.id}
+                  className="btn-h"
+                  onClick={() => {
+                    setFilterCat(cat.id);
+                    setPage('shop');
+                  }}
+                  align="center"
+                  direction="column"
+                  gap={4}
+                  wrap="nowrap"
+                  bg="#fff"
+                  miw={100}
+                  p="16px 20px"
                   style={{
-                    display: 'block',
+                    border: '1px solid #F3F4F6',
+                    borderRadius: 12,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
                   }}
                 >
-                  {cat.icon}
-                </Text>
-                <Text component="span" inherit c="#374151" fz={12} fw="600">
-                  {cat.label}
-                </Text>
-                <Text component="span" inherit c="#9CA3AF" fz={10}>
-                  {products.filter((p) => matchesCategory(p, cat.id)).length} items
-                </Text>
-              </Flex>
-            ))}
-        </Flex>
+                  <Text
+                    component="span"
+                    inherit
+                    fz={28}
+                    mb={6}
+                    style={{
+                      display: 'block',
+                    }}
+                  >
+                    {cat.icon}
+                  </Text>
+                  <Text component="span" inherit c="#374151" fz={12} fw="600">
+                    {cat.label}
+                  </Text>
+                  <Text component="span" inherit c="#9CA3AF" fz={10}>
+                    {products.filter((p) => matchesCategory(p, cat.id)).length} items
+                  </Text>
+                </Flex>
+              ))}
+          </Flex>
+        )}
       </Box>
       <Box
         py={{
@@ -465,6 +486,7 @@ export default function HomePage({
           </Flex>
           <ProductCollection
             products={homeProducts}
+            loading={loading}
             label={featured.length ? 'Featured Products' : 'Explore Our Products'}
             desktopLimit={featured.length ? undefined : 4}
             minColWidth={260}
@@ -566,6 +588,7 @@ export default function HomePage({
           </Flex>
           <ProductCollection
             products={[...products].sort((a, b) => b.reviews - a.reviews)}
+            loading={loading}
             label={cmsManaged ? 'More to Explore' : 'Best-Selling Products'}
             desktopLimit={4}
             minColWidth={260}
@@ -1098,27 +1121,31 @@ export default function HomePage({
                 <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>
                   Shop
                 </Box>
-                {categories
-                  .filter((c) => c.id !== 'all')
-                  .map((cat) => (
-                    <Box
-                      key={cat.id}
-                      className="nav-a"
-                      onClick={() => {
-                        setFilterCat(cat.id);
-                        setPage('shop');
-                      }}
-                      c="#6B7280"
-                      fz={13}
-                      mb={10}
-                      style={{
-                        cursor: 'pointer',
-                        transition: 'color 0.2s',
-                      }}
-                    >
-                      {cat.label}
-                    </Box>
-                  ))}
+                {loading ? (
+                  <CategorySkeleton variant="links" label="Loading footer categories" />
+                ) : (
+                  categories
+                    .filter((c) => c.id !== 'all')
+                    .map((cat) => (
+                      <Box
+                        key={cat.id}
+                        className="nav-a"
+                        onClick={() => {
+                          setFilterCat(cat.id);
+                          setPage('shop');
+                        }}
+                        c="#6B7280"
+                        fz={13}
+                        mb={10}
+                        style={{
+                          cursor: 'pointer',
+                          transition: 'color 0.2s',
+                        }}
+                      >
+                        {cat.label}
+                      </Box>
+                    ))
+                )}
               </div>
               <div>
                 <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>

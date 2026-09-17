@@ -1,4 +1,5 @@
-import { Box, Button, Container, Flex, Image, SimpleGrid, Text, Title } from '@mantine/core';
+import { Box, Button, Container, Flex, SimpleGrid, Text, Title } from '@mantine/core';
+import LoadingImage from '../components/LoadingImage';
 import { stars, fmtPrice, catLabel, getProdTheme } from '../utils/helpers';
 import ProductCard from '../components/ProductCard';
 import classes from './ProductPage.module.css';
@@ -90,7 +91,7 @@ export default function ProductPage({
               }}
             >
               {p.image && (
-                <Image
+                <LoadingImage
                   src={p.image}
                   alt={p.imageAlt || p.name}
                   pos="absolute"

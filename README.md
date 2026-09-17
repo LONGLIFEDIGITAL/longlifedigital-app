@@ -77,6 +77,22 @@ on the product page. Touch swipes, arrow buttons and keyboard navigation move
 between groups of four, and filtering/sorting resets to the first group. Desktop
 grids retain their existing layout. Styles live in the collection and card CSS modules.
 
+Loading states use Mantine's built-in `Skeleton`, with reusable components in
+`src/components/skeletons`. The homepage, shop, courses and product details show
+placeholders for their data-dependent content, including categories and counts.
+Product grids reserve the same column widths and compact mobile layout as the
+loaded cards. Static content and navigation remain available while requests run.
+`CatalogStatus` accepts a page-specific `loading` placeholder and keeps error,
+retry and empty states separate from loading.
+
+`LoadingImage` handles product photos independently after catalog data arrives,
+including featured images, product details and cart thumbnails. It reserves the
+image's container, removes the skeleton when the image loads and shows a fallback
+on failure. Skeleton colors live in `Skeletons.module.css`; loading regions are
+labelled for assistive technology and animation stops with reduced motion enabled.
+The catalog test suite covers delayed responses, responsive skeleton layouts,
+retry/empty states, delayed and failed images, and navigation during loading.
+
 The navigation measures its header and announcement heights and uses a drawer
 below the desktop breakpoint. Mobile category filters, scrollable dialogs, and
 the chat panel adapt to the available viewport. App state and business handlers

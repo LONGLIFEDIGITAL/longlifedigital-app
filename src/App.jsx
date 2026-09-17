@@ -11,6 +11,7 @@ import { EMPTY_FORM, DEFAULT_CONTACT } from './constants/data';
 import useCatalog from './hooks/useCatalog';
 import useAppNavigation from './hooks/useAppNavigation';
 import CatalogStatus from './components/CatalogStatus';
+import ProductDetailsSkeleton from './components/skeletons/ProductDetailsSkeleton';
 import { matchesCategory } from './services/catalog';
 import { addCartItem, adjustCartQuantity, getItemQuantity, getQuantityLimits } from './utils/cart';
 import Nav from './components/Nav';
@@ -472,7 +473,11 @@ export default function App() {
           />
         )}
         {page === 'product' && catalogStatus !== 'ready' && (
-          <CatalogStatus status={catalogStatus} retry={retryCatalog} />
+          <CatalogStatus
+            status={catalogStatus}
+            retry={retryCatalog}
+            loading={<ProductDetailsSkeleton />}
+          />
         )}
         {page === 'product' && catalogStatus === 'ready' && !selProduct && (
           <NotFoundPage product setPage={setPage} />

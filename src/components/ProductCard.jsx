@@ -1,6 +1,7 @@
 import { Box, Button, Flex, Text } from '@mantine/core';
 import { stars, fmtPrice, catLabel, getProdTheme } from '../utils/helpers';
 import classes from './ProductCard.module.css';
+import LoadingImage from './LoadingImage';
 
 export default function ProductCard({
   p,
@@ -27,13 +28,11 @@ export default function ProductCard({
       >
         {p.image ? (
           <>
-            <img
+            <LoadingImage
               src={p.image}
               alt={p.imageAlt || p.name}
               className={classes.image}
-              draggable={false}
               loading="lazy"
-              decoding="async"
             />
             <Box bg={getProdTheme(p.id).bar} h={3} pos="absolute" top={0} left={0} right={0} />
             {p.tag && (

@@ -558,7 +558,9 @@ test('loading, failure, retry and empty states never substitute demo products', 
     );
   });
   await page.goto('/');
-  await expect(page.getByText('Loading products…')).toBeVisible();
+  await expect(
+    page.getByRole('status', { name: 'Loading featured product', exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole('button', { name: 'View Details →' })).toHaveCount(0);
   state = 'error';
   release();

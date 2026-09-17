@@ -3,6 +3,7 @@ import { ActionIcon, SimpleGrid, useMantineTheme } from '@mantine/core';
 import { Carousel } from '@mantine/carousel';
 import { useMediaQuery, useReducedMotion } from '@mantine/hooks';
 import ProductCard from './ProductCard';
+import ProductGridSkeleton from './skeletons/ProductGridSkeleton';
 import classes from './ProductCollection.module.css';
 
 const PAGE_SIZE = 4;
@@ -104,12 +105,14 @@ export default function ProductCollection({
   label,
   desktopLimit,
   minColWidth = 250,
+  loading = false,
   ...cardProps
 }) {
   const theme = useMantineTheme();
   const desktop = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`, undefined, {
     getInitialValueInEffect: false,
   });
+  if (loading) return <ProductGridSkeleton label={`Loading ${label}`} minColWidth={minColWidth} />;
   if (products.length === 0) return null;
 
   return desktop ? (
