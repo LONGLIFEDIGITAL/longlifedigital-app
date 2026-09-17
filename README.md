@@ -82,6 +82,14 @@ below the desktop breakpoint. Mobile category filters, scrollable dialogs, and
 the chat panel adapt to the available viewport. App state and business handlers
 remain in `src/App.jsx`, with admin and editor views in `src/components`.
 
+React Router owns browser history. `src/hooks/useAppNavigation.js` maps the existing
+navigation handlers to URLs such as `/products`, `/about` and `/products/15`.
+Product URLs resolve against the catalog after loading. Back/Forward preserve the
+in-memory cart and restore scroll positions; repeated clicks on the current page
+do not add history entries. `vercel.json` rewrites these page paths to `index.html`
+for direct visits and refreshes, while leaving API and asset routes untouched.
+Those hosting rules take effect on the next deployment.
+
 ## Verification
 
 ```sh

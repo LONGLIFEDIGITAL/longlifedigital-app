@@ -5,9 +5,12 @@ import AdminDashboard from './components/AdminDashboard';
 import NewsletterPopup from './components/NewsletterPopup';
 import { Box } from '@mantine/core';
 import { useState, useEffect } from 'react';
+import { ScrollRestoration } from 'react-router';
 import { useStripePayment } from './payments';
 import { EMPTY_FORM, DEFAULT_CONTACT } from './constants/data';
 import useCatalog from './hooks/useCatalog';
+import useAppNavigation from './hooks/useAppNavigation';
+import CatalogStatus from './components/CatalogStatus';
 import { matchesCategory } from './services/catalog';
 import { addCartItem, adjustCartQuantity, getItemQuantity, getQuantityLimits } from './utils/cart';
 import Nav from './components/Nav';
@@ -29,8 +32,9 @@ import FAQPage from './pages/FAQPage';
 import RefundPage from './pages/RefundPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
+import NotFoundPage from './pages/NotFoundPage';
 export default function App() {
-  const [page, setPage] = useState('home');
+  const { page, setPage, productId, goProduct } = useAppNavigation();
   const {
     products,
     setProducts,
@@ -39,7 +43,7 @@ export default function App() {
     managed: cmsManaged,
     categories,
   } = useCatalog();
-  const [selProduct, setSelProduct] = useState(null);
+  const selProduct = products.find((product) => String(product.id) === productId);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [filterCat, setFilterCat] = useState('all');
@@ -194,8 +198,15 @@ export default function App() {
     return () => window.removeEventListener('scroll', fn);
   }, []);
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [page]);
+    const closeNavigationOverlays = () => {
+      setMenuOpen(false);
+      setActiveDropdown(null);
+      setShowCart(false);
+      setShowCheckout(false);
+    };
+    window.addEventListener('popstate', closeNavigationOverlays);
+    return () => window.removeEventListener('popstate', closeNavigationOverlays);
+  }, []);
   useEffect(() => {
     if (cmsManaged) return;
     let count = 0;
@@ -353,10 +364,6 @@ export default function App() {
     setDelId(null);
     fire('Product removed.', 'info');
   };
-  const goProduct = (p) => {
-    setSelProduct(p);
-    setPage('product');
-  };
   const openCheckout = (p) => {
     if (p.source === 'woocommerce') {
       fire('Checkout is not available yet.', 'info');
@@ -464,7 +471,13 @@ export default function App() {
             openDel={openDel}
           />
         )}
-        {page === 'product' && (
+        {page === 'product' && catalogStatus !== 'ready' && (
+          <CatalogStatus status={catalogStatus} retry={retryCatalog} />
+        )}
+        {page === 'product' && catalogStatus === 'ready' && !selProduct && (
+          <NotFoundPage product setPage={setPage} />
+        )}
+        {page === 'product' && selProduct && (
           <ProductPage
             selProduct={selProduct}
             products={products}
@@ -506,6 +519,7 @@ export default function App() {
         {page === 'refund' && <RefundPage />}
         {page === 'privacy' && <PrivacyPage />}
         {page === 'terms' && <TermsPage />}
+        {page === 'not-found' && <NotFoundPage setPage={setPage} />}
       </Box>
       {showCart && (
         <CartDrawer
@@ -605,6 +619,7 @@ export default function App() {
         setOrderNum={setOrderNum}
       />
       <AIChat />
+      <ScrollRestoration />
     </Box>
   );
 }
