@@ -647,7 +647,9 @@ test('unavailable products, currency precision, inert content and private-field 
 test('Vercel endpoint restricts requests and forwards only public pagination', async () => {
   const originalFetch = globalThis.fetch;
   const previousUrl = process.env.VITE_WOOCOMMERCE_STORE_API_URL;
+  const previousEnvironment = process.env.VERCEL_ENV;
   process.env.VITE_WOOCOMMERCE_STORE_API_URL = 'https://store.example.test/wp-json/wc/store/v1';
+  process.env.VERCEL_ENV = 'production';
   let requested;
   globalThis.fetch = async (url) => {
     requested = url;
@@ -680,14 +682,24 @@ test('Vercel endpoint restricts requests and forwards only public pagination', a
     );
     expect(response.code).toBe(200);
     expect(response.headers['X-WP-TotalPages']).toBe('2');
+    expect(response.headers['Cache-Control']).toBe(
+      'public, max-age=0, s-maxage=30, must-revalidate',
+    );
     expect(requested.href).toBe(
       'https://store.example.test/wp-json/wc/store/v1/products?per_page=100&page=2&featured=true',
     );
+    process.env.VERCEL_ENV = 'preview';
+    expect((await invoke('GET', '/api/catalog')).headers['Cache-Control']).toBe('no-store');
+    process.env.VERCEL_ENV = 'production';
     globalThis.fetch = async () => new Response('<html>Unavailable</html>', { status: 503 });
-    expect((await invoke('GET', '/api/catalog')).code).toBe(502);
+    const error = await invoke('GET', '/api/catalog');
+    expect(error.code).toBe(502);
+    expect(error.headers['Cache-Control']).toBe('no-store');
   } finally {
     globalThis.fetch = originalFetch;
     if (previousUrl === undefined) delete process.env.VITE_WOOCOMMERCE_STORE_API_URL;
     else process.env.VITE_WOOCOMMERCE_STORE_API_URL = previousUrl;
+    if (previousEnvironment === undefined) delete process.env.VERCEL_ENV;
+    else process.env.VERCEL_ENV = previousEnvironment;
   }
 });

@@ -32,8 +32,29 @@ If none are featured, the homepage shows the latest products instead.
 The browser reads `/api/catalog`. Vite proxies this route locally and
 `api/catalog.js` supplies the same read-only route on Vercel, avoiding cross-origin
 browser restrictions. All catalog pages are fetched, and errors show a retry
-action rather than demo products. Vercel caches successful responses for 60 seconds;
-reload the storefront to see publishing changes after that interval.
+action rather than demo products.
+
+Catalog data is cached in the browser with TanStack Query. The storefront checks
+for published changes every 30 seconds while its tab is visible and online, and
+refreshes when the tab becomes visible again or the network reconnects. Product
+details, categories, featured selections, availability and prices update together
+without reloading the document or resetting navigation, filters or cart selections.
+Existing content stays visible during background requests. Failed requests retry
+twice with backoff; a background failure retains the last successful catalog and
+later refreshes recover automatically. Skeletons appear only before the first
+successful load. The local cart remains a separate in-memory snapshot; authoritative
+cart pricing and order validation are still part of the WooCommerce checkout work.
+
+Local development and Vercel Preview catalog responses use `Cache-Control: no-store`.
+Production responses have no browser freshness window and a 30-second shared CDN
+cache. Production changes can therefore take longer than one polling interval to
+appear; upstream WordPress caching can add delay too. This is background polling,
+not an immediate server-push subscription. No WordPress plugin, webhook or Vercel
+deployment is needed to use it locally. The refresh policy lives in
+`src/hooks/useCatalog.js`; production cache headers live in `api/catalog.js`.
+
+References: [TanStack Query refresh and caching defaults](https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults)
+and [Vercel cache-control headers](https://vercel.com/docs/caching/cache-control-headers).
 
 To enable this connection on a **Vercel Preview** deployment, set
 `VITE_WOOCOMMERCE_STORE_API_URL` to
@@ -60,7 +81,8 @@ npm run test:catalog
 ```
 
 These tests mock the feed and cover pagination, featured products, categories,
-prices, loading/errors/retry, stock restrictions, the read-only Vercel endpoint,
+prices, loading/errors/retry, timed and tab-return refreshes, offline recovery,
+stock restrictions, the read-only Vercel endpoint,
 and product/cart behavior on mobile and desktop.
 
 ## UI and responsive layouts

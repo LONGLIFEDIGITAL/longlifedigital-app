@@ -16,6 +16,12 @@ export default defineConfig(({ mode }) => {
               changeOrigin: true,
               rewrite: (path) =>
                 path.replace('/api/catalog', `${store.pathname.replace(/\/+$/, '')}/products`),
+              configure: (proxy) => {
+                proxy.on('proxyRes', (response) => {
+                  // Local publishing checks should not reuse browser-cached CMS responses.
+                  response.headers['cache-control'] = 'no-store';
+                });
+              },
             },
           }
         : undefined,

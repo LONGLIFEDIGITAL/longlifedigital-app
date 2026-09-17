@@ -1,5 +1,7 @@
 // Public catalog only. No WooCommerce credentials or write operations are used here.
 export default async function handler(req, res) {
+  // Never cache errors or preview responses in a browser or shared cache.
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).json({ error: 'Method not allowed.' });
@@ -26,7 +28,9 @@ export default async function handler(req, res) {
     for (const header of ['X-WP-Total', 'X-WP-TotalPages']) {
       if (response.headers.has(header)) res.setHeader(header, response.headers.get(header));
     }
-    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60');
+    if (process.env.VERCEL_ENV !== 'preview') {
+      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, must-revalidate');
+    }
     return res.status(200).json(products);
   } catch {
     return res.status(502).json({ error: 'The catalog is temporarily unavailable.' });
