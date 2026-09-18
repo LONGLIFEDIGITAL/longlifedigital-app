@@ -17,7 +17,10 @@ import {
   UnstyledButton,
 } from '@mantine/core';
 import { useResizeObserver } from '@mantine/hooks';
+import { Link } from 'react-router';
 import LDLogo from './LDLogo';
+import SkeletonBlock from './skeletons/SkeletonBlock';
+import SkeletonRegion from './skeletons/SkeletonRegion';
 import { getCartCount } from '../utils/cart';
 import classes from './Nav.module.css';
 const SERVICES = [
@@ -114,6 +117,8 @@ const LINKS = [
   ['contact', 'Contact'],
 ];
 export default function Nav({
+  settings,
+  settingsStatus,
   page,
   setPage,
   annBarHidden,
@@ -133,6 +138,9 @@ export default function Nav({
   activeDropdown,
   setActiveDropdown,
 }) {
+  const { brand, contact, announcement } = settings;
+  const showAnnouncement = announcement.enabled && Boolean(announcement.message);
+  const announcementLink = announcement.cta;
   const [headerRef, headerRect] = useResizeObserver();
   const [announcementRef, announcementRect] = useResizeObserver();
   const cartCount = getCartCount(cart);
@@ -156,16 +164,43 @@ export default function Nav({
         className={classes.header}
         data-scrolled={scrolled || undefined}
         style={{
-          transform: annBarHidden ? `translateY(-${announcementRect.height}px)` : 'translateY(0)',
+          transform:
+            annBarHidden && showAnnouncement
+              ? `translateY(-${announcementRect.height}px)`
+              : 'translateY(0)',
         }}
       >
-        <Box ref={announcementRef} className={classes.announcement} px="md" py={8}>
-          <Text size="xs" ta="center" c="white" lh={1.6}>
-            🎉 Get <strong>10% off</strong> your first order — Code: <strong>WELCOME10</strong>
-            <Text component="span" visibleFrom="sm" inherit>
-              | ⚡ Instant Digital Delivery | 📧 support@lldhome.com
+        <Box ref={announcementRef} className={classes.announcement}>
+          {showAnnouncement && (
+            <Text size="xs" ta="center" c="white" lh={1.6} px="md" py={8}>
+              {announcement.message}
+              {announcement.couponCode && (
+                <>
+                  {' '}
+                  — Code: <strong>{announcement.couponCode}</strong>
+                </>
+              )}
+              <Text component="span" visibleFrom="sm" inherit>
+                {announcement.deliveryNote && <> | {announcement.deliveryNote}</>}
+                {contact.email && <> | 📧 {contact.email}</>}
+              </Text>
+              {announcementLink.label && announcementLink.destination && (
+                <>
+                  {' '}
+                  |{' '}
+                  {announcementLink.destination.startsWith('/') ? (
+                    <Link className={classes.announcementLink} to={announcementLink.destination}>
+                      {announcementLink.label}
+                    </Link>
+                  ) : (
+                    <a className={classes.announcementLink} href={announcementLink.destination}>
+                      {announcementLink.label}
+                    </a>
+                  )}
+                </>
+              )}
             </Text>
-          </Text>
+          )}
         </Box>
         <Container size={1440} py={10}>
           <Flex
@@ -181,23 +216,33 @@ export default function Nav({
             <UnstyledButton
               className={classes.brand}
               onClick={() => navigate('home')}
-              aria-label="Longlife Digital home"
+              aria-label={`${brand.name || 'Storefront'} home`}
             >
               <Group gap={10} wrap="nowrap">
-                <LDLogo size={36} />
+                <LDLogo size={36} src={brand.logo.src} alt={brand.logo.alt} />
                 <Box miw={0}>
-                  <Text
-                    className={classes.brandName}
-                    fz={{
-                      base: 14,
-                      sm: 16,
-                    }}
-                  >
-                    Longlife Digital
-                  </Text>
-                  <Text className={classes.brandSubtitle} visibleFrom="sm">
-                    Premium Digital Store
-                  </Text>
+                  {settingsStatus === 'loading' ? (
+                    <SkeletonRegion label="Loading site details">
+                      <SkeletonBlock width={120} height={20} />
+                    </SkeletonRegion>
+                  ) : (
+                    <>
+                      <Text
+                        className={classes.brandName}
+                        fz={{
+                          base: 14,
+                          sm: 16,
+                        }}
+                      >
+                        {brand.name || 'Storefront'}
+                      </Text>
+                      {brand.tagline && (
+                        <Text className={classes.brandSubtitle} visibleFrom="sm">
+                          {brand.tagline}
+                        </Text>
+                      )}
+                    </>
+                  )}
                 </Box>
               </Group>
             </UnstyledButton>
@@ -352,7 +397,7 @@ export default function Nav({
       <Drawer
         opened={menuOpen}
         onClose={() => setMenuOpen(false)}
-        title="Explore Longlife Digital"
+        title={`Explore ${brand.name || 'our store'}`}
         position="right"
         size="sm"
         zIndex={300}

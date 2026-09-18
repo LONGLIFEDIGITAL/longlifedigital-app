@@ -1,6 +1,6 @@
 import { Box, Button, Container, Flex, Text, Title } from '@mantine/core';
 import LDLogo from '../components/LDLogo';
-export default function AboutPage({ contact, isAdmin, setContactForm, setShowContactEdit }) {
+export default function AboutPage({ brand, contact, isAdmin, setContactForm, setShowContactEdit }) {
   return (
     <div>
       <Box
@@ -31,7 +31,7 @@ export default function AboutPage({ contact, isAdmin, setContactForm, setShowCon
       </Box>
       <Container size={800} p="60px 24px">
         <Box ta="center" mb={48}>
-          <LDLogo size={72} />
+          <LDLogo size={72} src={brand.logo.src} alt={brand.logo.alt} />
           <Title
             order={2}
             c="#111827"
@@ -41,7 +41,7 @@ export default function AboutPage({ contact, isAdmin, setContactForm, setShowCon
             mt={20}
             mb={4}
           >
-            Longlife Digital
+            {brand.name}
           </Title>
           <Text component="p" inherit c="#6B7280" fz={16} lh={1.85}>
             Premium digital products for entrepreneurs, creators and learners
@@ -108,15 +108,21 @@ export default function AboutPage({ contact, isAdmin, setContactForm, setShowCon
               </Button>
             )}
           </Flex>
-          <Text component="p" inherit c="#6B7280" mb={8}>
-            📧 {contact.email}
-          </Text>
-          <Text component="p" inherit c="#6B7280" mb={8}>
-            ◎ {contact.social}
-          </Text>
-          <Text component="p" inherit c="#6B7280">
-            🌐 {contact.website}
-          </Text>
+          {contact.email && (
+            <Text component="p" inherit c="#6B7280" mb={8}>
+              📧 {contact.email}
+            </Text>
+          )}
+          {contact.social && (
+            <Text component="p" inherit c="#6B7280" mb={8}>
+              ◎ {contact.social}
+            </Text>
+          )}
+          {contact.website && (
+            <Text component="p" inherit c="#6B7280">
+              🌐 {contact.website}
+            </Text>
+          )}
         </Box>
       </Container>
     </div>

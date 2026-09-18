@@ -1,6 +1,7 @@
 import { Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
 import { useState } from 'react';
-export default function ContactPage({ fire }) {
+import classes from './ContactPage.module.css';
+export default function ContactPage({ fire, contact, settings }) {
   const [cf, setCf] = useState({
     name: '',
     email: '',
@@ -35,7 +36,7 @@ export default function ContactPage({ fire }) {
             Contact Us
           </Title>
           <Text component="p" inherit c="#9CA3AF" fz={15}>
-            We respond within 24 hours — let us know how we can help
+            {contact.responseNote}
           </Text>
         </Container>
       </Box>
@@ -69,75 +70,80 @@ export default function ContactPage({ fire }) {
                 {
                   icon: '✉',
                   label: 'Email',
-                  val: 'support@lldhome.com',
-                  link: 'mailto:support@lldhome.com',
+                  val: contact.email,
+                  link: contact.email ? `mailto:${contact.email}` : '',
                 },
                 {
                   icon: '◎',
                   label: 'Social',
-                  val: '@longlifedigital',
-                  link: 'https://instagram.com/longlifedigital',
+                  val: contact.social,
+                  link: settings.social.instagram,
                 },
                 {
                   icon: '🌐',
                   label: 'Website',
-                  val: 'longlifedigital.co',
-                  link: 'https://longlifedigital.co',
+                  val: contact.website,
+                  link: settings.brand.website,
                 },
-              ].map(({ icon, label, val, link }) => (
-                <a
-                  key={label}
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 14,
-                    marginBottom: 20,
-                    textDecoration: 'none',
-                  }}
-                >
-                  <Flex
-                    align="center"
-                    justify="center"
-                    wrap="wrap"
-                    c="#1a0533"
-                    bg="linear-gradient(135deg,#C9963F,#E8C97A)"
-                    fz={16}
-                    w={42}
-                    h={42}
+              ]
+                .filter(({ val }) => val)
+                .map(({ icon, label, val, link }) => (
+                  <Box
+                    component={link ? 'a' : 'div'}
+                    key={label}
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{
-                      borderRadius: '50%',
-                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 14,
+                      marginBottom: 20,
+                      textDecoration: 'none',
                     }}
                   >
-                    {icon}
-                  </Flex>
-                  <div>
-                    <Box c="#6D28D9" fz={10} lts={2} tt="uppercase" mb={3}>
-                      {label}
-                    </Box>
-                    <Box c="#DDD6FE" fz={14} fw={500}>
-                      {val}
-                    </Box>
-                  </div>
-                </a>
-              ))}
-              <Box
-                mt={28}
-                pt={20}
-                style={{
-                  borderTop: '1px solid rgba(201,150,63,0.15)',
-                }}
-              >
-                <Box c="#E8C97A" fz={11} lts={1} mb={8}>
-                  ⏱ RESPONSE TIME
+                    <Flex
+                      align="center"
+                      justify="center"
+                      wrap="wrap"
+                      c="#1a0533"
+                      bg="linear-gradient(135deg,#C9963F,#E8C97A)"
+                      fz={16}
+                      w={42}
+                      h={42}
+                      style={{
+                        borderRadius: '50%',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {icon}
+                    </Flex>
+                    <div className={classes.contactValue}>
+                      <Box c="#6D28D9" fz={10} lts={2} tt="uppercase" mb={3}>
+                        {label}
+                      </Box>
+                      <Box c="#DDD6FE" fz={14} fw={500}>
+                        {val}
+                      </Box>
+                    </div>
+                  </Box>
+                ))}
+              {(contact.responseNote || contact.hours) && (
+                <Box
+                  mt={28}
+                  pt={20}
+                  style={{
+                    borderTop: '1px solid rgba(201,150,63,0.15)',
+                  }}
+                >
+                  <Box c="#E8C97A" fz={11} lts={1} mb={8}>
+                    ⏱ RESPONSE TIME
+                  </Box>
+                  <Box c="#C084FC" fz={13}>
+                    {contact.hours || contact.responseNote}
+                  </Box>
                 </Box>
-                <Box c="#C084FC" fz={13}>
-                  We reply to all messages within 24 hours, Monday through Saturday.
-                </Box>
-              </Box>
+              )}
             </Box>
           </div>
           <Box

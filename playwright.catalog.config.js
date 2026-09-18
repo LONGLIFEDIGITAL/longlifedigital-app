@@ -13,6 +13,9 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev -- --mode test --host 127.0.0.1 --port 5184 --strictPort',
     url: 'http://127.0.0.1:5184',
-    env: { VITE_WOOCOMMERCE_STORE_API_URL: 'https://catalog.example.test/wp-json/wc/store/v1' },
+    env: {
+      VITE_WOOCOMMERCE_STORE_API_URL: 'https://catalog.example.test/wp-json/wc/store/v1',
+      VITE_WORDPRESS_API_URL: '',
+    },
   },
 });

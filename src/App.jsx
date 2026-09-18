@@ -3,12 +3,14 @@ import ProductEditor from './components/ProductEditor';
 import ContactEditor from './components/ContactEditor';
 import AdminDashboard from './components/AdminDashboard';
 import NewsletterPopup from './components/NewsletterPopup';
-import { Box } from '@mantine/core';
+import { Alert, Box, Button } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { ScrollRestoration } from 'react-router';
 import { useStripePayment } from './payments';
 import { EMPTY_FORM, DEFAULT_CONTACT } from './constants/data';
 import useCatalog from './hooks/useCatalog';
+import useSiteSettings from './hooks/useSiteSettings';
+import useNewsletterPopup from './hooks/useNewsletterPopup';
 import useAppNavigation from './hooks/useAppNavigation';
 import CatalogStatus from './components/CatalogStatus';
 import ProductDetailsSkeleton from './components/skeletons/ProductDetailsSkeleton';
@@ -44,6 +46,12 @@ export default function App() {
     managed: cmsManaged,
     categories,
   } = useCatalog();
+  const {
+    settings,
+    managed: settingsManaged,
+    status: settingsStatus,
+    retry: retrySettings,
+  } = useSiteSettings();
   const selProduct = products.find((product) => String(product.id) === productId);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
@@ -89,12 +97,11 @@ export default function App() {
   const [subName, setSubName] = useState('');
   const [subEmail, setSubEmail] = useState('');
   const [subConsent, setSubConsent] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
   const [popupName, setPopupName] = useState('');
   const [popupEmail, setPopupEmail] = useState('');
   const [popupConsent, setPopupConsent] = useState(false);
-  const [popupDone, setPopupDone] = useState(false);
-  const [contact, setContact] = useState(DEFAULT_CONTACT);
+  const [localContact, setContact] = useState(DEFAULT_CONTACT);
+  const contact = settingsManaged ? settings.contact : { ...settings.contact, ...localContact };
   const [showContactEdit, setShowContactEdit] = useState(false);
   const [contactForm, setContactForm] = useState(DEFAULT_CONTACT);
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -173,6 +180,10 @@ export default function App() {
       method: 'card',
     },
   ]);
+  const { showPopup, setShowPopup, popupDone, setPopupDone } = useNewsletterPopup({
+    subscribed,
+    blocked: showCart || showCheckout || showLogin || showForm || showDashboard || showContactEdit,
+  });
   const ROLE_PASSWORDS = {
     owner: 'longlife2024',
     manager: 'manager2024',
@@ -229,12 +240,6 @@ export default function App() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [isAdmin, cmsManaged]);
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (!subscribed && !popupDone) setShowPopup(true);
-    }, 30000);
-    return () => clearTimeout(t);
-  }, []);
   const fire = (msg, type = 'ok') => {
     setToast({
       msg,
@@ -404,6 +409,8 @@ export default function App() {
     <Box c="#111827" bg="#fff" ff="'Inter',sans-serif" mih="100vh">
       <Toast toast={toast} />
       <Nav
+        settings={settings}
+        settingsStatus={settingsStatus}
         cmsManaged={cmsManaged}
         page={page}
         setPage={setPage}
@@ -424,8 +431,18 @@ export default function App() {
         setActiveDropdown={setActiveDropdown}
       />
       <Box component="main" id="main-content" bg="#fff" mih="100vh">
+        {settingsStatus === 'error' && (
+          <Alert title="Site details could not be loaded" color="yellow" m="md">
+            You can still browse products while we reconnect.
+            <Button variant="light" size="xs" ml="sm" onClick={() => retrySettings()}>
+              Retry site details
+            </Button>
+          </Alert>
+        )}
         {page === 'home' && (
           <HomePage
+            settings={settings}
+            settingsManaged={settingsManaged}
             products={products}
             categories={categories}
             catalogStatus={catalogStatus}
@@ -497,8 +514,9 @@ export default function App() {
         )}
         {page === 'about' && (
           <AboutPage
+            brand={settings.brand}
             contact={contact}
-            isAdmin={isAdmin}
+            isAdmin={isAdmin && !settingsManaged}
             setContactForm={setContactForm}
             setShowContactEdit={setShowContactEdit}
           />
@@ -519,7 +537,7 @@ export default function App() {
           />
         )}
         {page === 'domains' && <DomainsPage setPage={setPage} />}
-        {page === 'contact' && <ContactPage fire={fire} />}
+        {page === 'contact' && <ContactPage fire={fire} contact={contact} settings={settings} />}
         {page === 'faq' && <FAQPage setPage={setPage} />}
         {page === 'refund' && <RefundPage />}
         {page === 'privacy' && <PrivacyPage />}

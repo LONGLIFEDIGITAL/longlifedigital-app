@@ -1,0 +1,2556 @@
+[
+  {
+    "key": "post_type_lld_settings",
+    "title": "Site Settings",
+    "active": true,
+    "post_type": "lld_settings",
+    "advanced_configuration": true,
+    "labels": {
+      "name": "Site Settings",
+      "singular_name": "Site Settings Record",
+      "menu_name": "Site Settings",
+      "add_new_item": "Add Site Settings Record",
+      "edit_item": "Edit Site Settings Record",
+      "all_items": "All Site Settings"
+    },
+    "description": "Public brand/contact/newsletter/chat copy; one record named Storefront with slug storefront.",
+    "public": true,
+    "publicly_queryable": false,
+    "exclude_from_search": true,
+    "hierarchical": false,
+    "show_ui": true,
+    "show_in_menu": true,
+    "show_in_admin_bar": true,
+    "show_in_nav_menus": false,
+    "show_in_rest": true,
+    "rest_base": "lld-settings",
+    "rest_namespace": "wp/v2",
+    "rest_controller_class": "WP_REST_Posts_Controller",
+    "menu_icon": "dashicons-admin-settings",
+    "supports": [
+      "title",
+      "revisions"
+    ],
+    "taxonomies": [],
+    "has_archive": false,
+    "rewrite": {
+      "permalink_rewrite": "no_permalink"
+    },
+    "query_var": "none",
+    "can_export": true,
+    "delete_with_user": false,
+    "rename_capabilities": false
+  },
+  {
+    "key": "post_type_lld_service",
+    "title": "Services",
+    "active": true,
+    "post_type": "lld_service",
+    "advanced_configuration": true,
+    "labels": {
+      "name": "Services",
+      "singular_name": "Service",
+      "menu_name": "Services",
+      "add_new_item": "Add Service",
+      "edit_item": "Edit Service",
+      "all_items": "All Services"
+    },
+    "description": "One published record per service or package.",
+    "public": true,
+    "publicly_queryable": false,
+    "exclude_from_search": true,
+    "hierarchical": false,
+    "show_ui": true,
+    "show_in_menu": true,
+    "show_in_admin_bar": true,
+    "show_in_nav_menus": false,
+    "show_in_rest": true,
+    "rest_base": "lld-services",
+    "rest_namespace": "wp/v2",
+    "rest_controller_class": "WP_REST_Posts_Controller",
+    "menu_icon": "dashicons-businessman",
+    "supports": [
+      "title",
+      "editor",
+      "excerpt",
+      "thumbnail",
+      "revisions",
+      "page-attributes"
+    ],
+    "taxonomies": [],
+    "has_archive": false,
+    "rewrite": {
+      "permalink_rewrite": "no_permalink"
+    },
+    "query_var": "none",
+    "can_export": true,
+    "delete_with_user": false,
+    "rename_capabilities": false
+  },
+  {
+    "key": "post_type_lld_asset",
+    "title": "Assets",
+    "active": true,
+    "post_type": "lld_asset",
+    "advanced_configuration": true,
+    "labels": {
+      "name": "Assets",
+      "singular_name": "Asset",
+      "menu_name": "Assets",
+      "add_new_item": "Add Asset",
+      "edit_item": "Edit Asset",
+      "all_items": "All Assets"
+    },
+    "description": "Domains now; website listings supported for later migration.",
+    "public": true,
+    "publicly_queryable": false,
+    "exclude_from_search": true,
+    "hierarchical": false,
+    "show_ui": true,
+    "show_in_menu": true,
+    "show_in_admin_bar": true,
+    "show_in_nav_menus": false,
+    "show_in_rest": true,
+    "rest_base": "lld-assets",
+    "rest_namespace": "wp/v2",
+    "rest_controller_class": "WP_REST_Posts_Controller",
+    "menu_icon": "dashicons-admin-site-alt3",
+    "supports": [
+      "title",
+      "editor",
+      "excerpt",
+      "thumbnail",
+      "revisions",
+      "page-attributes"
+    ],
+    "taxonomies": [
+      "lld_asset_cat"
+    ],
+    "has_archive": false,
+    "rewrite": {
+      "permalink_rewrite": "no_permalink"
+    },
+    "query_var": "none",
+    "can_export": true,
+    "delete_with_user": false,
+    "rename_capabilities": false
+  },
+  {
+    "key": "post_type_lld_faq",
+    "title": "FAQs",
+    "active": true,
+    "post_type": "lld_faq",
+    "advanced_configuration": true,
+    "labels": {
+      "name": "FAQs",
+      "singular_name": "FAQ",
+      "menu_name": "FAQs",
+      "add_new_item": "Add FAQ",
+      "edit_item": "Edit FAQ",
+      "all_items": "All FAQs"
+    },
+    "description": "Question in title, answer in content.",
+    "public": true,
+    "publicly_queryable": false,
+    "exclude_from_search": true,
+    "hierarchical": false,
+    "show_ui": true,
+    "show_in_menu": true,
+    "show_in_admin_bar": true,
+    "show_in_nav_menus": false,
+    "show_in_rest": true,
+    "rest_base": "lld-faqs",
+    "rest_namespace": "wp/v2",
+    "rest_controller_class": "WP_REST_Posts_Controller",
+    "menu_icon": "dashicons-editor-help",
+    "supports": [
+      "title",
+      "editor",
+      "revisions",
+      "page-attributes"
+    ],
+    "taxonomies": [],
+    "has_archive": false,
+    "rewrite": {
+      "permalink_rewrite": "no_permalink"
+    },
+    "query_var": "none",
+    "can_export": true,
+    "delete_with_user": false,
+    "rename_capabilities": false
+  },
+  {
+    "key": "post_type_lld_block",
+    "title": "Content Blocks",
+    "active": true,
+    "post_type": "lld_block",
+    "advanced_configuration": true,
+    "labels": {
+      "name": "Content Blocks",
+      "singular_name": "Content Block",
+      "menu_name": "Content Blocks",
+      "add_new_item": "Add Content Block",
+      "edit_item": "Edit Content Block",
+      "all_items": "All Content Blocks"
+    },
+    "description": "Reusable trust statements, benefits, story cards and approved statistics.",
+    "public": true,
+    "publicly_queryable": false,
+    "exclude_from_search": true,
+    "hierarchical": false,
+    "show_ui": true,
+    "show_in_menu": true,
+    "show_in_admin_bar": true,
+    "show_in_nav_menus": false,
+    "show_in_rest": true,
+    "rest_base": "lld-blocks",
+    "rest_namespace": "wp/v2",
+    "rest_controller_class": "WP_REST_Posts_Controller",
+    "menu_icon": "dashicons-screenoptions",
+    "supports": [
+      "title",
+      "editor",
+      "excerpt",
+      "revisions",
+      "page-attributes"
+    ],
+    "taxonomies": [],
+    "has_archive": false,
+    "rewrite": {
+      "permalink_rewrite": "no_permalink"
+    },
+    "query_var": "none",
+    "can_export": true,
+    "delete_with_user": false,
+    "rename_capabilities": false
+  },
+  {
+    "key": "post_type_lld_nav_item",
+    "title": "Navigation Links",
+    "active": true,
+    "post_type": "lld_nav_item",
+    "advanced_configuration": true,
+    "labels": {
+      "name": "Navigation Links",
+      "singular_name": "Navigation Link",
+      "menu_name": "Navigation Links",
+      "add_new_item": "Add Navigation Link",
+      "edit_item": "Edit Navigation Link",
+      "all_items": "All Navigation Links"
+    },
+    "description": "Public header/footer links and dropdown sources.",
+    "public": true,
+    "publicly_queryable": false,
+    "exclude_from_search": true,
+    "hierarchical": false,
+    "show_ui": true,
+    "show_in_menu": true,
+    "show_in_admin_bar": true,
+    "show_in_nav_menus": false,
+    "show_in_rest": true,
+    "rest_base": "lld-navigation",
+    "rest_namespace": "wp/v2",
+    "rest_controller_class": "WP_REST_Posts_Controller",
+    "menu_icon": "dashicons-menu",
+    "supports": [
+      "title",
+      "excerpt",
+      "revisions",
+      "page-attributes"
+    ],
+    "taxonomies": [],
+    "has_archive": false,
+    "rewrite": {
+      "permalink_rewrite": "no_permalink"
+    },
+    "query_var": "none",
+    "can_export": true,
+    "delete_with_user": false,
+    "rename_capabilities": false
+  },
+  {
+    "key": "taxonomy_lld_asset_cat",
+    "title": "Asset Categories",
+    "active": true,
+    "taxonomy": "lld_asset_cat",
+    "object_type": [
+      "lld_asset"
+    ],
+    "advanced_configuration": true,
+    "labels": {
+      "name": "Asset Categories",
+      "singular_name": "Asset Category",
+      "menu_name": "Asset Categories"
+    },
+    "public": true,
+    "publicly_queryable": false,
+    "hierarchical": true,
+    "show_ui": true,
+    "show_in_menu": true,
+    "show_in_nav_menus": false,
+    "show_in_rest": true,
+    "rest_base": "lld-asset-categories",
+    "rest_namespace": "wp/v2",
+    "rest_controller_class": "WP_REST_Terms_Controller",
+    "show_admin_column": true,
+    "rewrite": {
+      "permalink_rewrite": "no_permalink"
+    },
+    "query_var": "none"
+  },
+  {
+    "key": "group_lld_page",
+    "title": "Longlife Digital | Page content",
+    "fields": [
+      {
+        "name": "lld_page_key",
+        "label": "Storefront page",
+        "type": "select",
+        "instructions": "Set this for each storefront content page. Leave empty on WooCommerce Cart, Checkout, My Account and other unrelated pages. Create one published entry per key using the route table.",
+        "required": 0,
+        "allow_null": 1,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "home": "Home",
+          "shop": "Shop",
+          "about": "About",
+          "blog": "Blog",
+          "services": "Services",
+          "courses": "Courses",
+          "domains": "Domains",
+          "contact": "Contact",
+          "faq": "Faq",
+          "refund": "Refund",
+          "privacy": "Privacy",
+          "terms": "Terms"
+        },
+        "default_value": "",
+        "key": "field_lld_page_lld_page_key"
+      },
+      {
+        "name": "lld_eyebrow",
+        "label": "Small heading / badge",
+        "type": "text",
+        "instructions": "Optional text above the page heading; Home uses this as the hero badge.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 160,
+        "key": "field_lld_page_lld_eyebrow"
+      },
+      {
+        "name": "lld_heading",
+        "label": "Display heading",
+        "type": "text",
+        "instructions": "Optional override of the WordPress page title. Home uses its three hero segments when supplied.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 160,
+        "key": "field_lld_page_lld_heading"
+      },
+      {
+        "name": "lld_intro",
+        "label": "Page introduction",
+        "type": "textarea",
+        "instructions": "Home uses this as the hero paragraph; other pages use it below the heading.",
+        "required": 0,
+        "default_value": "",
+        "rows": 3,
+        "new_lines": "",
+        "maxlength": 1000,
+        "key": "field_lld_page_lld_intro"
+      },
+      {
+        "name": "lld_cta",
+        "label": "Page closing call to action",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "heading",
+            "label": "Heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_cta_heading"
+          },
+          {
+            "name": "body",
+            "label": "Description",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_page_lld_cta_body"
+          },
+          {
+            "name": "label",
+            "label": "Button label",
+            "type": "text",
+            "instructions": "Leave both label and destination empty to hide this button.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 60,
+            "key": "field_lld_page_lld_cta_label"
+          },
+          {
+            "name": "destination",
+            "label": "Destination",
+            "type": "text",
+            "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 500,
+            "key": "field_lld_page_lld_cta_destination"
+          }
+        ],
+        "key": "field_lld_page_lld_cta"
+      },
+      {
+        "name": "lld_home",
+        "label": "Homepage sections",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "hero_prefix",
+            "label": "Hero opening line",
+            "type": "text",
+            "instructions": "For example: Beautifully Crafted.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_home_hero_prefix"
+          },
+          {
+            "name": "hero_highlight",
+            "label": "Hero highlighted words",
+            "type": "text",
+            "instructions": "For example: Digital Products. Gradient styling remains in React.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_home_hero_highlight"
+          },
+          {
+            "name": "hero_suffix",
+            "label": "Hero closing line",
+            "type": "text",
+            "instructions": "For example: for Life & Business.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_home_hero_suffix"
+          },
+          {
+            "name": "primary_cta",
+            "label": "Primary hero button",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "label",
+                "label": "Button label",
+                "type": "text",
+                "instructions": "Leave both label and destination empty to hide this button.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 60,
+                "key": "field_lld_page_lld_home_primary_cta_label"
+              },
+              {
+                "name": "destination",
+                "label": "Destination",
+                "type": "text",
+                "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 500,
+                "key": "field_lld_page_lld_home_primary_cta_destination"
+              }
+            ],
+            "key": "field_lld_page_lld_home_primary_cta"
+          },
+          {
+            "name": "secondary_cta",
+            "label": "Secondary hero button",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "label",
+                "label": "Button label",
+                "type": "text",
+                "instructions": "Leave both label and destination empty to hide this button.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 60,
+                "key": "field_lld_page_lld_home_secondary_cta_label"
+              },
+              {
+                "name": "destination",
+                "label": "Destination",
+                "type": "text",
+                "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 500,
+                "key": "field_lld_page_lld_home_secondary_cta_destination"
+              }
+            ],
+            "key": "field_lld_page_lld_home_secondary_cta"
+          },
+          {
+            "name": "catalog_title",
+            "label": "Catalog heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "Explore Our Products",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_home_catalog_title"
+          },
+          {
+            "name": "catalog_intro",
+            "label": "Catalog introduction",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_page_lld_home_catalog_intro"
+          },
+          {
+            "name": "featured_title",
+            "label": "Featured heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "Featured Products",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_home_featured_title"
+          },
+          {
+            "name": "featured_intro",
+            "label": "Featured introduction",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_page_lld_home_featured_intro"
+          },
+          {
+            "name": "more_title",
+            "label": "Second collection heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "More to Explore",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_home_more_title"
+          },
+          {
+            "name": "more_intro",
+            "label": "Second collection introduction",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_page_lld_home_more_intro"
+          },
+          {
+            "name": "collection_cta",
+            "label": "Collection view-all button",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "label",
+                "label": "Button label",
+                "type": "text",
+                "instructions": "Leave both label and destination empty to hide this button.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 60,
+                "key": "field_lld_page_lld_home_collection_cta_label"
+              },
+              {
+                "name": "destination",
+                "label": "Destination",
+                "type": "text",
+                "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 500,
+                "key": "field_lld_page_lld_home_collection_cta_destination"
+              }
+            ],
+            "key": "field_lld_page_lld_home_collection_cta"
+          },
+          {
+            "name": "offer_title",
+            "label": "Sale banner heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "Special Offer",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_home_offer_title"
+          },
+          {
+            "name": "offer_button",
+            "label": "Sale banner button label",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "Shop This Deal",
+            "maxlength": 60,
+            "key": "field_lld_page_lld_home_offer_button"
+          },
+          {
+            "name": "trust_items",
+            "label": "Trust strip items",
+            "type": "relationship",
+            "instructions": "Select blocks of kind Trust statement; approve delivery/payment claims before publishing.",
+            "required": 0,
+            "return_format": "id",
+            "filters": [
+              "search",
+              "post_type"
+            ],
+            "min": 0,
+            "max": 8,
+            "post_type": [
+              "lld_block"
+            ],
+            "key": "field_lld_page_lld_home_trust_items"
+          },
+          {
+            "name": "hero_stats",
+            "label": "Additional hero statistics",
+            "type": "relationship",
+            "instructions": "Select approved Statistic blocks. Product count and product review averages are derived from WooCommerce, not manually entered here.",
+            "required": 0,
+            "return_format": "id",
+            "filters": [
+              "search",
+              "post_type"
+            ],
+            "min": 0,
+            "max": 3,
+            "post_type": [
+              "lld_block"
+            ],
+            "key": "field_lld_page_lld_home_hero_stats"
+          },
+          {
+            "name": "about",
+            "label": "About preview",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "eyebrow",
+                "label": "Small heading",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "default_value": "Who are we?",
+                "maxlength": 160,
+                "key": "field_lld_page_lld_home_about_eyebrow"
+              },
+              {
+                "name": "heading",
+                "label": "Heading",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 160,
+                "key": "field_lld_page_lld_home_about_heading"
+              },
+              {
+                "name": "body",
+                "label": "Body",
+                "type": "wysiwyg",
+                "instructions": "",
+                "required": 0,
+                "default_value": "",
+                "tabs": "all",
+                "toolbar": "basic",
+                "media_upload": 0,
+                "delay": 0,
+                "key": "field_lld_page_lld_home_about_body"
+              },
+              {
+                "name": "benefits",
+                "label": "Benefits",
+                "type": "relationship",
+                "instructions": "Select Benefit blocks in display order.",
+                "required": 0,
+                "return_format": "id",
+                "filters": [
+                  "search",
+                  "post_type"
+                ],
+                "min": 0,
+                "max": 8,
+                "post_type": [
+                  "lld_block"
+                ],
+                "key": "field_lld_page_lld_home_about_benefits"
+              },
+              {
+                "name": "stats",
+                "label": "Statistics",
+                "type": "relationship",
+                "instructions": "Select verified Statistic blocks. Hide unverified claims.",
+                "required": 0,
+                "return_format": "id",
+                "filters": [
+                  "search",
+                  "post_type"
+                ],
+                "min": 0,
+                "max": 4,
+                "post_type": [
+                  "lld_block"
+                ],
+                "key": "field_lld_page_lld_home_about_stats"
+              },
+              {
+                "name": "cta",
+                "label": "About button",
+                "type": "group",
+                "instructions": "",
+                "required": 0,
+                "layout": "block",
+                "sub_fields": [
+                  {
+                    "name": "label",
+                    "label": "Button label",
+                    "type": "text",
+                    "instructions": "Leave both label and destination empty to hide this button.",
+                    "required": 0,
+                    "default_value": "",
+                    "maxlength": 60,
+                    "key": "field_lld_page_lld_home_about_cta_label"
+                  },
+                  {
+                    "name": "destination",
+                    "label": "Destination",
+                    "type": "text",
+                    "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+                    "required": 0,
+                    "default_value": "",
+                    "maxlength": 500,
+                    "key": "field_lld_page_lld_home_about_cta_destination"
+                  }
+                ],
+                "key": "field_lld_page_lld_home_about_cta"
+              }
+            ],
+            "key": "field_lld_page_lld_home_about"
+          },
+          {
+            "name": "blog",
+            "label": "Blog preview",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "heading",
+                "label": "Heading",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 160,
+                "key": "field_lld_page_lld_home_blog_heading"
+              },
+              {
+                "name": "intro",
+                "label": "Introduction",
+                "type": "textarea",
+                "instructions": "",
+                "required": 0,
+                "default_value": "",
+                "rows": 3,
+                "new_lines": "",
+                "maxlength": 1000,
+                "key": "field_lld_page_lld_home_blog_intro"
+              },
+              {
+                "name": "posts",
+                "label": "Featured articles",
+                "type": "relationship",
+                "instructions": "Choose up to three published posts. Empty means the latest three published posts.",
+                "required": 0,
+                "return_format": "id",
+                "filters": [
+                  "search",
+                  "post_type"
+                ],
+                "min": 0,
+                "max": 3,
+                "post_type": [
+                  "post"
+                ],
+                "key": "field_lld_page_lld_home_blog_posts"
+              },
+              {
+                "name": "cta",
+                "label": "Blog button",
+                "type": "group",
+                "instructions": "",
+                "required": 0,
+                "layout": "block",
+                "sub_fields": [
+                  {
+                    "name": "label",
+                    "label": "Button label",
+                    "type": "text",
+                    "instructions": "Leave both label and destination empty to hide this button.",
+                    "required": 0,
+                    "default_value": "",
+                    "maxlength": 60,
+                    "key": "field_lld_page_lld_home_blog_cta_label"
+                  },
+                  {
+                    "name": "destination",
+                    "label": "Destination",
+                    "type": "text",
+                    "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+                    "required": 0,
+                    "default_value": "",
+                    "maxlength": 500,
+                    "key": "field_lld_page_lld_home_blog_cta_destination"
+                  }
+                ],
+                "key": "field_lld_page_lld_home_blog_cta"
+              }
+            ],
+            "key": "field_lld_page_lld_home_blog"
+          }
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_page_lld_page_key",
+              "operator": "==",
+              "value": "home"
+            }
+          ]
+        ],
+        "key": "field_lld_page_lld_home"
+      },
+      {
+        "name": "lld_about",
+        "label": "About page",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "tagline",
+            "label": "Brand introduction",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_page_lld_about_tagline"
+          },
+          {
+            "name": "sections",
+            "label": "Mission, offering and promise cards",
+            "type": "relationship",
+            "instructions": "Select Value/story blocks. Native page content can hold additional introductory prose.",
+            "required": 0,
+            "return_format": "id",
+            "filters": [
+              "search",
+              "post_type"
+            ],
+            "min": 0,
+            "max": 6,
+            "post_type": [
+              "lld_block"
+            ],
+            "key": "field_lld_page_lld_about_sections"
+          }
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_page_lld_page_key",
+              "operator": "==",
+              "value": "about"
+            }
+          ]
+        ],
+        "key": "field_lld_page_lld_about"
+      },
+      {
+        "name": "lld_contact",
+        "label": "Contact page copy",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "information_heading",
+            "label": "Contact information heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_contact_information_heading"
+          },
+          {
+            "name": "form_heading",
+            "label": "Form heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_contact_form_heading"
+          },
+          {
+            "name": "form_intro",
+            "label": "Form introduction",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_page_lld_contact_form_intro"
+          },
+          {
+            "name": "success_heading",
+            "label": "Success heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_contact_success_heading"
+          },
+          {
+            "name": "success_body",
+            "label": "Success message",
+            "type": "textarea",
+            "instructions": "Show only after the future submission API confirms receipt, not on a failed request.",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_page_lld_contact_success_body"
+          }
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_page_lld_page_key",
+              "operator": "==",
+              "value": "contact"
+            }
+          ]
+        ],
+        "key": "field_lld_page_lld_contact"
+      },
+      {
+        "name": "lld_policy",
+        "label": "Policy details",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "updated_on",
+            "label": "Policy effective / updated date",
+            "type": "date_picker",
+            "instructions": "Date of the approved policy text, not the last incidental WordPress edit.",
+            "required": 1,
+            "display_format": "F j, Y",
+            "return_format": "Y-m-d",
+            "first_day": 1,
+            "key": "field_lld_page_lld_policy_updated_on"
+          },
+          {
+            "name": "callout_heading",
+            "label": "Optional callout heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_policy_callout_heading"
+          },
+          {
+            "name": "callout_body",
+            "label": "Optional callout text",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_page_lld_policy_callout_body"
+          }
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_page_lld_page_key",
+              "operator": "==",
+              "value": "privacy"
+            }
+          ],
+          [
+            {
+              "field": "field_lld_page_lld_page_key",
+              "operator": "==",
+              "value": "refund"
+            }
+          ],
+          [
+            {
+              "field": "field_lld_page_lld_page_key",
+              "operator": "==",
+              "value": "terms"
+            }
+          ]
+        ],
+        "key": "field_lld_page_lld_policy"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "page"
+        }
+      ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Shared page headings and structured sections. Policy prose lives in the native WordPress editor. Collection cards remain separate records. No CSS or React layout code is stored in these fields.",
+    "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_settings",
+    "title": "Longlife Digital | Site settings",
+    "fields": [
+      {
+        "name": "lld_brand",
+        "label": "Brand",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "name",
+            "label": "Brand name",
+            "type": "text",
+            "instructions": "",
+            "required": 1,
+            "default_value": "Longlife Digital",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_brand_name"
+          },
+          {
+            "name": "legal_name",
+            "label": "Legal business name",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "Longlife Digital LLC",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_brand_legal_name"
+          },
+          {
+            "name": "tagline",
+            "label": "Navigation tagline",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_brand_tagline"
+          },
+          {
+            "name": "website",
+            "label": "Public storefront URL",
+            "type": "url",
+            "instructions": "",
+            "required": 1,
+            "default_value": "",
+            "key": "field_lld_settings_lld_brand_website"
+          },
+          {
+            "name": "logo",
+            "label": "Brand logo",
+            "type": "group",
+            "instructions": "Public presentation media only. Purchased files and signed download links do not belong here.",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "attachment",
+                "label": "WordPress image",
+                "type": "image",
+                "instructions": "Optional public preview image; REST value is an attachment ID.",
+                "required": 0,
+                "return_format": "id",
+                "preview_size": "medium",
+                "library": "all",
+                "mime_types": "jpg,jpeg,png,webp,avif",
+                "max_size": 5,
+                "key": "field_lld_settings_lld_brand_logo_attachment"
+              },
+              {
+                "name": "public_url",
+                "label": "Public image URL",
+                "type": "url",
+                "instructions": "Optional HTTPS public image, including a public Firebase preview. If set, this takes precedence over the attachment.",
+                "required": 0,
+                "default_value": "",
+                "key": "field_lld_settings_lld_brand_logo_public_url"
+              },
+              {
+                "name": "alt",
+                "label": "Alternative text",
+                "type": "text",
+                "instructions": "Describe meaningful images; empty for purely decorative images.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 160,
+                "key": "field_lld_settings_lld_brand_logo_alt"
+              }
+            ],
+            "key": "field_lld_settings_lld_brand_logo"
+          }
+        ],
+        "key": "field_lld_settings_lld_brand"
+      },
+      {
+        "name": "lld_contact",
+        "label": "Public contact details",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "email",
+            "label": "Support email",
+            "type": "email",
+            "instructions": "Resolve the existing support@lldhome.com versus support@longlifedigital.co mismatch before publishing.",
+            "required": 1,
+            "default_value": "",
+            "key": "field_lld_settings_lld_contact_email"
+          },
+          {
+            "name": "social_handle",
+            "label": "Main social handle",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_contact_social_handle"
+          },
+          {
+            "name": "response_note",
+            "label": "Response-time statement",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_contact_response_note"
+          },
+          {
+            "name": "hours",
+            "label": "Support hours and timezone",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_settings_lld_contact_hours"
+          }
+        ],
+        "key": "field_lld_settings_lld_contact"
+      },
+      {
+        "name": "lld_social",
+        "label": "Social links",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "instagram",
+            "label": "Instagram",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_settings_lld_social_instagram"
+          },
+          {
+            "name": "facebook",
+            "label": "Facebook",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_settings_lld_social_facebook"
+          },
+          {
+            "name": "tiktok",
+            "label": "Tiktok",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_settings_lld_social_tiktok"
+          },
+          {
+            "name": "youtube",
+            "label": "Youtube",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_settings_lld_social_youtube"
+          },
+          {
+            "name": "linkedin",
+            "label": "Linkedin",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_settings_lld_social_linkedin"
+          }
+        ],
+        "key": "field_lld_settings_lld_social"
+      },
+      {
+        "name": "lld_announcement",
+        "label": "Announcement bar",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "enabled",
+            "label": "Show announcement",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "default_value": 0,
+            "ui": 1,
+            "key": "field_lld_settings_lld_announcement_enabled"
+          },
+          {
+            "name": "message",
+            "label": "Message",
+            "type": "textarea",
+            "instructions": "Public marketing copy. Any advertised offer must match an active WooCommerce coupon.",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_settings_lld_announcement_message"
+          },
+          {
+            "name": "coupon_code",
+            "label": "Displayed coupon code",
+            "type": "text",
+            "instructions": "Display only; does not create, enable or validate a coupon.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_announcement_coupon_code"
+          },
+          {
+            "name": "delivery_note",
+            "label": "Delivery note",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_announcement_delivery_note"
+          },
+          {
+            "name": "cta",
+            "label": "Optional announcement link",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "label",
+                "label": "Button label",
+                "type": "text",
+                "instructions": "Leave both label and destination empty to hide this button.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 60,
+                "key": "field_lld_settings_lld_announcement_cta_label"
+              },
+              {
+                "name": "destination",
+                "label": "Destination",
+                "type": "text",
+                "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 500,
+                "key": "field_lld_settings_lld_announcement_cta_destination"
+              }
+            ],
+            "key": "field_lld_settings_lld_announcement_cta"
+          }
+        ],
+        "key": "field_lld_settings_lld_announcement"
+      },
+      {
+        "name": "lld_footer",
+        "label": "Footer",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "description",
+            "label": "Business description",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_settings_lld_footer_description"
+          },
+          {
+            "name": "company_heading",
+            "label": "Company links heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "Company",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_footer_company_heading"
+          },
+          {
+            "name": "support_heading",
+            "label": "Support links heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "Support",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_footer_support_heading"
+          },
+          {
+            "name": "contact_heading",
+            "label": "Contact heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "Contact",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_footer_contact_heading"
+          },
+          {
+            "name": "copyright_name",
+            "label": "Copyright owner",
+            "type": "text",
+            "instructions": "Year is generated by React; do not enter a fixed year.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_footer_copyright_name"
+          }
+        ],
+        "key": "field_lld_settings_lld_footer"
+      },
+      {
+        "name": "lld_newsletter",
+        "label": "Newsletter copy",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "enabled",
+            "label": "Show newsletter signup",
+            "type": "true_false",
+            "instructions": "Enable in the integrated storefront only once subscription persistence is available.",
+            "required": 0,
+            "default_value": 0,
+            "ui": 1,
+            "key": "field_lld_settings_lld_newsletter_enabled"
+          },
+          {
+            "name": "heading",
+            "label": "Section heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_newsletter_heading"
+          },
+          {
+            "name": "body",
+            "label": "Description",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_settings_lld_newsletter_body"
+          },
+          {
+            "name": "button_label",
+            "label": "Subscribe button label",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 60,
+            "key": "field_lld_settings_lld_newsletter_button_label"
+          },
+          {
+            "name": "consent_text",
+            "label": "Consent wording",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_settings_lld_newsletter_consent_text"
+          },
+          {
+            "name": "success_message",
+            "label": "Confirmed subscription message",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_settings_lld_newsletter_success_message"
+          },
+          {
+            "name": "popup_enabled",
+            "label": "Show newsletter popup",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "default_value": 0,
+            "ui": 1,
+            "key": "field_lld_settings_lld_newsletter_popup_enabled"
+          },
+          {
+            "name": "popup_heading",
+            "label": "Popup heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_newsletter_popup_heading"
+          },
+          {
+            "name": "popup_body",
+            "label": "Popup body",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_settings_lld_newsletter_popup_body"
+          },
+          {
+            "name": "popup_delay_seconds",
+            "label": "Popup delay (seconds)",
+            "type": "number",
+            "instructions": "",
+            "required": 0,
+            "min": 0,
+            "step": 1,
+            "default_value": 30,
+            "max": 300,
+            "key": "field_lld_settings_lld_newsletter_popup_delay_seconds"
+          }
+        ],
+        "key": "field_lld_settings_lld_newsletter"
+      },
+      {
+        "name": "lld_chat",
+        "label": "Chat public copy",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "display_name",
+            "label": "Assistant display name",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_settings_lld_chat_display_name"
+          },
+          {
+            "name": "welcome",
+            "label": "Welcome message",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_settings_lld_chat_welcome"
+          },
+          {
+            "name": "unavailable_message",
+            "label": "Unavailable message",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_settings_lld_chat_unavailable_message"
+          },
+          {
+            "name": "suggested_questions",
+            "label": "Suggested questions",
+            "type": "textarea",
+            "instructions": "One question per line; front end caps the list at four. Public copy only, never model instructions or credentials.",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_settings_lld_chat_suggested_questions"
+          }
+        ],
+        "key": "field_lld_settings_lld_chat"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_settings"
+        }
+      ]
+    ],
+    "menu_order": 1,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "One published record with slug storefront. This is a public content record, not an ACF Pro Options Page. Do not put secrets, staff notes or customer records here.",
+    "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_service",
+    "title": "Longlife Digital | Service details",
+    "fields": [
+      {
+        "name": "lld_icon",
+        "label": "Icon",
+        "type": "text",
+        "instructions": "A short emoji or symbol; no HTML or SVG.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 12,
+        "key": "field_lld_service_lld_icon"
+      },
+      {
+        "name": "lld_nav_label",
+        "label": "Short menu label",
+        "type": "text",
+        "instructions": "Optional; fallback is the service title.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 60,
+        "key": "field_lld_service_lld_nav_label"
+      },
+      {
+        "name": "lld_nav_summary",
+        "label": "Menu description",
+        "type": "textarea",
+        "instructions": "",
+        "required": 0,
+        "default_value": "",
+        "rows": 3,
+        "new_lines": "",
+        "maxlength": 160,
+        "key": "field_lld_service_lld_nav_summary"
+      },
+      {
+        "name": "lld_pricing_mode",
+        "label": "Pricing display",
+        "type": "select",
+        "instructions": "A quoted amount is informational only. Purchasable prices always come from the linked WooCommerce product.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "contact": "Contact for pricing",
+          "estimate": "Indicative asking / starting price",
+          "product": "Linked WooCommerce product"
+        },
+        "default_value": "contact",
+        "key": "field_lld_service_lld_pricing_mode"
+      },
+      {
+        "name": "lld_amount",
+        "label": "Indicative amount",
+        "type": "number",
+        "instructions": "Never used to charge a customer.",
+        "required": 1,
+        "min": 0,
+        "step": 0.01,
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_amount"
+      },
+      {
+        "name": "lld_currency",
+        "label": "Quote currency",
+        "type": "select",
+        "instructions": "Initial business currency; expand deliberately if other currencies are supported.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "USD": "USD"
+        },
+        "default_value": "USD",
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_currency"
+      },
+      {
+        "name": "lld_billing_period",
+        "label": "Price wording",
+        "type": "select",
+        "instructions": "Display wording only; this does not create a subscription.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "once": "One time",
+          "month": "Per month",
+          "year": "Per year"
+        },
+        "default_value": "once",
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_billing_period"
+      },
+      {
+        "name": "lld_product",
+        "label": "Linked WooCommerce product",
+        "type": "post_object",
+        "instructions": "Choose a published product. Resolve its ID through the WooCommerce catalog. Checkout remains a later integration.",
+        "required": 1,
+        "return_format": "id",
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "post_type": [
+          "product"
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "product"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_product"
+      },
+      {
+        "name": "lld_cta",
+        "label": "Service inquiry / consultation button",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "label",
+            "label": "Button label",
+            "type": "text",
+            "instructions": "Leave both label and destination empty to hide this button.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 60,
+            "key": "field_lld_service_lld_cta_label"
+          },
+          {
+            "name": "destination",
+            "label": "Destination",
+            "type": "text",
+            "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 500,
+            "key": "field_lld_service_lld_cta_destination"
+          }
+        ],
+        "key": "field_lld_service_lld_cta"
+      },
+      {
+        "name": "lld_package_details",
+        "label": "Included work / package details",
+        "type": "wysiwyg",
+        "instructions": "",
+        "required": 0,
+        "default_value": "",
+        "tabs": "all",
+        "toolbar": "basic",
+        "media_upload": 0,
+        "delay": 0,
+        "key": "field_lld_service_lld_package_details"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_service"
+        }
+      ]
+    ],
+    "menu_order": 2,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Native title is the service name, excerpt is the card description, content is extended copy, featured image is optional and menu_order controls sorting. The same records feed the Services menu and contact form service choices.",
+    "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_asset",
+    "title": "Longlife Digital | Domain and website listing",
+    "fields": [
+      {
+        "name": "lld_asset_type",
+        "label": "Asset type",
+        "type": "select",
+        "instructions": "",
+        "required": 1,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "domain": "Domain",
+          "website": "Ready-to-launch website"
+        },
+        "default_value": "domain",
+        "key": "field_lld_asset_lld_asset_type"
+      },
+      {
+        "name": "lld_availability",
+        "label": "Listing availability",
+        "type": "select",
+        "instructions": "Editorial status only. Future checkout must enforce inventory and transfer eligibility in WooCommerce.",
+        "required": 1,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "available": "Available",
+          "reserved": "Reserved",
+          "sold": "Sold"
+        },
+        "default_value": "available",
+        "key": "field_lld_asset_lld_availability"
+      },
+      {
+        "name": "lld_badge",
+        "label": "Badge text",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 40,
+        "key": "field_lld_asset_lld_badge"
+      },
+      {
+        "name": "lld_demo_url",
+        "label": "Public website preview",
+        "type": "url",
+        "instructions": "HTTPS public demo only; never registrar credentials or transfer codes.",
+        "required": 0,
+        "default_value": "",
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_asset_lld_asset_type",
+              "operator": "==",
+              "value": "website"
+            }
+          ]
+        ],
+        "key": "field_lld_asset_lld_demo_url"
+      },
+      {
+        "name": "lld_pricing_mode",
+        "label": "Pricing display",
+        "type": "select",
+        "instructions": "A quoted amount is informational only. Purchasable prices always come from the linked WooCommerce product.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "contact": "Contact for pricing",
+          "estimate": "Indicative asking / starting price",
+          "product": "Linked WooCommerce product"
+        },
+        "default_value": "contact",
+        "key": "field_lld_asset_lld_pricing_mode"
+      },
+      {
+        "name": "lld_amount",
+        "label": "Indicative amount",
+        "type": "number",
+        "instructions": "Never used to charge a customer.",
+        "required": 1,
+        "min": 0,
+        "step": 0.01,
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_asset_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_asset_lld_amount"
+      },
+      {
+        "name": "lld_currency",
+        "label": "Quote currency",
+        "type": "select",
+        "instructions": "Initial business currency; expand deliberately if other currencies are supported.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "USD": "USD"
+        },
+        "default_value": "USD",
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_asset_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_asset_lld_currency"
+      },
+      {
+        "name": "lld_billing_period",
+        "label": "Price wording",
+        "type": "select",
+        "instructions": "Display wording only; this does not create a subscription.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "once": "One time",
+          "month": "Per month",
+          "year": "Per year"
+        },
+        "default_value": "once",
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_asset_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_asset_lld_billing_period"
+      },
+      {
+        "name": "lld_product",
+        "label": "Linked WooCommerce product",
+        "type": "post_object",
+        "instructions": "Choose a published product. Resolve its ID through the WooCommerce catalog. Checkout remains a later integration.",
+        "required": 1,
+        "return_format": "id",
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "post_type": [
+          "product"
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_asset_lld_pricing_mode",
+              "operator": "==",
+              "value": "product"
+            }
+          ]
+        ],
+        "key": "field_lld_asset_lld_product"
+      },
+      {
+        "name": "lld_cta",
+        "label": "Inquiry button",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "label",
+            "label": "Button label",
+            "type": "text",
+            "instructions": "Leave both label and destination empty to hide this button.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 60,
+            "key": "field_lld_asset_lld_cta_label"
+          },
+          {
+            "name": "destination",
+            "label": "Destination",
+            "type": "text",
+            "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 500,
+            "key": "field_lld_asset_lld_cta_destination"
+          }
+        ],
+        "key": "field_lld_asset_lld_cta"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_asset"
+        }
+      ]
+    ],
+    "menu_order": 3,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Native title is the domain or website name; excerpt is the listing summary. Assign Asset Categories for filtering. Initial domain names and asking prices in the React source are samples, not a verified inventory.",
+    "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_faq",
+    "title": "Longlife Digital | FAQ placement",
+    "fields": [
+      {
+        "name": "lld_topics",
+        "label": "Relevant sections",
+        "type": "checkbox",
+        "instructions": "General items appear on the FAQ page. Additional placements can be connected later.",
+        "required": 0,
+        "layout": "vertical",
+        "return_format": "value",
+        "allow_custom": 0,
+        "choices": {
+          "general": "General",
+          "products": "Products",
+          "services": "Services",
+          "domains": "Domains"
+        },
+        "default_value": [
+          "general"
+        ],
+        "key": "field_lld_faq_lld_topics"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_faq"
+        }
+      ]
+    ],
+    "menu_order": 4,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Native title is the question and native content is the formatted answer. Use menu_order for ordering. Store approved explanations, not application rules or customer messages.",
+    "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_block",
+    "title": "Longlife Digital | Reusable content block",
+    "fields": [
+      {
+        "name": "lld_kind",
+        "label": "Block kind",
+        "type": "select",
+        "instructions": "",
+        "required": 1,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "trust": "Trust statement",
+          "benefit": "Benefit",
+          "stat": "Statistic",
+          "value": "Value / story card"
+        },
+        "default_value": "benefit",
+        "key": "field_lld_block_lld_kind"
+      },
+      {
+        "name": "lld_icon",
+        "label": "Icon",
+        "type": "text",
+        "instructions": "Optional short emoji or symbol.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 12,
+        "key": "field_lld_block_lld_icon"
+      },
+      {
+        "name": "lld_stat_value",
+        "label": "Statistic display value",
+        "type": "text",
+        "instructions": "Only approved, supportable marketing figures. Do not duplicate live product counts, prices or product ratings.",
+        "required": 1,
+        "default_value": "",
+        "maxlength": 30,
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_block_lld_kind",
+              "operator": "==",
+              "value": "stat"
+            }
+          ]
+        ],
+        "key": "field_lld_block_lld_stat_value"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_block"
+        }
+      ]
+    ],
+    "menu_order": 5,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Native title is the label, excerpt the short description, and content longer story-card text. Homepage/About relationship fields select and order blocks; no ACF Pro Repeater is required.",
+    "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_navigation",
+    "title": "Longlife Digital | Navigation link",
+    "fields": [
+      {
+        "name": "lld_area",
+        "label": "Menu area",
+        "type": "select",
+        "instructions": "",
+        "required": 1,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "header": "Header",
+          "footer_company": "Footer: Company",
+          "footer_support": "Footer: Support",
+          "footer_legal": "Footer: Legal"
+        },
+        "default_value": "header",
+        "key": "field_lld_navigation_lld_area"
+      },
+      {
+        "name": "lld_destination",
+        "label": "Destination",
+        "type": "text",
+        "instructions": "Storefront path, approved HTTPS URL, mailto: or tel:. Never javascript:, a CMS admin URL or a file download token.",
+        "required": 1,
+        "default_value": "",
+        "maxlength": 500,
+        "key": "field_lld_navigation_lld_destination"
+      },
+      {
+        "name": "lld_new_tab",
+        "label": "Open external link in new tab",
+        "type": "true_false",
+        "instructions": "",
+        "required": 0,
+        "default_value": 0,
+        "ui": 1,
+        "key": "field_lld_navigation_lld_new_tab"
+      },
+      {
+        "name": "lld_icon",
+        "label": "Optional icon",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 12,
+        "key": "field_lld_navigation_lld_icon"
+      },
+      {
+        "name": "lld_children_source",
+        "label": "Dropdown content",
+        "type": "select",
+        "instructions": "",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "none": "No children",
+          "manual": "Child navigation records",
+          "services": "Published services",
+          "asset_categories": "Asset categories"
+        },
+        "default_value": "none",
+        "key": "field_lld_navigation_lld_children_source"
+      },
+      {
+        "name": "lld_parent",
+        "label": "Parent navigation record",
+        "type": "post_object",
+        "instructions": "Optional. Choose a top-level record in the same menu area with Manual children. One level only; no cycles.",
+        "required": 0,
+        "return_format": "id",
+        "allow_null": 1,
+        "multiple": 0,
+        "ui": 1,
+        "post_type": [
+          "lld_nav_item"
+        ],
+        "key": "field_lld_navigation_lld_parent"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_nav_item"
+        }
+      ]
+    ],
+    "menu_order": 6,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Native title is the label, excerpt is an optional dropdown description, and menu_order controls sibling order. Service/category dropdowns are derived from their records so their names are not copied into multiple lists.",
+    "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_product",
+    "title": "Longlife Digital | Product display extras",
+    "fields": [
+      {
+        "name": "lld_includes",
+        "label": "What is included",
+        "type": "wysiwyg",
+        "instructions": "Optional additional product section; do not repeat the full WooCommerce description.",
+        "required": 0,
+        "default_value": "",
+        "tabs": "all",
+        "toolbar": "basic",
+        "media_upload": 0,
+        "delay": 0,
+        "key": "field_lld_product_lld_includes"
+      },
+      {
+        "name": "lld_level",
+        "label": "Audience / skill level",
+        "type": "text",
+        "instructions": "For example: Beginner or All levels. Optional.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 160,
+        "key": "field_lld_product_lld_level"
+      },
+      {
+        "name": "lld_duration",
+        "label": "Course duration",
+        "type": "text",
+        "instructions": "Display text only, for example 10 weeks. No enrollment or entitlement logic.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 160,
+        "key": "field_lld_product_lld_duration"
+      },
+      {
+        "name": "lld_compatibility",
+        "label": "Software / format requirements",
+        "type": "textarea",
+        "instructions": "",
+        "required": 0,
+        "default_value": "",
+        "rows": 3,
+        "new_lines": "",
+        "maxlength": 1000,
+        "key": "field_lld_product_lld_compatibility"
+      },
+      {
+        "name": "lld_license_summary",
+        "label": "Public license summary",
+        "type": "textarea",
+        "instructions": "Plain-language display copy; any licensed deliverable is handled separately.",
+        "required": 0,
+        "default_value": "",
+        "rows": 3,
+        "new_lines": "",
+        "maxlength": 1000,
+        "key": "field_lld_product_lld_license_summary"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "product"
+        }
+      ]
+    ],
+    "menu_order": 7,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Optional product metadata only. WooCommerce owns title, description, short description, categories, images, tags, featured status, prices, discounts, ratings, stock and purchasing rules. ACF REST visibility does not automatically add these extras to the WooCommerce Store API.",
+    "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_seo",
+    "title": "Longlife Digital | Search and sharing metadata",
+    "fields": [
+      {
+        "name": "lld_seo_title",
+        "label": "Search title",
+        "type": "text",
+        "instructions": "Optional; fallback is the page or product title plus brand.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 70,
+        "key": "field_lld_seo_lld_seo_title"
+      },
+      {
+        "name": "lld_meta_description",
+        "label": "Search description",
+        "type": "textarea",
+        "instructions": "Optional concise summary; not a ranking guarantee.",
+        "required": 0,
+        "default_value": "",
+        "rows": 3,
+        "new_lines": "",
+        "maxlength": 180,
+        "key": "field_lld_seo_lld_meta_description"
+      },
+      {
+        "name": "lld_share_image",
+        "label": "Social sharing image",
+        "type": "group",
+        "instructions": "Public presentation media only. Purchased files and signed download links do not belong here.",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "attachment",
+            "label": "WordPress image",
+            "type": "image",
+            "instructions": "Optional public preview image; REST value is an attachment ID.",
+            "required": 0,
+            "return_format": "id",
+            "preview_size": "medium",
+            "library": "all",
+            "mime_types": "jpg,jpeg,png,webp,avif",
+            "max_size": 5,
+            "key": "field_lld_seo_lld_share_image_attachment"
+          },
+          {
+            "name": "public_url",
+            "label": "Public image URL",
+            "type": "url",
+            "instructions": "Optional HTTPS public image, including a public Firebase preview. If set, this takes precedence over the attachment.",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_seo_lld_share_image_public_url"
+          },
+          {
+            "name": "alt",
+            "label": "Alternative text",
+            "type": "text",
+            "instructions": "Describe meaningful images; empty for purely decorative images.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_seo_lld_share_image_alt"
+          }
+        ],
+        "key": "field_lld_seo_lld_share_image"
+      },
+      {
+        "name": "lld_noindex",
+        "label": "Request noindex",
+        "type": "true_false",
+        "instructions": "An indexing preference only, not access control. The React metadata/prerender integration must apply it.",
+        "required": 0,
+        "default_value": 0,
+        "ui": 1,
+        "key": "field_lld_seo_lld_noindex"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "page"
+        }
+      ],
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "post"
+        }
+      ],
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_service"
+        }
+      ],
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_asset"
+        }
+      ],
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "product"
+        }
+      ]
+    ],
+    "menu_order": 8,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Applies to public pages, posts, services, assets and products. Use this as the initial metadata source; reconcile with any future SEO plugin instead of maintaining two competing sets of fields.",
+    "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_asset_category",
+    "title": "Longlife Digital | Asset category display",
+    "fields": [
+      {
+        "name": "lld_icon",
+        "label": "Category icon",
+        "type": "text",
+        "instructions": "Optional short emoji or symbol.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 12,
+        "key": "field_lld_asset_category_lld_icon"
+      },
+      {
+        "name": "lld_order",
+        "label": "Category display order",
+        "type": "number",
+        "instructions": "",
+        "required": 0,
+        "min": 0,
+        "step": 1,
+        "default_value": 0,
+        "key": "field_lld_asset_category_lld_order"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "taxonomy",
+          "operator": "==",
+          "value": "lld_asset_cat"
+        }
+      ]
+    ],
+    "menu_order": 9,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Native term name and description supply category labels and menu descriptions. Native slug identifies each filter. Initial categories: Premium, Brandable, Local, AI-related, Marketing and Real Estate.",
+    "show_in_rest": 1
+  }
+]

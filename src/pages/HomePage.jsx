@@ -12,6 +12,8 @@ import SkeletonBlock from '../components/skeletons/SkeletonBlock';
 import SkeletonRegion from '../components/skeletons/SkeletonRegion';
 import classes from './HomePage.module.css';
 export default function HomePage({
+  settings,
+  settingsManaged,
   products,
   categories,
   catalogStatus,
@@ -37,6 +39,7 @@ export default function HomePage({
   setSubscribers,
   contact,
 }) {
+  const { brand, footer, social } = settings;
   const loading = catalogStatus === 'loading';
   const featured = products.filter((product) => product.featured);
   const highlighted = featured[0] || products[0];
@@ -1068,7 +1071,7 @@ export default function HomePage({
           )}
         </Container>
       </Box>
-      <Box bg="#111827" component="footer">
+      <Box bg="#111827" component="footer" className={classes.footer}>
         <Box p="48px 24px 36px">
           <Container>
             <SimpleGrid
@@ -1086,35 +1089,39 @@ export default function HomePage({
             >
               <div>
                 <Flex align="center" gap={10} wrap="wrap" mb={14}>
-                  <LDLogo size={32} />
+                  <LDLogo size={32} src={brand.logo.src} alt={brand.logo.alt} />
                   <div>
                     <Box c="#fff" fz={15} fw="700" ff="'Playfair Display',serif">
-                      Longlife Digital
+                      {brand.name}
                     </Box>
                     <Box c="#9CA3AF" fz={11}>
-                      longlifedigital.co
+                      {brand.websiteLabel}
                     </Box>
                   </div>
                 </Flex>
                 <Text component="p" inherit c="#6B7280" fz={13} lh={1.7} mb={16}>
-                  Premium digital products for entrepreneurs, creators and learners. Excellence in
-                  every product.
+                  {footer.description}
                 </Text>
                 <Flex gap={12} wrap="wrap">
-                  {['Facebook', 'Instagram', 'TikTok', 'YouTube'].map((sn) => (
-                    <Text
-                      key={sn}
-                      component="span"
-                      inherit
-                      c="#6B7280"
-                      fz={12}
-                      style={{
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {sn}
-                    </Text>
-                  ))}
+                  {['Facebook', 'Instagram', 'TikTok', 'YouTube', 'LinkedIn']
+                    .filter((name) =>
+                      settingsManaged ? social[name.toLowerCase()] : name !== 'LinkedIn',
+                    )
+                    .map((sn) => (
+                      <Text
+                        key={sn}
+                        component={settingsManaged ? 'a' : 'span'}
+                        href={settingsManaged ? social[sn.toLowerCase()] : undefined}
+                        inherit
+                        c="#6B7280"
+                        fz={12}
+                        style={{
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {sn}
+                      </Text>
+                    ))}
                 </Flex>
               </div>
               <div>
@@ -1149,7 +1156,7 @@ export default function HomePage({
               </div>
               <div>
                 <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>
-                  Company
+                  {footer.companyHeading}
                 </Box>
                 {[
                   ['About', 'about'],
@@ -1185,7 +1192,7 @@ export default function HomePage({
               </div>
               <div>
                 <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>
-                  Support
+                  {footer.supportHeading}
                 </Box>
                 {[
                   ['FAQ', 'faq'],
@@ -1209,25 +1216,27 @@ export default function HomePage({
                     {l}
                   </Box>
                 ))}
-                <Box mt={16}>
-                  <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>
-                    Contact
+                {contact.email && (
+                  <Box mt={16}>
+                    <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>
+                      {footer.contactHeading}
+                    </Box>
+                    <a
+                      href={'mailto:' + contact.email}
+                      style={{
+                        fontSize: 13,
+                        color: '#6B7280',
+                        cursor: 'pointer',
+                        marginBottom: 10,
+                        transition: 'color 0.2s',
+                        textDecoration: 'none',
+                        display: 'block',
+                      }}
+                    >
+                      📧 {contact.email}
+                    </a>
                   </Box>
-                  <a
-                    href={'mailto:' + contact.email}
-                    style={{
-                      fontSize: 13,
-                      color: '#6B7280',
-                      cursor: 'pointer',
-                      marginBottom: 10,
-                      transition: 'color 0.2s',
-                      textDecoration: 'none',
-                      display: 'block',
-                    }}
-                  >
-                    📧 {contact.email}
-                  </a>
-                </Box>
+                )}
               </div>
             </SimpleGrid>
           </Container>
@@ -1249,7 +1258,10 @@ export default function HomePage({
               maw={1280}
               m="0 auto"
             >
-              <span>© {new Date().getFullYear()} Longlife Digital · longlifedigital.co</span>
+              <span>
+                © {new Date().getFullYear()} {footer.copyrightName}
+                {brand.websiteLabel && ` · ${brand.websiteLabel}`}
+              </span>
               <Flex gap={8} wrap="wrap">
                 {['Visa', 'Mastercard', 'PayPal', 'Stripe', 'Apple Pay'].map((p) => (
                   <Text

@@ -224,8 +224,9 @@ test('images have independent placeholders without blocking cart actions', async
   await expect(image).toHaveAttribute('data-image-state', 'loaded');
   await expect(image.locator('.mantine-Skeleton-root')).toHaveCount(0);
   const after = await image.boundingBox();
-  expect(after.width).toBe(before.width);
-  expect(after.height).toBe(before.height);
+  // Browser transforms can introduce tiny fractional-pixel rounding differences.
+  expect(after.width).toBeCloseTo(before.width, 2);
+  expect(after.height).toBeCloseTo(before.height, 2);
   await card.getByRole('button', { name: `View ${products[0].name}` }).click();
   await expect(page.locator('main [data-image-state]').first()).toHaveAttribute(
     'data-image-state',

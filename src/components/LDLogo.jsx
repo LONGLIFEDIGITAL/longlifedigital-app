@@ -1,5 +1,5 @@
 import { Flex } from '@mantine/core';
-export default function LDLogo({ size = 36 }) {
+export default function LDLogo({ size = 36, src, alt = 'Longlife Digital' }) {
   return (
     <Flex
       align="center"
@@ -16,8 +16,14 @@ export default function LDLogo({ size = 36 }) {
       }}
     >
       <img
-        src="/logo.png"
-        alt="Longlife Digital"
+        key={src}
+        src={src || '/logo.png'}
+        alt={alt}
+        onError={(event) => {
+          if (event.currentTarget.getAttribute('src') !== '/logo.png') {
+            event.currentTarget.src = '/logo.png';
+          }
+        }}
         width={size}
         height={size}
         style={{

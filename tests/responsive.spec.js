@@ -232,7 +232,7 @@ test('timed newsletter dialog fits and closes on a short screen', async ({ page 
   await page.setViewportSize({ width: 320, height: 568 });
   await page.clock.install();
   await page.goto('/');
-  await page.clock.fastForward(31000);
+  await page.clock.fastForward(180001);
   const popup = page.getByRole('dialog', { name: 'Join the community' });
   await expect(popup).toBeVisible();
   await expectFits(page);

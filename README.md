@@ -17,7 +17,7 @@ directory before starting Vite. The supported Node.js versions are declared in
 
 ## WooCommerce catalog connection
 
-Local development reads published products from the WordPress staging store,
+Local development reads published products from the configured WordPress store,
 configured in `.env.development`. Restart Vite after changing environment values.
 The homepage product highlights, shop, product details, categories, search and
 local cart use this feed. Product descriptions retain their WordPress paragraphs,
@@ -85,7 +85,65 @@ prices, loading/errors/retry, timed and tab-return refreshes, offline recovery,
 stock restrictions, the read-only Vercel endpoint,
 and product/cart behavior on mobile and desktop.
 
+## WordPress site settings
+
+Shared brand/logo, contact details, announcement copy/visibility, footer text and
+social links now read the published ACF **Site Settings → Storefront** record
+(slug `storefront`). Set the public REST root in `VITE_WORDPRESS_API_URL`:
+
+```dotenv
+VITE_WORDPRESS_API_URL=https://staging-a7b0-longlifedigital-zmuro.wpcomstaging.com/wp-json/wp/v2
+```
+
+This is the CMS address. The **Public storefront URL** field in WordPress remains
+`https://longlifedigital.co`; it supplies customer-facing website links.
+Restart Vite after editing environment values. For Vercel Preview, set the same
+variable in the Preview environment and redeploy; no deployment is performed here.
+
+`/api/content?resource=settings` uses the same read-only handler in Vite and Vercel.
+It fetches the published record, resolves the WordPress logo attachment and returns
+only the fields used in this migration. It accepts no arbitrary CMS resource or
+URL. Optional blank fields stay blank, and disabled announcements stay hidden.
+An initial failure shows a retry action without substituting demo contact details
+or promotions. Product browsing remains available. TanStack Query retains the last
+successful settings and refreshes every 30 seconds while visible/online, on tab
+return and on reconnect. Settings requests bypass the browser HTTP cache. The
+handler also requests fresh WordPress settings and logo metadata with a unique
+upstream query value, because the CMS edge can reuse REST responses even with
+`Cache-Control: no-cache`. This value is generated per request, not at Vite startup.
+Local and Preview responses are uncached; Production retains a 30-second shared
+cache at Vercel to limit WordPress traffic. Published field edits therefore appear
+on the next successful refresh locally (normally within 30 seconds in an active
+tab); Production can take an additional cache interval. Returning to the tab or
+reloading also fetches settings. Editing content does not require restarting Vite;
+changing the CMS environment URL still does.
+
+**Temporary catalog split:** the corrected `staging-a7b0-…` site has the ACF content,
+but its public WooCommerce catalog was empty when verified. The existing
+`VITE_WOOCOMMERCE_STORE_API_URL` still points to `longlifedigital-zmuro.wpcomstaging.com`
+so existing product browsing remains usable. Publish or import test products into
+the new staging site, then point the catalog variable at that site's
+`/wp-json/wc/store/v1`. Both feeds should use the same environment before checkout
+integration. No records were copied or modified on either WordPress site.
+
+The remaining page sections, navigation records, FAQs, policy text, newsletter/chat
+copy and server-side chatbot context still need their own content migration.
+This connection does not implement form delivery, subscriptions, payments or files.
+The ACF field reference and import package are in [docs/cms](docs/cms/README.md).
+
+```sh
+PLAYWRIGHT_CHANNEL=chrome npx playwright test --config playwright.content.config.js
+```
+
 ## UI and responsive layouts
+
+The newsletter popup waits three minutes from the browser's first visit, then
+appears once. A localStorage flag is saved when it opens, so closing, refreshing,
+navigating or returning later does not repeat it. Only the timestamp/display flag
+are stored, never the entered name or email. Tabs coordinate the display, and a
+hidden tab or an open cart/checkout/dialog defers it until the page is available.
+Subscribing through the page also suppresses the popup on future visits. If browser
+storage is unavailable, repeat prevention lasts for the current page visit only.
 
 The app uses React, Vite, and Mantine. Brand colors, typography, and shared
 component defaults live in `src/theme.js`; `src/main.jsx` installs the provider.
@@ -146,9 +204,10 @@ Browser tests cover pages from 320px to 1440px wide, navigation, search, cart,
 checkout, chat, product editing, admin tabs, contact forms, and newsletter
 dialogs. Payment and chat requests are mocked during tests.
 
-`npm run lint` also checks the source. Existing unused state and the existing
-newsletter timer dependency warning are retained to keep application logic
-unchanged during the layout refactor.
+`npm run lint` also checks the source. Existing unused checkout/admin variables in
+`src/App.jsx` still produce lint errors. The new CMS settings and newsletter hook
+pass their targeted lint checks; the old newsletter timer dependency warning has
+been removed with the new hook.
 
 Currently, two official plugins are available:
 
