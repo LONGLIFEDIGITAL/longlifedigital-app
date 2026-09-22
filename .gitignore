@@ -25,3 +25,6 @@ dist-ssr
 .vercel
 test-results/
 playwright-report/
+
+# Generated public CMS snapshots for local development/build reuse
+.cache/

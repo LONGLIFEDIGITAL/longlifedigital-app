@@ -1,15 +1,12 @@
 import { ActionIcon, Box, Flex, Input, Text } from '@mantine/core';
 import { useState, useRef, useEffect } from 'react';
-const WELCOME =
-  "Hi! I'm your Longlife Digital AI assistant. Ask me anything about our services, courses, domains, or digital products. 👋";
-export default function AIChat() {
+export default function AIChat({ settings }) {
+  const chat = settings.chat || {};
+  const welcome = chat.welcome || 'How can we help?';
+  const unavailable =
+    chat.unavailableMessage || 'Chat is temporarily unavailable. Please try again later.';
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: WELCOME,
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
@@ -31,7 +28,7 @@ export default function AIChat() {
     setInput('');
     setLoading(true);
     try {
-      const apiMessages = next.filter((m) => m.role !== 'assistant' || m.content !== WELCOME);
+      const apiMessages = next;
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -46,7 +43,7 @@ export default function AIChat() {
         ...prev,
         {
           role: 'assistant',
-          content: data.reply || "Sorry, I couldn't respond. Try again!",
+          content: data.reply || unavailable,
         },
       ]);
     } catch {
@@ -54,7 +51,7 @@ export default function AIChat() {
         ...prev,
         {
           role: 'assistant',
-          content: 'Connection error. Please try again.',
+          content: unavailable,
         },
       ]);
     } finally {
@@ -145,10 +142,10 @@ export default function AIChat() {
             </Flex>
             <div>
               <Box c="#E8C97A" fz={14} fw={700} lh={1.2}>
-                AI Assistant
+                {chat.displayName || 'AI Assistant'}
               </Box>
               <Box c="#A78BFA" fz={11}>
-                Longlife Digital • Online now
+                {settings.brand.name}
               </Box>
             </div>
             <Flex align="center" gap={5} wrap="wrap" ml="auto">
@@ -179,7 +176,7 @@ export default function AIChat() {
               minHeight: 0,
             }}
           >
-            {messages.map((m, i) => (
+            {[{ role: 'assistant', content: welcome }, ...messages].map((m, i) => (
               <Flex key={i} justify={m.role === 'user' ? 'flex-end' : 'flex-start'} wrap="wrap">
                 <Box
                   c={m.role === 'user' ? '#fff' : '#E2D9F3'}
@@ -244,6 +241,12 @@ export default function AIChat() {
                 </Box>
               </Flex>
             )}
+            {!messages.length &&
+              (chat.suggestedQuestions || []).map((question) => (
+                <button key={question} type="button" onClick={() => setInput(question)}>
+                  {question}
+                </button>
+              ))}
             <div ref={bottomRef} />
           </Flex>
 

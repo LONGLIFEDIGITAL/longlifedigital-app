@@ -4,17 +4,13 @@ async function navigate(page, label) {
   const burger = page.getByRole('button', { name: 'Open navigation menu', exact: true });
   if (await burger.isVisible()) {
     await burger.click();
-    await page.getByRole('dialog').getByRole('button', { name: label, exact: true }).click();
+    await page.getByRole('dialog').getByRole('link', { name: label, exact: true }).click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
   } else {
     await page
       .getByRole('navigation', { name: 'Main navigation' })
-      .getByRole('button', { name: label, exact: true })
+      .getByRole('link', { name: label, exact: true })
       .click();
-    if (label === 'Services')
-      await page.getByRole('menuitem', { name: 'View All Services →' }).click();
-    if (label === 'Domains')
-      await page.getByRole('menuitem', { name: 'Browse All Domains →' }).click();
   }
 }
 
@@ -216,7 +212,7 @@ test('contact form and newsletter retain their validation and success behavior',
     .getByPlaceholder('Tell us about your project or question...')
     .fill('Please send information.');
   await page.getByRole('button', { name: /Send Message/ }).click();
-  await expect(page.getByText('Thank you! We will reply within 24 hours.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Thank you', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Longlife Digital home', exact: true }).click();
   await page.getByPlaceholder('e.g. John', { exact: true }).fill('Responsive Test');
   await page
@@ -224,7 +220,9 @@ test('contact form and newsletter retain their validation and success behavior',
     .fill('responsive@example.com');
   await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: /Subscribe — It's Free/ }).click();
-  await expect(page.getByText("✦ You're subscribed! Welcome aboard.")).toBeVisible();
+  await expect(
+    page.locator('main').getByText("✦ You're subscribed! Welcome aboard."),
+  ).toBeVisible();
   await expectFits(page);
 });
 

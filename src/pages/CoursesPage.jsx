@@ -1,3 +1,6 @@
+import useContent from '../hooks/useContent';
+import { PageHeader, ContentState, PageCta } from '../components/ContentPage';
+import RichText from '../components/RichText';
 import { Box, Container, SimpleGrid, Text, Title } from '@mantine/core';
 import ProductCard from '../components/ProductCard';
 import CatalogStatus from '../components/CatalogStatus';
@@ -15,38 +18,13 @@ export default function CoursesPage({
   openDel,
 }) {
   const courses = products.filter((p) => matchesCategory(p, 'course'));
+  const content = useContent('page', 'courses');
   return (
     <div>
-      <Box
-        py={{
-          base: 32,
-          sm: 40,
-        }}
-        bg="#F9FAFB"
-        style={{
-          borderBottom: '1px solid #F3F4F6',
-        }}
-      >
-        <Container>
-          <Box c="#9333EA" fz={11} fw="600" lts={2} tt="uppercase" mb={8}>
-            ✦ LEARN & GROW ✦
-          </Box>
-          <Title
-            order={1}
-            c="#111827"
-            fz="clamp(28px,5vw,48px)"
-            fw="700"
-            ff="'Playfair Display',serif"
-            mb={8}
-          >
-            Courses
-          </Title>
-          <Text component="p" inherit c="#9CA3AF" fz={15}>
-            Step-by-step courses to build skills and grow your income
-          </Text>
-        </Container>
-      </Box>
+      <PageHeader pageKey="courses" content={content.data} />
       <Container p="60px 24px">
+        <ContentState {...content} />
+        {content.data?.body && <RichText html={content.data.body} />}
         {catalogStatus !== 'ready' ? (
           <CatalogStatus
             status={catalogStatus}
@@ -111,6 +89,7 @@ export default function CoursesPage({
             </SimpleGrid>
           )}
         </Box>
+        <PageCta cta={content.data?.cta} />
       </Container>
     </div>
   );

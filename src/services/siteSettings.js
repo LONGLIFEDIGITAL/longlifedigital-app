@@ -1,6 +1,24 @@
 export const wordpressApiUrl = import.meta.env.VITE_WORDPRESS_API_URL?.trim() || '';
 
 export const DEMO_SITE_SETTINGS = {
+  newsletter: {
+    enabled: true,
+    popupEnabled: true,
+    popupDelay: 180,
+    heading: 'Newsletter',
+    body: '',
+    button_label: "✦ Subscribe — It's Free",
+    consent_text: 'I agree to receive news and offers. I can unsubscribe anytime.',
+    success_message: "✦ You're subscribed! Welcome aboard.",
+    popup_heading: 'Join the newsletter',
+    popup_body: '',
+  },
+  chat: {
+    displayName: 'AI Assistant',
+    welcome: 'How can we help?',
+    unavailableMessage: 'Chat is temporarily unavailable.',
+    suggestedQuestions: [],
+  },
   brand: {
     name: 'Longlife Digital',
     legalName: 'Longlife Digital LLC',
@@ -69,6 +87,7 @@ export async function fetchSiteSettings(signal) {
     credentials: 'omit',
     headers: { Accept: 'application/json' },
   });
+  if (response.status === 404) return null;
   if (!response.ok) throw new Error('Site settings could not be loaded.');
   const settings = await response.json();
   if (

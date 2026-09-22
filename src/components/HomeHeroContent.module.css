@@ -1,0 +1,88 @@
+.content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0 0 20px;
+  padding: 5px 16px;
+  border: 1px solid rgba(201, 150, 63, 0.3);
+  border-radius: 30px;
+  background: rgba(201, 150, 63, 0.12);
+  color: #e8c97a;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.heading {
+  margin: 0 0 20px;
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 64px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.line,
+.highlight {
+  display: block;
+}
+
+.highlight {
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
+  background-image: linear-gradient(135deg, #c084fc, #e8c97a);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.intro {
+  max-width: 480px;
+  margin: 0 0 32px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 16px;
+  line-height: 1.85;
+  white-space: pre-line;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.button {
+  max-width: 100%;
+  height: auto;
+  min-height: 48px;
+  padding: 14px 32px;
+  color: #1a0533;
+  font-size: 15px;
+}
+
+.button :global(.mantine-Button-label) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.secondary {
+  padding-inline: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 35.99em) {
+  .actions {
+    flex-direction: column;
+  }
+}

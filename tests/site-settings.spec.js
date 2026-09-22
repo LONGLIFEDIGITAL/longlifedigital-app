@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { createContentHandler } from '../api/content.js';
+import { homeRecord } from './fixtures/home';
 
 const record = {
   id: 196,
@@ -62,6 +63,7 @@ async function runHandler({
 } = {}) {
   const calls = [];
   const handler = createContentHandler({
+    cacheTtl: 0,
     baseUrl: 'https://content.example.test/wp-json/wp/v2',
     fetcher: async (url) => {
       calls.push(url);
@@ -116,6 +118,7 @@ for (const preview of [true, false]) {
   test(`a running ${preview ? 'local/preview' : 'production'} handler reads published edits through the CMS cache`, async () => {
     const cms = cachedWordPress();
     const handler = createContentHandler({
+      cacheTtl: 0,
       baseUrl: 'https://content.example.test/wp-json/wp/v2',
       preview,
       fetcher: cms.fetcher,
@@ -133,7 +136,7 @@ for (const preview of [true, false]) {
     expect(updated.body.contact.email).toBe('updated@store.example');
     expect(updated.body.brand.logo.src).toBe('https://images.example/updated-logo.png');
     expect(updated.headers['Cache-Control']).toBe(
-      preview ? 'no-store' : 'public, max-age=0, s-maxage=30, must-revalidate',
+      preview ? 'no-store' : 'public, max-age=0, s-maxage=30, stale-while-revalidate=30',
     );
   });
 }
@@ -233,8 +236,23 @@ async function setup(page, handler) {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.clock.install();
   const server = { settings: (await runHandler()).body, failure: false, hold: null };
+  await page.route('**/api/content?resource=page&**', (route) =>
+    route.fulfill({ status: 404, json: { error: 'Not published' } }),
+  );
+  for (const resource of ['navigation', 'services', 'asset-categories', 'faqs', 'assets']) {
+    await page.route(`**/api/content?resource=${resource}`, (route) => route.fulfill({ json: [] }));
+  }
+  const home = await runHandler({
+    records: [homeRecord],
+    request: { url: '/api/content?resource=home' },
+  });
+  await page.route('**/api/content?resource=posts&**', (route) =>
+    route.fulfill({ json: { posts: [], page: 1, totalPages: 0 } }),
+  );
+  await page.route('**/api/content?resource=home', (route) => route.fulfill({ json: home.body }));
   await page.route('**/api/content?resource=settings', async (route) => {
     if (server.hold) await server.hold;
+    if (server.removed) return route.fulfill({ status: 404, json: { error: 'Not published' } });
     if (handler) {
       const result = await invokeHandler(handler);
       return route.fulfill({ status: result.status, headers: result.headers, json: result.body });
@@ -260,6 +278,7 @@ test('published footer edits appear on the next poll and page reload without res
 }) => {
   const cms = cachedWordPress();
   const handler = createContentHandler({
+    cacheTtl: 0,
     baseUrl: 'https://content.example.test/wp-json/wp/v2',
     fetcher: cms.fetcher,
   });
@@ -285,6 +304,22 @@ async function refocus(page) {
     }
   });
 }
+
+test('unpublishing settings clears cached brand and footer copy across reloads', async ({
+  page,
+}) => {
+  const server = await setup(page);
+  await page.goto('/');
+  await expect(page.locator('footer')).toContainText('A published footer description.');
+  server.removed = true;
+  await refocus(page);
+  await expect(page.getByRole('button', { name: 'Retry site details' })).toBeVisible();
+  await expect(page.locator('footer')).not.toContainText('A published footer description.');
+  await expect(page.getByRole('button', { name: 'CMS Store home' })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Retry site details' })).toBeVisible();
+  await expect(page.locator('footer')).not.toContainText('A published footer description.');
+});
 
 test('published brand, logo, footer and contact details appear on the existing pages', async ({
   page,

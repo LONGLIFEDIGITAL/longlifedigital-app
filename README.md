@@ -65,11 +65,11 @@ Production must use its own production CMS URL when ready; the local staging
 configuration is not loaded by a production build. With the variable unset,
 the existing demo catalog and workflows remain available during migration.
 
-This is the catalog milestone only. WooCommerce products can be added to the
+WooCommerce products can be added to the
 local cart, but checkout is disabled until WooCommerce orders, payment and
 fulfillment are connected. They never use the old standalone Stripe flow.
 The React admin entry points are hidden in CMS mode; edit these products in
-WordPress. Other page content and backend integrations still await migration.
+WordPress. Editorial content also reads WordPress; checkout and delivery integrations remain separate work.
 
 The local cart supports quantity controls, repeated additions and immediate
 removal. Item totals, the subtotal and navigation badge update together.
@@ -126,14 +126,116 @@ the new staging site, then point the catalog variable at that site's
 `/wp-json/wc/store/v1`. Both feeds should use the same environment before checkout
 integration. No records were copied or modified on either WordPress site.
 
-The remaining page sections, navigation records, FAQs, policy text, newsletter/chat
-copy and server-side chatbot context still need their own content migration.
+The remaining pages, navigation records, FAQs, policy text, newsletter/chat
+copy and server-side chatbot context now read published CMS records. The
+[content checklist](docs/cms/CONTENT-CHECKLIST.md) lists every page slug, field and collection
+to populate. Missing records show a preparation message; failed requests offer retry.
 This connection does not implement form delivery, subscriptions, payments or files.
 The ACF field reference and import package are in [docs/cms](docs/cms/README.md).
 
 ```sh
 PLAYWRIGHT_CHANNEL=chrome npx playwright test --config playwright.content.config.js
 ```
+
+## WordPress homepage hero and catalog statistics
+
+The published WordPress Page with slug `home` and **Storefront page → Home**
+supplies `/api/content?resource=home`: the hero, collection headings and buttons,
+sale banner labels, trust statements, About preview, benefits, additional editorial
+statistics, blog preview and optional closing call to action. Product names, prices,
+images and collection membership continue to come from WooCommerce. Empty optional
+fields and incomplete/unsafe buttons stay hidden; managed mode never substitutes
+sample marketing copy. Demo content is used only without a WordPress endpoint.
+
+The hero's three segments take precedence over its display heading, with the page
+title as the final heading fallback. Internal buttons use React Router; HTTPS
+links to the public storefront are converted to local routes when settings load.
+Trust and Benefit relationships preserve the order selected in ACF. A block's
+native title supplies its heading, its native Excerpt supplies its description,
+and `lld_icon` supplies its symbol (including `✓`). Only selected, published blocks
+of the expected kind are returned. No new ACF import is required.
+
+The hero and blog no longer wait on a chain of CMS requests. Vite prepares a
+snapshot of the published pages, settings, shared collections, first blog page,
+selected cards and those cards' full articles before the dev server is ready or the build completes.
+The hero and blog preview are included as escaped initial HTML with critical CSS,
+so visitors see content before React executes. Route headers and metadata are also
+generated as static HTML. The snapshot additionally seeds TanStack Query through
+non-executable JSON. Other routes and payment code load when needed.
+Snapshots contain public editorial content only;
+WooCommerce prices, stock, carts and customer data are never snapshotted.
+
+Configure `VITE_WORDPRESS_API_URL` in the **build environment**, including Vercel
+Preview/Production. Snapshots are scoped to that exact CMS URL. `.cache/` stores a
+local, git-ignored copy for build reuse; no new CMS plugin, field or service is
+required for editorial content. Product-specific ACF extras require the small plugin
+linked in the content checklist. Builds without a CMS URL retain demo mode. Test mode disables bootstrap
+network calls. A configured build with neither available published content nor a
+previous snapshot fails explicitly rather than deploying an empty homepage.
+
+Published content still refreshes every 30 seconds while the tab is visible and
+on tab return/reconnect. Reopening a page checks in the background while showing
+its last content. Successful browser reads are retained for up to 24 hours to keep
+reloads fast; confirmed removals take priority over older build snapshots. If
+browser storage is blocked, the embedded snapshot still provides the first render.
+The last successful content remains visible during temporary CMS failures.
+
+Identical concurrent API requests are combined, with a 10-second process cache.
+Production also uses a 30-second CDN cache with 30 seconds of stale-while-revalidate.
+Only cache misses bypass WordPress edge caching. A cache miss has a 6-second
+upstream deadline and at most one rate-limit retry; the client has an 8-second
+deadline and no stacked retry loop. An uncached failure shows a retry action instead
+of a minute-long skeleton. Cache expiry and background refresh bring in published
+edits and remove unpublished records without restarting Vite or rebuilding.
+
+References: [TanStack initial query data](https://tanstack.com/query/latest/docs/framework/react/guides/initial-query-data),
+[Vercel cache headers](https://vercel.com/docs/caching/cache-control-headers).
+
+### WordPress articles
+
+Write articles in **Posts**: title, body, Excerpt, categories and featured image.
+Publish them to make them available to the storefront. Home → Blog preview → Posts
+can select up to three articles in display order; leaving it empty shows the latest
+three published posts. Home's Blog button is the section-wide **View All → /blog**.
+Each card's **Read More** link is generated automatically as `/blog/<post-slug>`.
+Keep published slugs stable to preserve existing links.
+
+`/blog` lists articles with pagination. `/blog/:postSlug` renders the full article;
+Vercel rewrites support direct visits and reloads. The public content handler exposes
+only allowlisted fields through `resource=posts` (`page`, `limit`, or up to three
+`include` IDs) and `resource=post&slug=...`. Draft and password-protected articles
+are excluded. Rich text is sanitized and styled with scoped CSS, preserving lists,
+headings, paragraphs, links, images and tables without WordPress theme styles.
+No WordPress permalink needs to be entered for a card. A post's embedded body links
+remain the author's URLs; use storefront paths for links to other storefront pages.
+
+Any WordPress starter post is displayed if it remains published; unpublish unwanted
+sample posts in WordPress. Navigation records, search/sharing metadata and the other
+editorial pages are connected. Newsletter subscriber storage, contact delivery,
+WooCommerce checkout and protected downloads remain separate integrations.
+After publishing, rebuild/redeploy to update initial HTML and crawler metadata;
+React refreshes visible content at runtime without waiting for another build.
+
+API references: [WordPress posts](https://developer.wordpress.org/rest-api/reference/posts/),
+[embedding](https://developer.wordpress.org/rest-api/using-the-rest-api/global-parameters/),
+[pagination](https://developer.wordpress.org/rest-api/using-the-rest-api/pagination/).
+
+The About preview's four statistic tiles use these rules:
+
+- **Product Categories:** count distinct category slugs assigned to products in
+  the public catalog, excluding the synthetic All Products filter.
+- **AI Prompt Products:** count each product once if it belongs to `ai-prompt-packs`
+  or `ai-prompts`, or has the `ai-prompts` tag. All tags are checked, not just the
+  card's first badge. This counts products, not prompts within a pack. Assign one
+  of these existing classifications to new prompt products in WooCommerce.
+- **24hr Support** and **100% Digital:** fixed values confirmed by the site owner.
+
+These four tiles do not require manual Statistics blocks. Catalog counts refresh
+with the existing product query and include published products returned by the
+Store API, including listed products that are temporarily out of stock. First-load
+skeletons and error placeholders avoid presenting unavailable data as zero; a
+successfully loaded empty catalog correctly shows zero. No numbers are inferred
+from product titles, descriptions or old sample marketing claims.
 
 ## UI and responsive layouts
 

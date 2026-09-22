@@ -3,7 +3,7 @@ import base from './playwright.config.js';
 
 export default defineConfig({
   ...base,
-  testMatch: ['site-settings.spec.js'],
+  testMatch: ['site-settings.spec.js', 'home-content.spec.js', 'content-pages.spec.js'],
   use: { ...base.use, baseURL: 'http://127.0.0.1:5185' },
   webServer: {
     command: 'npm run dev -- --mode test --host 127.0.0.1 --port 5185 --strictPort',

@@ -20,7 +20,6 @@ export default function CheckoutModal({
   setCart,
   fire,
   setPage,
-  orderNum,
   setOrderNum,
 }) {
   if (!showCheckout || !checkoutItem) return null;

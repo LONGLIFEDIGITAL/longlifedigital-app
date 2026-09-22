@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
 
-const PUBLISHABLE_KEY = 'pk_live_51TYT5WFUxxwF6THk5f6W6lnpuySIg76odRKfr78vYHPWeXmDPfxMRhVJrhq0Gp1BghRnjM2E8Lm41eoccOj33HIw00SuUZ07j5';
+const PUBLISHABLE_KEY =
+  'pk_live_51TYT5WFUxxwF6THk5f6W6lnpuySIg76odRKfr78vYHPWeXmDPfxMRhVJrhq0Gp1BghRnjM2E8Lm41eoccOj33HIw00SuUZ07j5';
 
 let stripePromise;
 export function getStripe() {
-  if (!stripePromise) stripePromise = loadStripe(PUBLISHABLE_KEY);
+  if (!stripePromise)
+    stripePromise = import('@stripe/stripe-js/pure').then(({ loadStripe }) =>
+      loadStripe(PUBLISHABLE_KEY),
+    );
   return stripePromise;
 }
 

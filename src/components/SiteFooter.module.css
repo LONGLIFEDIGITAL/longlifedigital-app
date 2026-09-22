@@ -1,0 +1,79 @@
+.footer {
+  background: #111827;
+  color: #d1d5db;
+  padding: 48px 0 28px;
+  font-size: 14px;
+}
+.footer a {
+  color: #d1d5db;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.footer a:hover {
+  color: #c084fc;
+  text-decoration: underline;
+}
+.footer h2 {
+  font:
+    700 22px 'Playfair Display',
+    serif;
+  color: white;
+}
+.footer h3 {
+  font-size: 14px;
+  color: white;
+}
+.footer p {
+  line-height: 1.8;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+  gap: 32px;
+}
+.footer button {
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.footer button:hover {
+  color: #c084fc;
+  text-decoration: underline;
+}
+.grid > * {
+  min-width: 0;
+}
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  border-top: 1px solid #374151;
+  margin-top: 32px;
+  padding-top: 24px;
+}
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+@media (max-width: 48em) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+}
+@media (max-width: 24em) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -14,6 +14,20 @@ import { theme } from './theme';
 const router = createBrowserRouter([{ path: '*', element: <App /> }]);
 const queryClient = new QueryClient();
 
+// The published HTML is visible while non-critical CSS and React load.
+await Promise.all(
+  [...document.querySelectorAll('link[data-app-css]')].map((link) =>
+    link.sheet
+      ? Promise.resolve()
+      : new Promise((resolve) => {
+          link.addEventListener('load', resolve, { once: true });
+          link.addEventListener('error', resolve, { once: true });
+          setTimeout(resolve, 3000);
+        }),
+  ),
+);
+document.querySelectorAll('[data-initial-meta]').forEach((node) => node.remove());
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <MantineProvider theme={theme} forceColorScheme="light">

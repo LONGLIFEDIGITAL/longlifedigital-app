@@ -1,4 +1,7 @@
-import { Box, Button, Container, Flex, NativeSelect, Text, Title } from '@mantine/core';
+import useContent from '../hooks/useContent';
+import { PageHeader, ContentState, PageCta } from '../components/ContentPage';
+import RichText from '../components/RichText';
+import { Box, Button, Container, Flex, NativeSelect, Text } from '@mantine/core';
 import CatalogStatus from '../components/CatalogStatus';
 import { matchesCategory } from '../services/catalog';
 import ProductCollection from '../components/ProductCollection';
@@ -24,35 +27,13 @@ export default function ShopPage({
   openDel,
 }) {
   const loading = catalogStatus === 'loading';
+  const content = useContent('page', 'shop');
   return (
     <div>
-      <Box
-        py={{
-          base: 32,
-          sm: 40,
-        }}
-        bg="#F9FAFB"
-        style={{
-          borderBottom: '1px solid #F3F4F6',
-        }}
-      >
-        <Container>
-          <Title
-            order={1}
-            c="#111827"
-            fz="clamp(28px,5vw,48px)"
-            fw="700"
-            ff="'Playfair Display',serif"
-            mb={8}
-          >
-            All Products
-          </Title>
-          <Text component="p" inherit c="#9CA3AF" fz={15}>
-            Discover our full collection of premium digital products
-          </Text>
-        </Container>
-      </Box>
+      <PageHeader pageKey="shop" content={content.data} />
       <Container>
+        <ContentState {...content} />
+        {content.data?.body && <RichText html={content.data.body} />}
         <Box hiddenFrom="md" pt="lg">
           {loading ? (
             <CategorySkeleton variant="select" />
@@ -206,6 +187,7 @@ export default function ShopPage({
             )}
           </Box>
         </Flex>
+        <PageCta cta={content.data?.cta} />
       </Container>
     </div>
   );

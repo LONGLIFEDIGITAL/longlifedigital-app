@@ -13,6 +13,20 @@ See the project's [WordPress site settings setup](../../README.md#wordpress-site
 for environment configuration and the remaining content migration. The PDF records
 the initial schema; these integration notes track the implementation afterward.
 
+The published Home page (slug `home`, Storefront page `Home`) now supplies the
+homepage hero and remaining Home sections, including selected trust/benefit blocks,
+About rich text and blog preview. Published Posts power `/blog` and individual
+`/blog/<slug>` articles; Read More links are automatic. Navigation Links and the remaining storefront pages are now connected. See the
+[content checklist](CONTENT-CHECKLIST.md) for exact slugs, fields, missing-content behavior,
+and the product ACF plugin installation step. See the
+[homepage integration notes](../../README.md#wordpress-homepage-hero-and-catalog-statistics).
+
+The About preview's Product Categories and AI Prompt Products counts are computed
+from WooCommerce products. Support (`24hr`) and Digital (`100%`) are fixed,
+owner-confirmed values. Leave these four values out of the manual Statistics
+relationship; that field remains available for additional editorial statistics
+when additional verified content blocks are selected. No ACF re-import is needed.
+
 The schema in `scripts/generate-acf-reference.py` is the maintained source for these files. Regenerate from the project root:
 
 ```sh
@@ -21,3 +35,7 @@ node scripts/render-acf-reference.mjs
 ```
 
 PDF rendering uses the project's existing Playwright dependency and a locally installed Google Chrome. Use the project's supported Node.js version. No production app dependencies or runtime behavior are changed by this package.
+
+## Remaining content migration
+
+Use [CONTENT-CHECKLIST.md](CONTENT-CHECKLIST.md) as the current implementation checklist. The existing ACF import remains compatible. Home and Storefront settings are published; About needs its page key selected, and the remaining page/collection records need authoring.

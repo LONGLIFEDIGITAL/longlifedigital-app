@@ -1,3 +1,6 @@
+import useContent from '../hooks/useContent';
+import { PageHeader, ContentState, PageCta } from '../components/ContentPage';
+import RichText from '../components/RichText';
 import { Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
 import { useState } from 'react';
 import classes from './ContactPage.module.css';
@@ -9,38 +12,14 @@ export default function ContactPage({ fire, contact, settings }) {
     message: '',
   });
   const [sent, setSent] = useState(false);
+  const content = useContent('page', 'contact');
+  const services = useContent('services');
   return (
     <div>
-      <Box
-        py={{
-          base: 32,
-          sm: 40,
-        }}
-        bg="#F9FAFB"
-        style={{
-          borderBottom: '1px solid #F3F4F6',
-        }}
-      >
-        <Container>
-          <Box c="#9333EA" fz={11} fw="600" lts={2} tt="uppercase" mb={8}>
-            ✦ GET IN TOUCH ✦
-          </Box>
-          <Title
-            order={1}
-            c="#111827"
-            fz="clamp(28px,5vw,48px)"
-            fw="700"
-            ff="'Playfair Display',serif"
-            mb={8}
-          >
-            Contact Us
-          </Title>
-          <Text component="p" inherit c="#9CA3AF" fz={15}>
-            {contact.responseNote}
-          </Text>
-        </Container>
-      </Box>
+      <PageHeader pageKey="contact" content={content.data} />
       <Container p="60px 24px">
+        <ContentState {...content} />
+        {content.data?.body && <RichText html={content.data.body} />}
         <SimpleGrid
           cols={{
             base: 1,
@@ -64,7 +43,7 @@ export default function ContactPage({ fire, contact, settings }) {
               }}
             >
               <Title order={3} c="#fff" fz={22} ff="'Playfair Display',serif" mb={28}>
-                Contact Information
+                {content.data?.contact.information_heading || 'Contact Information'}
               </Title>
               {[
                 {
@@ -172,10 +151,10 @@ export default function ContactPage({ fire, contact, settings }) {
                   ✦
                 </Box>
                 <Title order={3} c="#9333EA" fz={24} ff="'Playfair Display',serif" mb={12}>
-                  Message Sent!
+                  {content.data?.contact.success_heading || 'Thank you'}
                 </Title>
                 <Text component="p" inherit c="#9CA3AF" mb={24}>
-                  Thank you! We will reply within 24 hours.
+                  {content.data?.contact.success_body || ''}
                 </Text>
                 <Button
                   className="btn-h"
@@ -191,8 +170,11 @@ export default function ContactPage({ fire, contact, settings }) {
             ) : (
               <Box pos="relative">
                 <Title order={3} c="#1a0533" fz={20} ff="'Playfair Display',serif" mb={20}>
-                  Send Us a Message
+                  {content.data?.contact.form_heading || 'Send Us a Message'}
                 </Title>
+                {content.data?.contact.form_intro && (
+                  <Text mb="md">{content.data.contact.form_intro}</Text>
+                )}
                 <SimpleGrid
                   cols={{
                     base: 1,
@@ -289,24 +271,12 @@ export default function ContactPage({ fire, contact, settings }) {
                       component="select"
                     >
                       <option value="">Select a service...</option>
-                      {[
-                        'Affiliate Marketing',
-                        'SEO',
-                        'LLC Formation',
-                        'Website Design',
-                        'Social Media Management',
-                        'Google Business',
-                        'Facebook & Google Ads',
-                        'AI Automation',
-                        'Branding & Design',
-                        'Digital Product Creation',
-                        'Domain Purchase',
-                        'Other',
-                      ].map((sv) => (
-                        <option key={sv} value={sv}>
-                          {sv}
+                      {(services.data || []).map((service) => (
+                        <option key={service.id} value={service.title}>
+                          {service.title}
                         </option>
                       ))}
+                      <option value="Other">Other</option>
                     </Input>
                   </div>
                 </SimpleGrid>
@@ -347,7 +317,7 @@ export default function ContactPage({ fire, contact, settings }) {
                   onClick={() => {
                     if (cf.name && cf.email && cf.message) {
                       setSent(true);
-                      fire('Message sent! We will reply within 24 hours. ✦');
+                      fire(content.data?.contact.success_body || 'Thank you');
                     } else {
                       fire('Please fill all required fields.', 'err');
                     }
@@ -366,6 +336,7 @@ export default function ContactPage({ fire, contact, settings }) {
             )}
           </Box>
         </SimpleGrid>
+        <PageCta cta={content.data?.cta} />
       </Container>
     </div>
   );

@@ -1,4 +1,9 @@
+import { cacheContent } from '../server/contentCache.js';
 import { randomUUID } from 'node:crypto';
+import { setTimeout as delay } from 'node:timers/promises';
+import { homeSections, postContent, postRequest, validPostQuery } from '../server/editorial.js';
+import { COLLECTIONS, readSiteContent, resolveSeo, validSiteQuery } from '../server/siteContent.js';
+import { CONTENT_PAGES } from '../src/contentPages.js';
 
 // Public storefront copy only; never expose arbitrary WordPress metadata or credentials.
 function text(value) {
@@ -26,7 +31,7 @@ function destination(value, website) {
   const url = httpsUrl(input);
   if (!url) return '';
   const target = new URL(url);
-  return target.origin === new URL(website).origin
+  return website && target.origin === new URL(website).origin
     ? target.pathname + target.search + target.hash
     : url;
 }
@@ -37,19 +42,54 @@ function send(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+function sendContent(res, body, preview) {
+  if (!preview)
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=30');
+  return send(res, 200, body);
+}
+
 // The same handler runs in Vite locally and in a Vercel Function after deployment.
-export function createContentHandler({ baseUrl, preview = true, fetcher = fetch }) {
-  return async function content(req, res) {
+export function createContentHandler({
+  baseUrl,
+  preview = true,
+  fetcher = fetch,
+  cacheTtl = 10_000,
+  now = Date.now,
+}) {
+  let pagesCache;
+  let pagesPending;
+  const readPages = async (read) => {
+    if (pagesCache && pagesCache.expires > now()) return pagesCache.records;
+    if (pagesPending) return pagesPending;
+    const slugs = Object.entries(CONTENT_PAGES)
+      .filter(([key]) => key !== 'home')
+      .map(([, page]) => page.slug);
+    pagesPending = read(
+      `pages?slug=${slugs.join(',')}&status=publish&per_page=100&acf_format=light&_fields=id,slug,status,type,title,content,acf`,
+    )
+      .then((records) => {
+        if (!Array.isArray(records)) throw new Error('Invalid pages.');
+        pagesCache = { records, expires: now() + cacheTtl };
+        return records;
+      })
+      .finally(() => {
+        pagesPending = null;
+      });
+    return pagesPending;
+  };
+  const content = async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     if (req.method !== 'GET') {
       res.setHeader('Allow', 'GET');
       return send(res, 405, { error: 'Method not allowed.' });
     }
     const query = new URL(req.url, 'http://localhost').searchParams;
+    const resource = query.get('resource');
+    const siteResource = resource === 'page' || Object.hasOwn(COLLECTIONS, resource);
     if (
-      query.get('resource') !== 'settings' ||
+      (!siteResource && !['settings', 'home', 'posts', 'post'].includes(resource)) ||
       query.getAll('resource').length !== 1 ||
-      [...query.keys()].some((key) => key !== 'resource')
+      !(siteResource ? validSiteQuery(resource, query) : validPostQuery(resource, query))
     ) {
       return send(res, 400, { error: 'Unknown content request.' });
     }
@@ -65,21 +105,152 @@ export function createContentHandler({ baseUrl, preview = true, fetcher = fetch 
       ) {
         throw new Error('Invalid CMS configuration.');
       }
-      const signal = AbortSignal.timeout(12000);
-      const read = async (path) => {
+      const signal = AbortSignal.timeout(6000);
+      const request = async (path) => {
         const url = new URL(path, base);
         // WordPress's edge can serve a cached REST response even with no-cache headers.
         // Refresh upstream on every handler request; Vercel controls the shared TTL.
         url.searchParams.set('_lld_refresh', randomUUID());
-        const response = await fetcher(url, {
-          cache: 'no-store',
-          headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' },
-          signal,
-          redirect: 'error',
-        });
+        for (let attempt = 0; ; attempt++) {
+          const response = await fetcher(url, {
+            cache: 'no-store',
+            headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' },
+            signal,
+            redirect: 'error',
+          });
+          if (response.status !== 429 || attempt === 1) return response;
+          // WordPress.com can throttle a burst of otherwise valid public reads.
+          // Honor Retry-After; the shared deadline bounds the entire request.
+          const retryAfter = response.headers.get('Retry-After');
+          const waitMs =
+            retryAfter && /^\d+$/.test(retryAfter)
+              ? Number(retryAfter) * 1000
+              : retryAfter
+                ? Date.parse(retryAfter) - Date.now()
+                : NaN;
+          await response.body?.cancel();
+          await delay(
+            Number.isFinite(waitMs) ? Math.max(0, waitMs) : 1000 * (attempt + 1),
+            undefined,
+            { signal },
+          );
+        }
+      };
+      const read = async (path) => {
+        const response = await request(path);
         if (!response.ok) throw new Error('Content unavailable.');
         return response.json();
       };
+      if (siteResource) {
+        const data = await readSiteContent({
+          resource,
+          query,
+          request,
+          read,
+          readPages: () => readPages(read),
+          destination,
+          httpsUrl,
+        });
+        return data === null
+          ? send(res, 404, { error: 'This page has not been published.' })
+          : sendContent(res, data, preview);
+      }
+      if (resource === 'posts' || resource === 'post') {
+        const response = await request(postRequest(resource, query));
+        const records = await response.json();
+        if (!response.ok) {
+          if (
+            resource === 'posts' &&
+            response.status === 400 &&
+            records.code === 'rest_post_invalid_page_number'
+          )
+            return sendContent(
+              res,
+              { posts: [], page: Number(query.get('page') || 1), totalPages: 0 },
+              preview,
+            );
+          throw new Error('Articles unavailable.');
+        }
+        if (!Array.isArray(records)) throw new Error('Invalid articles response.');
+        let posts = records
+          .map((post) => postContent(post, resource === 'post', httpsUrl))
+          .filter(Boolean);
+        if (resource === 'post') {
+          posts = posts.filter((post) => post.slug === query.get('slug'));
+          if (posts.length === 1)
+            posts[0].seo = await resolveSeo(
+              records.find((record) => record.id === posts[0].id)?.acf,
+              read,
+              httpsUrl,
+            );
+          return posts.length === 1
+            ? sendContent(res, posts[0], preview)
+            : send(res, 404, { error: 'Article not found.' });
+        }
+        if (query.has('include')) {
+          const order = query.get('include').split(',').map(Number);
+          posts = order.flatMap((id) => posts.find((post) => post.id === id) || []);
+        }
+        const totalPages = Number(response.headers.get('X-WP-TotalPages'));
+        return sendContent(
+          res,
+          {
+            posts,
+            page: Number(query.get('page') || 1),
+            totalPages:
+              Number.isSafeInteger(totalPages) && totalPages > 0
+                ? totalPages
+                : posts.length
+                  ? 1
+                  : 0,
+          },
+          preview,
+        );
+      }
+      if (resource === 'home') {
+        const pages = await read(
+          'pages?slug=home&status=publish&per_page=2&acf_format=light&_fields=id,slug,status,type,title,acf',
+        );
+        if (Array.isArray(pages) && !pages.length)
+          return send(res, 404, { error: 'The homepage has not been published.' });
+        if (
+          !Array.isArray(pages) ||
+          pages.length !== 1 ||
+          pages[0].slug !== 'home' ||
+          pages[0].status !== 'publish' ||
+          pages[0].type !== 'page' ||
+          pages[0].acf?.lld_page_key !== 'home'
+        ) {
+          throw new Error('Invalid homepage record.');
+        }
+        const page = pages[0];
+        const acf = page.acf;
+        const home = acf.lld_home || {};
+        const button = (value) => ({
+          label: text(value?.label),
+          destination: destination(value?.destination),
+        });
+        const sections = await homeSections(acf, read, button);
+        return sendContent(
+          res,
+          {
+            title: text(page.title?.rendered),
+            seo: await resolveSeo(acf, read, httpsUrl),
+            ...sections,
+            hero: {
+              eyebrow: text(acf.lld_eyebrow),
+              heading: text(acf.lld_heading),
+              intro: text(acf.lld_intro),
+              prefix: text(home.hero_prefix),
+              highlight: text(home.hero_highlight),
+              suffix: text(home.hero_suffix),
+              primaryCta: button(home.primary_cta),
+              secondaryCta: button(home.secondary_cta),
+            },
+          },
+          preview,
+        );
+      }
       const records = await read(
         'lld-settings?slug=storefront&status=publish&per_page=2&acf_format=light&_fields=id,slug,status,type,acf',
       );
@@ -120,7 +291,35 @@ export function createContentHandler({ baseUrl, preview = true, fetcher = fetch 
       }
       const announcement = acf.lld_announcement || {};
       const footer = acf.lld_footer || {};
+      const newsletter = acf.lld_newsletter || {};
+      const chat = acf.lld_chat || {};
       const settings = {
+        newsletter: {
+          enabled: newsletter.enabled === true || newsletter.enabled === 1,
+          popupEnabled: newsletter.popup_enabled === true || newsletter.popup_enabled === 1,
+          popupDelay: Math.max(180, Number(newsletter.popup_delay_seconds) || 180),
+          ...Object.fromEntries(
+            [
+              'heading',
+              'body',
+              'button_label',
+              'consent_text',
+              'success_message',
+              'popup_heading',
+              'popup_body',
+            ].map((key) => [key, text(newsletter[key])]),
+          ),
+        },
+        chat: {
+          displayName: text(chat.display_name),
+          welcome: text(chat.welcome),
+          unavailableMessage: text(chat.unavailable_message),
+          suggestedQuestions: text(chat.suggested_questions)
+            .split(/\r?\n/)
+            .map(text)
+            .filter(Boolean)
+            .slice(0, 4),
+        },
         brand: {
           name,
           legalName: text(acf.lld_brand.legal_name),
@@ -160,18 +359,32 @@ export function createContentHandler({ baseUrl, preview = true, fetcher = fetch 
           copyrightName: text(footer.copyright_name) || name,
         },
       };
-      if (!preview)
-        res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, must-revalidate');
-      return send(res, 200, settings);
+      return sendContent(res, settings, preview);
     } catch {
-      return send(res, 502, { error: 'Site settings are temporarily unavailable.' });
+      return send(res, 502, {
+        error:
+          resource === 'home'
+            ? 'Homepage content is temporarily unavailable.'
+            : resource === 'settings'
+              ? 'Site settings are temporarily unavailable.'
+              : 'Content is temporarily unavailable.',
+      });
     }
   };
+  return cacheContent(content, { ttl: cacheTtl, now });
 }
 
+let activeHandler;
+let activeConfig;
 export default function handler(req, res) {
-  return createContentHandler({
+  const config = {
     baseUrl: process.env.VITE_WORDPRESS_API_URL,
     preview: process.env.VERCEL_ENV !== 'production',
-  })(req, res);
+  };
+  const key = JSON.stringify(config);
+  if (key !== activeConfig) {
+    activeConfig = key;
+    activeHandler = createContentHandler(config);
+  }
+  return activeHandler(req, res);
 }

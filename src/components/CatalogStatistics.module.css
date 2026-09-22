@@ -1,0 +1,21 @@
+.card {
+  min-width: 0;
+  padding: 14px;
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.value {
+  color: #9333ea;
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.label {
+  margin-top: 2px;
+  color: #9ca3af;
+  font-size: 10px;
+}

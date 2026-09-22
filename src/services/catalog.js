@@ -54,8 +54,20 @@ export function normalizeProduct(product, featuredIds = new Set()) {
     ),
   ).map((category) => category.id);
 
+  const extras = product.extensions?.['longlife-content'] || {};
   return {
     source: 'woocommerce',
+    level: plainText(extras.level),
+    duration: plainText(extras.duration),
+    includesHtml: sanitizeRichText(typeof extras.includes === 'string' ? extras.includes : ''),
+    compatibility: plainText(extras.compatibility),
+    licenseSummary: plainText(extras.license_summary),
+    seo: {
+      title: plainText(extras.seo_title),
+      description: plainText(extras.meta_description),
+      image: publicUrl(extras.share_image),
+      noindex: extras.noindex === true,
+    },
     id: product.id,
     slug: product.slug,
     name: plainText(product.name),
@@ -74,6 +86,7 @@ export function normalizeProduct(product, featuredIds = new Set()) {
     thumbnail: publicUrl(product.images?.[0]?.thumbnail),
     imageAlt: plainText(product.images?.[0]?.alt || product.name),
     tag: plainText(product.tags?.[0]?.name),
+    tags: (product.tags || []).map((tag) => ({ id: tag.slug, label: plainText(tag.name) })),
     rating: Math.max(0, Math.min(5, Number(product.average_rating) || 0)),
     reviews: Math.max(0, Number(product.review_count) || 0),
     featured: featuredIds.has(product.id),

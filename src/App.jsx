@@ -1,12 +1,9 @@
-import DeleteProductModal from './components/DeleteProductModal';
-import ProductEditor from './components/ProductEditor';
-import ContactEditor from './components/ContactEditor';
-import AdminDashboard from './components/AdminDashboard';
-import NewsletterPopup from './components/NewsletterPopup';
+import SiteFooter from './components/SiteFooter';
+import { ContentState } from './components/ContentPage';
 import { Alert, Box, Button } from '@mantine/core';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
 import { ScrollRestoration } from 'react-router';
-import { useStripePayment } from './payments';
+import { useStripePayment } from './payments/useStripePayment';
 import { EMPTY_FORM, DEFAULT_CONTACT } from './constants/data';
 import useCatalog from './hooks/useCatalog';
 import useSiteSettings from './hooks/useSiteSettings';
@@ -17,27 +14,36 @@ import ProductDetailsSkeleton from './components/skeletons/ProductDetailsSkeleto
 import { matchesCategory } from './services/catalog';
 import { addCartItem, adjustCartQuantity, getItemQuantity, getQuantityLimits } from './utils/cart';
 import Nav from './components/Nav';
-import CartDrawer from './components/CartDrawer';
-import CheckoutModal from './components/CheckoutModal';
 import Toast from './components/Toast';
-import LoginModal from './components/LoginModal';
 import AIChat from './components/AIChat';
 import HomePage from './pages/HomePage';
-import ShopPage from './pages/ShopPage';
-import ProductPage from './pages/ProductPage';
-import AboutPage from './pages/AboutPage';
-import BlogPage from './pages/BlogPage';
-import ServicesPage from './pages/ServicesPage';
-import CoursesPage from './pages/CoursesPage';
-import DomainsPage from './pages/DomainsPage';
-import ContactPage from './pages/ContactPage';
-import FAQPage from './pages/FAQPage';
-import RefundPage from './pages/RefundPage';
-import PrivacyPage from './pages/PrivacyPage';
-import TermsPage from './pages/TermsPage';
 import NotFoundPage from './pages/NotFoundPage';
+const DeleteProductModal = lazy(() => import('./components/DeleteProductModal'));
+const ProductEditor = lazy(() => import('./components/ProductEditor'));
+const ContactEditor = lazy(() => import('./components/ContactEditor'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+import NewsletterPopup from './components/NewsletterPopup';
+import CartDrawer from './components/CartDrawer';
+const CheckoutModal = lazy(() => import('./components/CheckoutModal'));
+const LoginModal = lazy(() => import('./components/LoginModal'));
+const ShopPage = lazy(() => import('./pages/ShopPage'));
+const ProductPage = lazy(() => import('./pages/ProductPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const BlogPage = lazy(() => import('./pages/BlogPage'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+const ServicesPage = lazy(() => import('./pages/ServicesPage'));
+const CoursesPage = lazy(() => import('./pages/CoursesPage'));
+const DomainsPage = lazy(() => import('./pages/DomainsPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const FAQPage = lazy(() => import('./pages/FAQPage'));
+const RefundPage = lazy(() => import('./pages/RefundPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
 export default function App() {
-  const { page, setPage, productId, goProduct } = useAppNavigation();
+  useLayoutEffect(() => {
+    document.getElementById('initial-content')?.remove();
+  }, []);
+  const { page, setPage, productId, postSlug, goProduct } = useAppNavigation();
   const {
     products,
     setProducts,
@@ -80,13 +86,13 @@ export default function App() {
     email: '',
     phone: '',
   });
-  const [payMethod, setPayMethod] = useState('card');
-  const [cardNum, setCardNum] = useState('');
-  const [cardExp, setCardExp] = useState('');
-  const [cardCvc, setCardCvc] = useState('');
-  const [cardName, setCardName] = useState('');
+  const [, setPayMethod] = useState('card');
+  const [, setCardNum] = useState('');
+  const [, setCardExp] = useState('');
+  const [, setCardCvc] = useState('');
+  const [, setCardName] = useState('');
   const [orderNum, setOrderNum] = useState('');
-  const [processing, setProcessing] = useState(false);
+  const [, setProcessing] = useState(false);
   const {
     clientSecret,
     loading: stripeLoading,
@@ -128,7 +134,7 @@ export default function App() {
     password: '',
   });
   const [editMemberId, setEditMemberId] = useState(null);
-  const [orders, setOrders] = useState([
+  const [orders] = useState([
     {
       id: 'LD-001',
       customer: 'Sarah Johnson',
@@ -182,7 +188,16 @@ export default function App() {
   ]);
   const { showPopup, setShowPopup, popupDone, setPopupDone } = useNewsletterPopup({
     subscribed,
-    blocked: showCart || showCheckout || showLogin || showForm || showDashboard || showContactEdit,
+    delaySeconds: settings.newsletter?.popupDelay,
+    blocked:
+      !settings.newsletter?.enabled ||
+      !settings.newsletter?.popupEnabled ||
+      showCart ||
+      showCheckout ||
+      showLogin ||
+      showForm ||
+      showDashboard ||
+      showContactEdit,
   });
   const ROLE_PASSWORDS = {
     owner: 'longlife2024',
@@ -391,8 +406,7 @@ export default function App() {
     resetStripe();
     setShowCheckout(true);
   };
-  const STRIPE_KEY =
-    'pk_live_51TYT5WFUxxwF6THk5f6W6lnpuySIg76odRKfr78vYHPWeXmDPfxMRhVJrhq0Gp1BghRnjM2E8Lm41eoccOj33HIw00SuUZ07j5';
+
   const filtered = products
     .filter((p) => matchesCategory(p, filterCat))
     .filter((p) => !search || p.name.toLowerCase().includes(search.toLowerCase()))
@@ -430,218 +444,235 @@ export default function App() {
         activeDropdown={activeDropdown}
         setActiveDropdown={setActiveDropdown}
       />
-      <Box component="main" id="main-content" bg="#fff" mih="100vh">
-        {settingsStatus === 'error' && (
-          <Alert title="Site details could not be loaded" color="yellow" m="md">
-            You can still browse products while we reconnect.
-            <Button variant="light" size="xs" ml="sm" onClick={() => retrySettings()}>
-              Retry site details
-            </Button>
-          </Alert>
-        )}
-        {page === 'home' && (
-          <HomePage
-            settings={settings}
-            settingsManaged={settingsManaged}
-            products={products}
-            categories={categories}
-            catalogStatus={catalogStatus}
-            retryCatalog={retryCatalog}
-            cmsManaged={cmsManaged}
+      <Suspense
+        fallback={
+          <Box p="xl">
+            <ContentState status="loading" />
+          </Box>
+        }
+      >
+        <Box component="main" id="main-content" bg="#fff" mih="100vh">
+          {settingsStatus === 'error' && (
+            <Alert title="Site details could not be loaded" color="yellow" m="md">
+              You can still browse products while we reconnect.
+              <Button variant="light" size="xs" ml="sm" onClick={() => retrySettings()}>
+                Retry site details
+              </Button>
+            </Alert>
+          )}
+          {page === 'home' && (
+            <HomePage
+              settings={settings}
+              settingsManaged={settingsManaged}
+              products={products}
+              categories={categories}
+              catalogStatus={catalogStatus}
+              retryCatalog={retryCatalog}
+              cmsManaged={cmsManaged}
+              setPage={setPage}
+              setFilterCat={setFilterCat}
+              goProduct={goProduct}
+              addCart={addCart}
+              fire={fire}
+              isAdmin={isAdmin}
+              openAdd={openAdd}
+              openEdit={openEdit}
+              openDel={openDel}
+              subName={subName}
+              setSubName={setSubName}
+              subEmail={subEmail}
+              setSubEmail={setSubEmail}
+              subConsent={subConsent}
+              setSubConsent={setSubConsent}
+              subscribed={subscribed}
+              setSubscribed={setSubscribed}
+              setSubscribers={setSubscribers}
+              contact={contact}
+            />
+          )}
+          {page === 'shop' && (
+            <ShopPage
+              products={products}
+              categories={categories}
+              catalogStatus={catalogStatus}
+              retryCatalog={retryCatalog}
+              filtered={filtered}
+              filterCat={filterCat}
+              setFilterCat={setFilterCat}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              isAdmin={isAdmin}
+              openAdd={openAdd}
+              addCart={addCart}
+              goProduct={goProduct}
+              fire={fire}
+              openEdit={openEdit}
+              openDel={openDel}
+            />
+          )}
+          {page === 'product' && catalogStatus !== 'ready' && (
+            <CatalogStatus
+              status={catalogStatus}
+              retry={retryCatalog}
+              loading={<ProductDetailsSkeleton />}
+            />
+          )}
+          {page === 'product' && catalogStatus === 'ready' && !selProduct && (
+            <NotFoundPage product setPage={setPage} />
+          )}
+          {page === 'product' && selProduct && (
+            <ProductPage
+              selProduct={selProduct}
+              products={products}
+              setPage={setPage}
+              addCart={addCart}
+              fire={fire}
+              isAdmin={isAdmin}
+              openEdit={openEdit}
+              openDel={openDel}
+              goProduct={goProduct}
+            />
+          )}
+          {page === 'about' && (
+            <AboutPage
+              brand={settings.brand}
+              contact={contact}
+              isAdmin={isAdmin && !settingsManaged}
+              setContactForm={setContactForm}
+              setShowContactEdit={setShowContactEdit}
+            />
+          )}
+          {page === 'blog' && <BlogPage />}
+          {page === 'post' && <BlogPostPage key={postSlug} slug={postSlug} />}
+          {page === 'services' && <ServicesPage setPage={setPage} />}
+          {page === 'courses' && (
+            <CoursesPage
+              products={products}
+              catalogStatus={catalogStatus}
+              retryCatalog={retryCatalog}
+              addCart={addCart}
+              goProduct={goProduct}
+              fire={fire}
+              isAdmin={isAdmin}
+              openEdit={openEdit}
+              openDel={openDel}
+            />
+          )}
+          {page === 'domains' && <DomainsPage setPage={setPage} />}
+          {page === 'contact' && <ContactPage fire={fire} contact={contact} settings={settings} />}
+          {page === 'faq' && <FAQPage setPage={setPage} />}
+          {page === 'refund' && <RefundPage />}
+          {page === 'privacy' && <PrivacyPage />}
+          {page === 'terms' && <TermsPage />}
+          {page === 'not-found' && <NotFoundPage setPage={setPage} />}
+        </Box>
+      </Suspense>
+      <SiteFooter setPage={setPage} setFilterCat={setFilterCat} />
+      <Suspense fallback={null}>
+        {showCart && (
+          <CartDrawer
+            cart={cart}
+            setShowCart={setShowCart}
+            rmCart={rmCart}
+            changeCartQuantity={changeCartQuantity}
             setPage={setPage}
-            setFilterCat={setFilterCat}
-            goProduct={goProduct}
-            addCart={addCart}
+            openCheckout={openCheckout}
+            setCart={setCart}
+          />
+        )}
+        {showLogin && (
+          <LoginModal
+            showLogin={showLogin}
+            setShowLogin={setShowLogin}
+            loginPass={loginPass}
+            setLoginPass={setLoginPass}
+            loginErr={loginErr}
+            setLoginErr={setLoginErr}
+            login={login}
+          />
+        )}
+        {delId && <DeleteProductModal delId={delId} delProduct={delProduct} setDelId={setDelId} />}
+        {showForm && (
+          <ProductEditor
+            editId={editId}
+            form={form}
+            saveProduct={saveProduct}
+            setForm={setForm}
+            setShowForm={setShowForm}
+          />
+        )}
+        {showContactEdit && (
+          <ContactEditor
+            contactForm={contactForm}
             fire={fire}
-            isAdmin={isAdmin}
-            openAdd={openAdd}
-            openEdit={openEdit}
-            openDel={openDel}
-            subName={subName}
-            setSubName={setSubName}
-            subEmail={subEmail}
-            setSubEmail={setSubEmail}
-            subConsent={subConsent}
-            setSubConsent={setSubConsent}
-            subscribed={subscribed}
-            setSubscribed={setSubscribed}
-            setSubscribers={setSubscribers}
-            contact={contact}
-          />
-        )}
-        {page === 'shop' && (
-          <ShopPage
-            products={products}
-            categories={categories}
-            catalogStatus={catalogStatus}
-            retryCatalog={retryCatalog}
-            filtered={filtered}
-            filterCat={filterCat}
-            setFilterCat={setFilterCat}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            isAdmin={isAdmin}
-            openAdd={openAdd}
-            addCart={addCart}
-            goProduct={goProduct}
-            fire={fire}
-            openEdit={openEdit}
-            openDel={openDel}
-          />
-        )}
-        {page === 'product' && catalogStatus !== 'ready' && (
-          <CatalogStatus
-            status={catalogStatus}
-            retry={retryCatalog}
-            loading={<ProductDetailsSkeleton />}
-          />
-        )}
-        {page === 'product' && catalogStatus === 'ready' && !selProduct && (
-          <NotFoundPage product setPage={setPage} />
-        )}
-        {page === 'product' && selProduct && (
-          <ProductPage
-            selProduct={selProduct}
-            products={products}
-            setPage={setPage}
-            addCart={addCart}
-            fire={fire}
-            isAdmin={isAdmin}
-            openEdit={openEdit}
-            openDel={openDel}
-            goProduct={goProduct}
-          />
-        )}
-        {page === 'about' && (
-          <AboutPage
-            brand={settings.brand}
-            contact={contact}
-            isAdmin={isAdmin && !settingsManaged}
+            setContact={setContact}
             setContactForm={setContactForm}
             setShowContactEdit={setShowContactEdit}
           />
         )}
-        {page === 'blog' && <BlogPage />}
-        {page === 'services' && <ServicesPage setPage={setPage} />}
-        {page === 'courses' && (
-          <CoursesPage
-            products={products}
-            catalogStatus={catalogStatus}
-            retryCatalog={retryCatalog}
-            addCart={addCart}
-            goProduct={goProduct}
+        {showDashboard && isAdmin && (
+          <AdminDashboard
+            canDo={canDo}
+            dashTab={dashTab}
+            editMemberId={editMemberId}
             fire={fire}
-            isAdmin={isAdmin}
-            openEdit={openEdit}
+            memberForm={memberForm}
+            openAdd={openAdd}
             openDel={openDel}
+            openEdit={openEdit}
+            orders={orders}
+            products={products}
+            setDashTab={setDashTab}
+            setEditMemberId={setEditMemberId}
+            setMemberForm={setMemberForm}
+            setShowDashboard={setShowDashboard}
+            setShowMemberForm={setShowMemberForm}
+            setTeamMembers={setTeamMembers}
+            showMemberForm={showMemberForm}
+            subscribers={subscribers}
+            teamMembers={teamMembers}
+            userRole={userRole}
           />
         )}
-        {page === 'domains' && <DomainsPage setPage={setPage} />}
-        {page === 'contact' && <ContactPage fire={fire} contact={contact} settings={settings} />}
-        {page === 'faq' && <FAQPage setPage={setPage} />}
-        {page === 'refund' && <RefundPage />}
-        {page === 'privacy' && <PrivacyPage />}
-        {page === 'terms' && <TermsPage />}
-        {page === 'not-found' && <NotFoundPage setPage={setPage} />}
-      </Box>
-      {showCart && (
-        <CartDrawer
-          cart={cart}
-          setShowCart={setShowCart}
-          rmCart={rmCart}
-          changeCartQuantity={changeCartQuantity}
-          setPage={setPage}
-          openCheckout={openCheckout}
-          setCart={setCart}
-        />
-      )}
-      <LoginModal
-        showLogin={showLogin}
-        setShowLogin={setShowLogin}
-        loginPass={loginPass}
-        setLoginPass={setLoginPass}
-        loginErr={loginErr}
-        setLoginErr={setLoginErr}
-        login={login}
-      />
-      {delId && <DeleteProductModal delId={delId} delProduct={delProduct} setDelId={setDelId} />}
-      {showForm && (
-        <ProductEditor
-          editId={editId}
-          form={form}
-          saveProduct={saveProduct}
-          setForm={setForm}
-          setShowForm={setShowForm}
-        />
-      )}
-      {showContactEdit && (
-        <ContactEditor
-          contactForm={contactForm}
-          fire={fire}
-          setContact={setContact}
-          setContactForm={setContactForm}
-          setShowContactEdit={setShowContactEdit}
-        />
-      )}
-      {showDashboard && isAdmin && (
-        <AdminDashboard
-          canDo={canDo}
-          dashTab={dashTab}
-          editMemberId={editMemberId}
-          fire={fire}
-          memberForm={memberForm}
-          openAdd={openAdd}
-          openDel={openDel}
-          openEdit={openEdit}
-          orders={orders}
-          products={products}
-          setDashTab={setDashTab}
-          setEditMemberId={setEditMemberId}
-          setMemberForm={setMemberForm}
-          setShowDashboard={setShowDashboard}
-          setShowMemberForm={setShowMemberForm}
-          setTeamMembers={setTeamMembers}
-          showMemberForm={showMemberForm}
-          subscribers={subscribers}
-          teamMembers={teamMembers}
-          userRole={userRole}
-        />
-      )}
-      {showPopup && !popupDone && (
-        <NewsletterPopup
-          fire={fire}
-          popupConsent={popupConsent}
-          popupEmail={popupEmail}
-          popupName={popupName}
-          setPopupConsent={setPopupConsent}
-          setPopupDone={setPopupDone}
-          setPopupEmail={setPopupEmail}
-          setPopupName={setPopupName}
-          setShowPopup={setShowPopup}
-          setSubscribed={setSubscribed}
-          setSubscribers={setSubscribers}
-        />
-      )}
-      <CheckoutModal
-        showCheckout={showCheckout}
-        checkoutItem={checkoutItem}
-        setShowCheckout={setShowCheckout}
-        checkoutStep={checkoutStep}
-        setCheckoutStep={setCheckoutStep}
-        orderInfo={orderInfo}
-        setOrderInfo={setOrderInfo}
-        stripeLoading={stripeLoading}
-        stripeError={stripeError}
-        clientSecret={clientSecret}
-        createPaymentIntent={createPaymentIntent}
-        resetStripe={resetStripe}
-        setCart={setCart}
-        fire={fire}
-        setPage={setPage}
-        orderNum={orderNum}
-        setOrderNum={setOrderNum}
-      />
-      <AIChat />
+        {showPopup && !popupDone && (
+          <NewsletterPopup
+            newsletter={settings.newsletter}
+            fire={fire}
+            popupConsent={popupConsent}
+            popupEmail={popupEmail}
+            popupName={popupName}
+            setPopupConsent={setPopupConsent}
+            setPopupDone={setPopupDone}
+            setPopupEmail={setPopupEmail}
+            setPopupName={setPopupName}
+            setShowPopup={setShowPopup}
+            setSubscribed={setSubscribed}
+            setSubscribers={setSubscribers}
+          />
+        )}
+        {showCheckout && (
+          <CheckoutModal
+            showCheckout={showCheckout}
+            checkoutItem={checkoutItem}
+            setShowCheckout={setShowCheckout}
+            checkoutStep={checkoutStep}
+            setCheckoutStep={setCheckoutStep}
+            orderInfo={orderInfo}
+            setOrderInfo={setOrderInfo}
+            stripeLoading={stripeLoading}
+            stripeError={stripeError}
+            clientSecret={clientSecret}
+            createPaymentIntent={createPaymentIntent}
+            resetStripe={resetStripe}
+            setCart={setCart}
+            fire={fire}
+            setPage={setPage}
+            orderNum={orderNum}
+            setOrderNum={setOrderNum}
+          />
+        )}
+      </Suspense>
+      <AIChat settings={settings} />
       <ScrollRestoration />
     </Box>
   );

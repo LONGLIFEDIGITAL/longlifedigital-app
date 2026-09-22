@@ -1,16 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
-    { "source": "/products/:path*", "destination": "/index.html" },
-    { "source": "/about", "destination": "/index.html" },
-    { "source": "/blog", "destination": "/index.html" },
-    { "source": "/services", "destination": "/index.html" },
-    { "source": "/courses", "destination": "/index.html" },
-    { "source": "/domains", "destination": "/index.html" },
-    { "source": "/contact", "destination": "/index.html" },
-    { "source": "/faq", "destination": "/index.html" },
-    { "source": "/refund-policy", "destination": "/index.html" },
-    { "source": "/privacy-policy", "destination": "/index.html" },
-    { "source": "/terms-of-service", "destination": "/index.html" }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "^/(?:products|blog)(?:/.*)?$", "dest": "/index.html" },
+    {
+      "src": "^/(?:about|services|courses|domains|contact|faq|refund-policy|privacy-policy|terms-of-service)/?$",
+      "dest": "/index.html"
+    }
   ]
 }

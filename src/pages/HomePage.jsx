@@ -1,10 +1,12 @@
+import PageMetadata from '../components/PageMetadata';
 import { Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
 import LoadingImage from '../components/LoadingImage';
-import { BLOG_POSTS } from '../constants/data';
+import HomeHeroContent from '../components/HomeHeroContent';
+import HomeEditorial, { EditorialStatistics, SectionHeading } from '../components/HomeEditorial';
+import useHomeHero from '../hooks/useHomeHero';
 import { fmtPrice, getProdTheme, stars } from '../utils/helpers';
 import { matchesCategory } from '../services/catalog';
 import CatalogStatus from '../components/CatalogStatus';
-import LDLogo from '../components/LDLogo';
 import ProductCollection from '../components/ProductCollection';
 import FeaturedProductSkeleton from '../components/skeletons/FeaturedProductSkeleton';
 import CategorySkeleton from '../components/skeletons/CategorySkeleton';
@@ -13,7 +15,6 @@ import SkeletonRegion from '../components/skeletons/SkeletonRegion';
 import classes from './HomePage.module.css';
 export default function HomePage({
   settings,
-  settingsManaged,
   products,
   categories,
   catalogStatus,
@@ -37,9 +38,16 @@ export default function HomePage({
   subscribed,
   setSubscribed,
   setSubscribers,
-  contact,
 }) {
-  const { brand, footer, social } = settings;
+  const { brand } = settings;
+  const newsletter = settings.newsletter;
+  const { content, status: contentStatus, managed: contentManaged } = useHomeHero();
+  const collection =
+    content?.collections?.[products.some((product) => product.featured) ? 'featured' : 'catalog'];
+  const more =
+    !contentManaged && !cmsManaged
+      ? { title: 'Best-Selling Products', intro: 'Our most loved digital products' }
+      : content?.collections?.more;
   const loading = catalogStatus === 'loading';
   const featured = products.filter((product) => product.featured);
   const highlighted = featured[0] || products[0];
@@ -49,6 +57,7 @@ export default function HomePage({
     fmtPrice(amount, product.currency, product.minorUnit);
   return (
     <div>
+      <PageMetadata content={content} title={brand.name} path="/" />
       <Flex
         align="center"
         wrap="wrap"
@@ -148,102 +157,8 @@ export default function HomePage({
           }}
         >
           <Box miw={0}>
-            <Text
-              component="p"
-              inherit
-              c="#E8C97A"
-              bg="rgba(201,150,63,0.12)"
-              fz={13}
-              fw="600"
-              lts={2}
-              tt="uppercase"
-              mb={20}
-              p="5px 16px"
-              style={{
-                border: '1px solid rgba(201,150,63,0.3)',
-                borderRadius: 30,
-                display: 'inline-block',
-              }}
-            >
-              ✦ Premium Digital Products
-            </Text>
-            <Title
-              order={1}
-              c="#ffffff"
-              fz="clamp(32px,5vw,64px)"
-              fw="700"
-              ff="'Playfair Display',serif"
-              lh={1.1}
-              mb={20}
-            >
-              Beautifully Crafted
-              <br />
-              <Text component="span" inherit className={classes.gradientText}>
-                Digital Products
-              </Text>
-              <br />
-              for Life & Business
-            </Title>
-            <Text
-              component="p"
-              inherit
-              c="rgba(255,255,255,0.72)"
-              fz={16}
-              lh={1.85}
-              maw={480}
-              mb={32}
-            >
-              Instant download ebooks, courses, marketing tools and premium domains — everything you
-              need to grow online.
-            </Text>
-            <Flex
-              gap={12}
-              wrap="wrap"
-              direction={{
-                base: 'column',
-                xs: 'row',
-              }}
-              align="stretch"
-            >
-              <Button
-                className="btn-h"
-                onClick={() => setPage('shop')}
-                variant="gradient"
-                color="brand"
-                px="lg"
-                gradient={{
-                  from: '#C9963F',
-                  to: '#E8C97A',
-                  deg: 135,
-                }}
-                c="#1a0533"
-                type="button"
-                fz={15}
-                p="14px 32px"
-              >
-                Shop Now
-              </Button>
-              <Button
-                className="btn-h"
-                onClick={() => setPage('about')}
-                variant="transparent"
-                color="dark"
-                type="button"
-                c="#fff"
-                bg="rgba(255,255,255,0.08)"
-                fz={15}
-                fw={600}
-                p="14px 20px"
-                style={{
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  backdropFilter: 'blur(8px)',
-                }}
-              >
-                Learn More
-              </Button>
-            </Flex>
+            <HomeHeroContent website={brand.website} />
+            <EditorialStatistics items={content?.heroStats} light />
             <Flex gap={24} wrap="wrap" mt={32}>
               {(cmsManaged
                 ? [[String(products.length), 'Digital Products']]
@@ -458,39 +373,17 @@ export default function HomePage({
         component="section"
       >
         <Container>
-          <Flex align="flex-end" justify="space-between" gap={12} wrap="wrap" mb={32}>
-            <div>
-              <Title
-                order={2}
-                c="#111827"
-                fz="clamp(24px,4vw,36px)"
-                fw="700"
-                ff="'Playfair Display',serif"
-                mb={4}
-              >
-                {featured.length ? 'Featured Products' : 'Explore Our Products'}
-              </Title>
-              <Text component="p" inherit c="#9CA3AF" fz={14}>
-                {featured.length
-                  ? 'Handpicked for quality and results'
-                  : 'Discover our latest digital products'}
-              </Text>
-            </div>
-            <Button
-              className="btn-h"
-              onClick={() => setPage('shop')}
-              variant="outline"
-              color="brand"
-              px="lg"
-              type="button"
-            >
-              View All →
-            </Button>
-          </Flex>
+          <SectionHeading
+            title={collection?.title}
+            intro={collection?.intro}
+            cta={content?.collections?.cta}
+            website={brand.website}
+            loading={contentStatus === 'loading'}
+          />
           <ProductCollection
             products={homeProducts}
             loading={loading}
-            label={featured.length ? 'Featured Products' : 'Explore Our Products'}
+            label={collection?.title || 'Products'}
             desktopLimit={featured.length ? undefined : 4}
             minColWidth={260}
             addCart={addCart}
@@ -515,39 +408,41 @@ export default function HomePage({
           )}
         </Container>
       </Box>
-      {saleProduct && (
+      {saleProduct && content?.offer?.title && (
         <Box bg="linear-gradient(135deg,#9333EA,#7C3AED)" p="32px 24px">
           <Flex align="center" justify="space-between" gap={20} wrap="wrap" maw={1280} m="0 auto">
             <div>
               <Title order={3} c="#fff" fz={22} fw="700" ff="'Playfair Display',serif" mb={6}>
-                Special Offer
+                {content.offer.title}
               </Title>
               <Text component="p" inherit c="rgba(255,255,255,0.85)" fz={15}>
                 {saleProduct.name} — Was {money(saleProduct, saleProduct.oldPrice)}, now{' '}
                 {money(saleProduct)}.
               </Text>
             </div>
-            <Button
-              className="btn-h"
-              onClick={() => goProduct(saleProduct)}
-              variant="transparent"
-              color="dark"
-              type="button"
-              c="#9333EA"
-              bg="#fff"
-              fz={14}
-              fw="700"
-              ff="'Inter',sans-serif"
-              p="13px 20px"
-              style={{
-                border: 'none',
-                borderRadius: 8,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Shop This Deal
-            </Button>
+            {content.offer.button && (
+              <Button
+                className="btn-h"
+                onClick={() => goProduct(saleProduct)}
+                variant="transparent"
+                color="dark"
+                type="button"
+                c="#9333EA"
+                bg="#fff"
+                fz={14}
+                fw="700"
+                ff="'Inter',sans-serif"
+                p="13px 20px"
+                style={{
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {content.offer.button}
+              </Button>
+            )}
           </Flex>
         </Box>
       )}
@@ -560,39 +455,17 @@ export default function HomePage({
         component="section"
       >
         <Container>
-          <Flex align="flex-end" justify="space-between" gap={12} wrap="wrap" mb={32}>
-            <div>
-              <Title
-                order={2}
-                c="#111827"
-                fz="clamp(24px,4vw,36px)"
-                fw="700"
-                ff="'Playfair Display',serif"
-                mb={4}
-              >
-                {cmsManaged ? 'More to Explore' : 'Best-Selling Products'}
-              </Title>
-              <Text component="p" inherit c="#9CA3AF" fz={14}>
-                {cmsManaged
-                  ? 'Browse our digital product collection'
-                  : 'Our most loved digital products'}
-              </Text>
-            </div>
-            <Button
-              className="btn-h"
-              onClick={() => setPage('shop')}
-              variant="outline"
-              color="brand"
-              px="lg"
-              type="button"
-            >
-              View All →
-            </Button>
-          </Flex>
+          <SectionHeading
+            title={more?.title}
+            intro={more?.intro}
+            cta={content?.collections?.cta}
+            website={brand.website}
+            loading={contentStatus === 'loading'}
+          />
           <ProductCollection
             products={[...products].sort((a, b) => b.reviews - a.reviews)}
             loading={loading}
-            label={cmsManaged ? 'More to Explore' : 'Best-Selling Products'}
+            label={more?.title || 'More products'}
             desktopLimit={4}
             minColWidth={260}
             addCart={addCart}
@@ -603,705 +476,214 @@ export default function HomePage({
           />
         </Container>
       </Box>
-      <Box
-        bg="#F9FAFB"
-        p="40px 24px"
-        style={{
-          borderTop: '1px solid #F3F4F6',
-        }}
-      >
-        <SimpleGrid minColWidth="min(100%, 160px)" spacing={24} maw={1280} m="0 auto">
-          {[
-            ['⚡', 'Instant Delivery', 'Download immediately after purchase'],
-            ['🔒', 'Secure Payments', 'Protected by Payhip & Stripe'],
-            ['♾️', 'Lifetime Access', 'Buy once, yours forever'],
-            ['💬', '24hr Support', 'We reply within 24 hours'],
-            ['⭐', '5-Star Rated', 'Loved by thousands of customers'],
-            ['🌍', 'Global Store', 'Serving customers worldwide'],
-          ].map(([icon, title, desc]) => (
-            <Box key={title} ta="center">
-              <Text
-                component="span"
-                inherit
-                fz={28}
-                mb={8}
-                style={{
-                  display: 'block',
-                }}
-              >
-                {icon}
-              </Text>
-              <Box c="#111827" fz={13} fw="700" mb={4}>
-                {title}
-              </Box>
-              <Box c="#9CA3AF" fz={11} lh={1.5}>
-                {desc}
-              </Box>
+      <HomeEditorial
+        content={content}
+        status={contentStatus}
+        products={products}
+        catalogStatus={catalogStatus}
+        brand={brand}
+      />
+      {newsletter?.enabled && (
+        <Box
+          py={{
+            base: 32,
+            sm: 64,
+          }}
+          bg="linear-gradient(135deg,#1a0533,#2d1066)"
+          component="section"
+        >
+          <Container size={600} ta="center">
+            <Box c="#E8C97A" fz={10} lts={3} tt="uppercase" mb={10}>
+              ✦ JOIN THE COMMUNITY ✦
             </Box>
-          ))}
-        </SimpleGrid>
-      </Box>
-      <Box
-        py={{
-          base: 32,
-          sm: 64,
-        }}
-        component="section"
-      >
-        <Container>
-          <Flex align="flex-end" justify="space-between" gap={12} wrap="wrap" mb={32}>
-            <div>
-              <Title
-                order={2}
-                c="#111827"
-                fz="clamp(24px,4vw,36px)"
-                fw="700"
-                ff="'Playfair Display',serif"
-                mb={4}
-              >
-                Blog Posts
-              </Title>
-              <Text component="p" inherit c="#9CA3AF" fz={14}>
-                Tips, guides and strategies to grow your business
-              </Text>
-            </div>
-            <Button
-              className="btn-h"
-              onClick={() => setPage('blog')}
-              variant="outline"
-              color="brand"
-              px="lg"
-              type="button"
+            <Title
+              order={2}
+              c="#fff"
+              fz="clamp(22px,4vw,36px)"
+              ff="'Playfair Display',serif"
+              mb={10}
             >
-              View All →
-            </Button>
-          </Flex>
-          <SimpleGrid minColWidth="min(100%, 300px)" spacing={24}>
-            {BLOG_POSTS.map((post) => (
-              <Box
-                key={post.id}
-                className="pcard"
-                bg="#fff"
-                style={{
-                  border: '1px solid #F3F4F6',
-                  borderRadius: 12,
-                  overflow: 'hidden',
-                  transition: 'all 0.3s',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                }}
-              >
-                <Flex
-                  align="center"
-                  justify="center"
-                  wrap="wrap"
-                  bg="linear-gradient(135deg,#F3EEFF,#EDE9FE)"
-                  h={160}
-                >
-                  <Text component="span" inherit fz={48}>
-                    {post.img}
-                  </Text>
-                </Flex>
-                <Box p="20px">
-                  <Text
-                    component="span"
-                    inherit
-                    c="#9333EA"
-                    bg="#F3EEFF"
-                    fz={11}
-                    fw="600"
-                    mb={8}
-                    p="3px 10px"
-                    style={{
-                      borderRadius: 20,
-                      display: 'inline-block',
-                    }}
-                  >
-                    {post.tag}
-                  </Text>
-                  <Box c="#9CA3AF" fz={12} mb={10}>
-                    {post.date}
-                  </Box>
-                  <Title
-                    order={3}
-                    c="#111827"
-                    fz={16}
-                    fw="700"
-                    ff="'Playfair Display',serif"
-                    lh={1.4}
-                    mb={10}
-                  >
-                    {post.title}
-                  </Title>
-                  <Text component="p" inherit c="#6B7280" fz={13} lh={1.65} mb={14}>
-                    {post.excerpt}
-                  </Text>
-                  <Button
-                    className="btn-h"
-                    variant="transparent"
-                    color="dark"
-                    px={0}
-                    type="button"
-                    c="#9333EA"
-                    bg="none"
-                    fz={13}
-                    fw="600"
-                    ff="'Inter',sans-serif"
-                    p={0}
-                    style={{
-                      border: 'none',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Read More →
-                  </Button>
-                </Box>
+              {newsletter.heading || 'Newsletter'}
+            </Title>
+            <Text component="p" inherit c="rgba(255,255,255,0.7)" fz={14} mb={28}>
+              {newsletter.body}
+            </Text>
+            {subscribed ? (
+              <Box c="#E8C97A" fz={18} fw={700}>
+                {newsletter.success_message || 'Thank you for subscribing.'}
               </Box>
-            ))}
-          </SimpleGrid>
-        </Container>
-      </Box>
-      <Box
-        py={{
-          base: 32,
-          sm: 64,
-        }}
-        bg="#F9F7FF"
-        component="section"
-      >
-        <Container>
-          <SimpleGrid
-            cols={{
-              base: 1,
-              md: 2,
-            }}
-            spacing={{
-              base: 24,
-              md: 56,
-            }}
-            style={{
-              alignItems: 'center',
-            }}
-          >
-            <Flex
-              align="center"
-              direction="column"
-              gap={24}
-              wrap="nowrap"
-              bg="#F3EEFF"
-              ta="center"
-              p="40px 24px"
-              style={{
-                borderRadius: 20,
-              }}
-            >
-              <LDLogo size={80} />
-              <SimpleGrid cols={2} spacing={16} w="100%">
-                {[
-                  ['6+', 'Product Categories'],
-                  ['500+', 'AI Prompts'],
-                  ['24hr', 'Support'],
-                  ['100%', 'Digital'],
-                ].map(([v, l]) => (
-                  <Box
-                    key={l}
-                    bg="#fff"
-                    ta="center"
-                    p="14px"
-                    style={{
-                      borderRadius: 10,
-                    }}
-                  >
-                    <Box c="#9333EA" fz={22} fw="700" ff="'Playfair Display',serif">
-                      {v}
-                    </Box>
-                    <Box c="#9CA3AF" fz={10} mt={2}>
-                      {l}
-                    </Box>
-                  </Box>
-                ))}
-              </SimpleGrid>
-            </Flex>
-            <div>
-              <Text
-                component="p"
-                inherit
-                c="#9333EA"
-                fz={11}
-                fw="600"
-                lts={2}
-                tt="uppercase"
-                mb={8}
-              >
-                WHO ARE WE?
-              </Text>
-              <Title
-                order={2}
-                c="#111827"
-                fz="clamp(24px,4vw,36px)"
-                fw="700"
-                ff="'Playfair Display',serif"
-                mb={4}
-              >
-                About Longlife Digital
-              </Title>
-              <Text component="p" inherit c="#6B7280" fz={15} lh={1.85} mb={16}>
-                At Longlife Digital, we believe that powerful knowledge tools should be accessible,
-                impactful, and incredibly easy to use. We are more than just a digital product shop
-                — we are a trusted partner for entrepreneurs, creators and learners worldwide.
-              </Text>
-              <Text component="p" inherit c="#6B7280" fz={15} lh={1.85} mb={16}>
-                Every product we create is built on three principles: <strong>real value</strong>,{' '}
-                <strong>professional quality</strong>, and <strong>actionable results</strong>. We
-                stand behind everything we sell.
-              </Text>
-              <Box m="20px 0">
-                {[
-                  ['✓ Pre-built and ready to use', '✓ No subscriptions — one-time purchase'],
-                  ['✓ Instant digital delivery', '✓ Lifetime access included free'],
-                ].map((row, i) => (
-                  <Flex key={i} gap={16} wrap="wrap" mb={8}>
-                    {row.map((f) => (
-                      <Text key={f} component="span" inherit c="#374151" fz={13} fw="500">
-                        {f}
-                      </Text>
-                    ))}
-                  </Flex>
-                ))}
-              </Box>
-              <Button
-                className="btn-h"
-                onClick={() => setPage('about')}
-                variant="filled"
-                color="brand"
-                px="lg"
-                type="button"
-              >
-                Learn More →
-              </Button>
-            </div>
-          </SimpleGrid>
-        </Container>
-      </Box>
-      <Box
-        py={{
-          base: 32,
-          sm: 64,
-        }}
-        bg="linear-gradient(135deg,#1a0533,#2d1066)"
-        component="section"
-      >
-        <Container size={600} ta="center">
-          <Box c="#E8C97A" fz={10} lts={3} tt="uppercase" mb={10}>
-            ✦ JOIN THE COMMUNITY ✦
-          </Box>
-          <Title order={2} c="#fff" fz="clamp(22px,4vw,36px)" ff="'Playfair Display',serif" mb={10}>
-            Get News, Offers & Free Resources
-          </Title>
-          <Text component="p" inherit c="rgba(255,255,255,0.7)" fz={14} mb={28}>
-            Exclusive deals, new products and free tips — straight to your inbox.
-          </Text>
-          {subscribed ? (
-            <Box c="#E8C97A" fz={18} fw={700}>
-              ✦ You're subscribed! Welcome aboard.
-            </Box>
-          ) : (
-            <Box
-              bg="rgba(255,255,255,0.06)"
-              p="24px"
-              style={{
-                border: '1px solid rgba(201,150,63,0.25)',
-                borderRadius: 14,
-              }}
-            >
-              <SimpleGrid
-                cols={{
-                  base: 1,
-                  sm: 2,
-                }}
-                spacing={10}
-                mb={10}
-              >
-                <div>
-                  <Box
-                    component="label"
-                    c="#E8C97A"
-                    fz={10}
-                    lts={2}
-                    mb={5}
-                    style={{
-                      display: 'block',
-                    }}
-                  >
-                    FIRST NAME *
-                  </Box>
-                  <Input
-                    placeholder="e.g. John"
-                    value={subName}
-                    onChange={(e) => setSubName(e.target.value)}
-                    styles={{
-                      input: {
-                        background: 'rgba(255,255,255,0.08)',
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        padding: '10px 12px',
-                        color: '#fff',
-                      },
-                    }}
-                  />
-                </div>
-                <div>
-                  <Box
-                    component="label"
-                    c="#E8C97A"
-                    fz={10}
-                    lts={2}
-                    mb={5}
-                    style={{
-                      display: 'block',
-                    }}
-                  >
-                    EMAIL *
-                  </Box>
-                  <Input
-                    placeholder="e.g. john@email.com"
-                    value={subEmail}
-                    onChange={(e) => setSubEmail(e.target.value)}
-                    styles={{
-                      input: {
-                        background: 'rgba(255,255,255,0.08)',
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        padding: '10px 12px',
-                        color: '#fff',
-                      },
-                    }}
-                  />
-                </div>
-              </SimpleGrid>
+            ) : (
               <Box
-                component="label"
-                ta="left"
-                mb={16}
+                bg="rgba(255,255,255,0.06)"
+                p="24px"
                 style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 8,
-                  cursor: 'pointer',
+                  border: '1px solid rgba(201,150,63,0.25)',
+                  borderRadius: 14,
                 }}
               >
-                <input
-                  type="checkbox"
-                  checked={subConsent}
-                  onChange={(e) => setSubConsent(e.target.checked)}
-                  style={{
-                    marginTop: 2,
-                    width: 15,
-                    height: 15,
-                    accentColor: '#C9963F',
-                    flexShrink: 0,
+                <SimpleGrid
+                  cols={{
+                    base: 1,
+                    sm: 2,
                   }}
-                />
-                <Text component="span" inherit c="rgba(255,255,255,0.6)" fz={11} lh={1.6}>
-                  Yes! I want news, offers and free resources from Longlife Digital. I can
-                  unsubscribe anytime.{' '}
-                  <Text
-                    onClick={() => setPage('privacy')}
-                    component="span"
-                    inherit
-                    c="#E8C97A"
-                    style={{
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Privacy Policy
-                  </Text>
-                  .
-                </Text>
-              </Box>
-              <Button
-                className="btn-h"
-                onClick={() => {
-                  if (!subName.trim()) {
-                    fire('Enter your name', 'err');
-                    return;
-                  }
-                  if (!subEmail.includes('@')) {
-                    fire('Enter valid email', 'err');
-                    return;
-                  }
-                  if (!subConsent) {
-                    fire('Please check consent box', 'err');
-                    return;
-                  }
-                  setSubscribers((p) => [
-                    ...p,
-                    {
-                      name: subName,
-                      email: subEmail,
-                      date: new Date().toLocaleDateString(),
-                      time: new Date().toLocaleTimeString(),
-                    },
-                  ]);
-                  setSubscribed(true);
-                  setSubName('');
-                  setSubEmail('');
-                  setSubConsent(false);
-                  fire('Welcome ' + subName + '! ✦');
-                }}
-                variant="transparent"
-                color="dark"
-                px={0}
-                type="button"
-                c="#1a0533"
-                bg="linear-gradient(135deg,#C9963F,#E8C97A)"
-                fz={13}
-                fw={700}
-                w="100%"
-                p="12px"
-                style={{
-                  border: 'none',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                }}
-              >
-                ✦ Subscribe — It's Free
-              </Button>
-              <Text component="p" inherit c="rgba(255,255,255,0.3)" fz={10} ta="center" mt={10}>
-                🔒 No spam. Unsubscribe anytime.
-              </Text>
-            </Box>
-          )}
-        </Container>
-      </Box>
-      <Box bg="#111827" component="footer" className={classes.footer}>
-        <Box p="48px 24px 36px">
-          <Container>
-            <SimpleGrid
-              cols={{
-                base: 1,
-                xs: 2,
-                md: 4,
-              }}
-              spacing={{
-                base: 24,
-                md: 40,
-              }}
-              maw={1280}
-              m="0 auto"
-            >
-              <div>
-                <Flex align="center" gap={10} wrap="wrap" mb={14}>
-                  <LDLogo size={32} src={brand.logo.src} alt={brand.logo.alt} />
-                  <div>
-                    <Box c="#fff" fz={15} fw="700" ff="'Playfair Display',serif">
-                      {brand.name}
-                    </Box>
-                    <Box c="#9CA3AF" fz={11}>
-                      {brand.websiteLabel}
-                    </Box>
-                  </div>
-                </Flex>
-                <Text component="p" inherit c="#6B7280" fz={13} lh={1.7} mb={16}>
-                  {footer.description}
-                </Text>
-                <Flex gap={12} wrap="wrap">
-                  {['Facebook', 'Instagram', 'TikTok', 'YouTube', 'LinkedIn']
-                    .filter((name) =>
-                      settingsManaged ? social[name.toLowerCase()] : name !== 'LinkedIn',
-                    )
-                    .map((sn) => (
-                      <Text
-                        key={sn}
-                        component={settingsManaged ? 'a' : 'span'}
-                        href={settingsManaged ? social[sn.toLowerCase()] : undefined}
-                        inherit
-                        c="#6B7280"
-                        fz={12}
-                        style={{
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {sn}
-                      </Text>
-                    ))}
-                </Flex>
-              </div>
-              <div>
-                <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>
-                  Shop
-                </Box>
-                {loading ? (
-                  <CategorySkeleton variant="links" label="Loading footer categories" />
-                ) : (
-                  categories
-                    .filter((c) => c.id !== 'all')
-                    .map((cat) => (
-                      <Box
-                        key={cat.id}
-                        className="nav-a"
-                        onClick={() => {
-                          setFilterCat(cat.id);
-                          setPage('shop');
-                        }}
-                        c="#6B7280"
-                        fz={13}
-                        mb={10}
-                        style={{
-                          cursor: 'pointer',
-                          transition: 'color 0.2s',
-                        }}
-                      >
-                        {cat.label}
-                      </Box>
-                    ))
-                )}
-              </div>
-              <div>
-                <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>
-                  {footer.companyHeading}
-                </Box>
-                {[
-                  ['About', 'about'],
-                  ['Blog', 'blog'],
-                  ['Shop', 'shop'],
-                ].map(([l, id]) => (
-                  <Box
-                    key={id}
-                    className="nav-a"
-                    onClick={() => setPage(id)}
-                    c="#6B7280"
-                    fz={13}
-                    mb={10}
-                    style={{
-                      cursor: 'pointer',
-                      transition: 'color 0.2s',
-                    }}
-                  >
-                    {l}
-                  </Box>
-                ))}
-                <Box
-                  c="#6B7280"
-                  fz={13}
+                  spacing={10}
                   mb={10}
-                  style={{
-                    cursor: 'pointer',
-                    transition: 'color 0.2s',
-                  }}
                 >
-                  Contact Us
-                </Box>
-              </div>
-              <div>
-                <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>
-                  {footer.supportHeading}
-                </Box>
-                {[
-                  ['FAQ', 'faq'],
-                  ['Refund Policy', 'refund'],
-                  ['Privacy Policy', 'privacy'],
-                  ['Terms of Service', 'terms'],
-                  ['Contact Us', 'contact'],
-                ].map(([l, pg]) => (
-                  <Box
-                    key={l}
-                    className="nav-a"
-                    onClick={() => setPage(pg)}
-                    c="#6B7280"
-                    fz={13}
-                    mb={10}
-                    style={{
-                      cursor: 'pointer',
-                      transition: 'color 0.2s',
-                    }}
-                  >
-                    {l}
-                  </Box>
-                ))}
-                {contact.email && (
-                  <Box mt={16}>
-                    <Box c="#9CA3AF" fz={12} fw="700" lts={1} tt="uppercase" mb={14}>
-                      {footer.contactHeading}
-                    </Box>
-                    <a
-                      href={'mailto:' + contact.email}
+                  <div>
+                    <Box
+                      component="label"
+                      c="#E8C97A"
+                      fz={10}
+                      lts={2}
+                      mb={5}
                       style={{
-                        fontSize: 13,
-                        color: '#6B7280',
-                        cursor: 'pointer',
-                        marginBottom: 10,
-                        transition: 'color 0.2s',
-                        textDecoration: 'none',
                         display: 'block',
                       }}
                     >
-                      📧 {contact.email}
-                    </a>
-                  </Box>
-                )}
-              </div>
-            </SimpleGrid>
+                      FIRST NAME *
+                    </Box>
+                    <Input
+                      placeholder="e.g. John"
+                      value={subName}
+                      onChange={(e) => setSubName(e.target.value)}
+                      styles={{
+                        input: {
+                          background: 'rgba(255,255,255,0.08)',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                          padding: '10px 12px',
+                          color: '#fff',
+                        },
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Box
+                      component="label"
+                      c="#E8C97A"
+                      fz={10}
+                      lts={2}
+                      mb={5}
+                      style={{
+                        display: 'block',
+                      }}
+                    >
+                      EMAIL *
+                    </Box>
+                    <Input
+                      placeholder="e.g. john@email.com"
+                      value={subEmail}
+                      onChange={(e) => setSubEmail(e.target.value)}
+                      styles={{
+                        input: {
+                          background: 'rgba(255,255,255,0.08)',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                          padding: '10px 12px',
+                          color: '#fff',
+                        },
+                      }}
+                    />
+                  </div>
+                </SimpleGrid>
+                <Box
+                  component="label"
+                  ta="left"
+                  mb={16}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 8,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={subConsent}
+                    onChange={(e) => setSubConsent(e.target.checked)}
+                    style={{
+                      marginTop: 2,
+                      width: 15,
+                      height: 15,
+                      accentColor: '#C9963F',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Text component="span" inherit c="rgba(255,255,255,0.6)" fz={11} lh={1.6}>
+                    {newsletter.consent_text}{' '}
+                    <Text
+                      onClick={() => setPage('privacy')}
+                      component="span"
+                      inherit
+                      c="#E8C97A"
+                      style={{
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Privacy Policy
+                    </Text>
+                    .
+                  </Text>
+                </Box>
+                <Button
+                  className="btn-h"
+                  onClick={() => {
+                    if (!subName.trim()) {
+                      fire('Enter your name', 'err');
+                      return;
+                    }
+                    if (!subEmail.includes('@')) {
+                      fire('Enter valid email', 'err');
+                      return;
+                    }
+                    if (!subConsent) {
+                      fire('Please check consent box', 'err');
+                      return;
+                    }
+                    setSubscribers((p) => [
+                      ...p,
+                      {
+                        name: subName,
+                        email: subEmail,
+                        date: new Date().toLocaleDateString(),
+                        time: new Date().toLocaleTimeString(),
+                      },
+                    ]);
+                    setSubscribed(true);
+                    setSubName('');
+                    setSubEmail('');
+                    setSubConsent(false);
+                    fire(newsletter.success_message || 'Thank you for subscribing.');
+                  }}
+                  variant="transparent"
+                  color="dark"
+                  px={0}
+                  type="button"
+                  c="#1a0533"
+                  bg="linear-gradient(135deg,#C9963F,#E8C97A)"
+                  fz={13}
+                  fw={700}
+                  w="100%"
+                  p="12px"
+                  style={{
+                    border: 'none',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {newsletter.button_label || 'Subscribe'}
+                </Button>
+                <Text
+                  component="p"
+                  inherit
+                  c="rgba(255,255,255,0.3)"
+                  fz={10}
+                  ta="center"
+                  mt={10}
+                ></Text>
+              </Box>
+            )}
           </Container>
         </Box>
-        <Box
-          p="18px 24px"
-          style={{
-            borderTop: '1px solid #1F2937',
-          }}
-        >
-          <Container>
-            <Flex
-              align="center"
-              justify="space-between"
-              gap={12}
-              wrap="wrap"
-              c="#4B5563"
-              fz={12}
-              maw={1280}
-              m="0 auto"
-            >
-              <span>
-                © {new Date().getFullYear()} {footer.copyrightName}
-                {brand.websiteLabel && ` · ${brand.websiteLabel}`}
-              </span>
-              <Flex gap={8} wrap="wrap">
-                {['Visa', 'Mastercard', 'PayPal', 'Stripe', 'Apple Pay'].map((p) => (
-                  <Text
-                    key={p}
-                    component="span"
-                    inherit
-                    c="#9CA3AF"
-                    bg="#1F2937"
-                    fz={11}
-                    p="4px 8px"
-                    style={{
-                      borderRadius: 4,
-                    }}
-                  >
-                    {p}
-                  </Text>
-                ))}
-              </Flex>
-              <Flex gap={16} wrap="wrap">
-                {['Refund Policy', 'Privacy Policy', 'Terms'].map((l) => (
-                  <Text
-                    key={l}
-                    component="span"
-                    inherit
-                    c="#6B7280"
-                    fz={11}
-                    mb={10}
-                    style={{
-                      cursor: 'pointer',
-                      transition: 'color 0.2s',
-                    }}
-                  >
-                    {l}
-                  </Text>
-                ))}
-              </Flex>
-            </Flex>
-          </Container>
-        </Box>
-      </Box>
+      )}
     </div>
   );
 }

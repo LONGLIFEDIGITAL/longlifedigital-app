@@ -703,3 +703,34 @@ test('Vercel endpoint restricts requests and forwards only public pagination', a
     else process.env.VERCEL_ENV = previousEnvironment;
   }
 });
+
+test('approved ACF product extras render safely without exposing unrelated extensions', async ({
+  page,
+}) => {
+  await mockCatalog(page, [
+    {
+      ...product,
+      extensions: {
+        ...product.extensions,
+        'longlife-content': {
+          level: 'Beginner',
+          duration: 'Two hours',
+          includes:
+            '<ul><li>Published worksheet</li></ul><script>window.productInjected=true</script>',
+          compatibility: 'Excel and Google Sheets',
+          license_summary: 'One business license',
+          seo_title: 'CMS product search title',
+          noindex: true,
+          internal_note: 'Never render this',
+        },
+      },
+    },
+  ]);
+  await page.goto(`/products/${product.id}`);
+  await expect(page.getByText('Published worksheet')).toBeVisible();
+  await expect(page.getByText('One business license')).toBeVisible();
+  await expect(page).toHaveTitle('CMS product search title');
+  await expect(page.locator('main')).not.toContainText('Never render this');
+  await expect(page.locator('main')).not.toContainText('private.example.test');
+  expect(await page.evaluate(() => window.productInjected)).toBeUndefined();
+});

@@ -2,6 +2,7 @@ import ResponsiveModal from './ResponsiveModal';
 import { ActionIcon, Box, Button, Flex, Input, Text, Title } from '@mantine/core';
 export default function NewsletterPopup({
   fire,
+  newsletter,
   popupConsent,
   popupEmail,
   popupName,
@@ -77,22 +78,12 @@ export default function NewsletterPopup({
           <Box fz={44} mb={12}>
             🎁
           </Box>
-          <Box c="#E8C97A" fz={10} lts={3} tt="uppercase" mb={10}>
-            ✦ EXCLUSIVE OFFER ✦
-          </Box>
+          <Box c="#E8C97A" fz={10} lts={3} tt="uppercase" mb={10}></Box>
           <Title order={2} c="#fff" fz={28} fw={700} ff="'Playfair Display',serif" mb={8}>
-            Get 10% Off Your First Order
+            {newsletter.popup_heading || newsletter.heading || 'Newsletter'}
           </Title>
           <Text component="p" inherit c="#C084FC" fz={13} lh={1.75}>
-            Sign up for news and exclusive offers from Longlife Digital and we will send you a{' '}
-            <strong
-              style={{
-                color: '#E8C97A',
-              }}
-            >
-              10% discount code
-            </strong>{' '}
-            for your first purchase.
+            {newsletter.popup_body || newsletter.body}
           </Text>
         </Box>
         <Flex direction="column" gap={10} wrap="nowrap" mb={14}>
@@ -150,8 +141,7 @@ export default function NewsletterPopup({
             }}
           />
           <Text component="span" inherit c="rgba(255,255,255,0.55)" fz={11} lh={1.6}>
-            I agree to receive news, offers and updates from Longlife Digital. I can unsubscribe
-            anytime.
+            {newsletter.consent_text}
           </Text>
         </Box>
         <Button
@@ -181,7 +171,7 @@ export default function NewsletterPopup({
             setSubscribed(true);
             setPopupDone(true);
             setShowPopup(false);
-            fire(`✦ Welcome ${popupName}! Your code WELCOME10 is on its way!`);
+            fire(newsletter.success_message || 'Thank you for subscribing.');
           }}
           variant="transparent"
           color="dark"
@@ -200,11 +190,9 @@ export default function NewsletterPopup({
             cursor: 'pointer',
           }}
         >
-          ✦ Claim My 10% Discount
+          {newsletter.button_label || 'Subscribe'}
         </Button>
-        <Text component="p" inherit c="rgba(255,255,255,0.3)" fz={11} ta="center" mt={10}>
-          🔒 No spam. Unsubscribe anytime.
-        </Text>
+        <Text component="p" inherit c="rgba(255,255,255,0.3)" fz={11} ta="center" mt={10}></Text>
       </Box>
     </ResponsiveModal>
   );

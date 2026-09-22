@@ -2,13 +2,6 @@
   overflow-wrap: anywhere;
 }
 
-.gradientText {
-  background-image: linear-gradient(135deg, #c084fc, #e8c97a);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 .featuredCard {
   position: relative;
   isolation: isolate;

@@ -1,3 +1,6 @@
+import RichText from '../components/RichText';
+import PageMetadata from '../components/PageMetadata';
+import CmsFaqs from '../components/CmsFaqs';
 import { Box, Button, Container, Flex, SimpleGrid, Text, Title } from '@mantine/core';
 import LoadingImage from '../components/LoadingImage';
 import { stars, fmtPrice, catLabel, getProdTheme } from '../utils/helpers';
@@ -20,6 +23,7 @@ export default function ProductPage({
   const related = products.filter((r) => r.cat === p.cat && r.id !== p.id).slice(0, 4);
   return (
     <div>
+      <PageMetadata content={p} title={p.name} path={`/products/${p.id}`} />
       <Flex align="center" gap={8} wrap="wrap" maw={1280} m="0 auto" p="16px 24px">
         <Text
           onClick={() => setPage('home')}
@@ -275,7 +279,12 @@ export default function ProductPage({
                 <p className={classes.plainDescription}>{p.desc}</p>
               </Box>
             )}
-            {(p.level || p.duration || p.includes) && (
+            {(p.level ||
+              p.duration ||
+              p.includes ||
+              p.includesHtml ||
+              p.compatibility ||
+              p.licenseSummary) && (
               <Flex
                 direction="column"
                 gap={8}
@@ -303,15 +312,27 @@ export default function ProductPage({
                     <span>{p.duration}</span>
                   </Flex>
                 )}
-                {p.includes && (
+                {(p.includes || p.includesHtml) && (
                   <Flex gap={8} wrap="wrap" c="#374151" fz={13}>
                     <Text component="span" inherit c="#111827" fw="600" miw={80}>
                       Includes:
                     </Text>
-                    <span>{p.includes}</span>
+                    <RichText html={p.includesHtml || p.includes} />
                   </Flex>
                 )}
               </Flex>
+            )}
+            {p.compatibility && (
+              <section>
+                <h3>Compatibility</h3>
+                <Text>{p.compatibility}</Text>
+              </section>
+            )}
+            {p.licenseSummary && (
+              <section>
+                <h3>License</h3>
+                <Text>{p.licenseSummary}</Text>
+              </section>
             )}
             <Flex
               gap={12}
@@ -493,6 +514,9 @@ export default function ProductPage({
             </SimpleGrid>
           </Box>
         )}
+      </Container>
+      <Container py="xl">
+        <CmsFaqs topic="products" optional />
       </Container>
     </div>
   );

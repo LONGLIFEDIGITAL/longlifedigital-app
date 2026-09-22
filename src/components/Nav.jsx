@@ -1,3 +1,5 @@
+import useNavigationContent from '../hooks/useNavigationContent';
+import ContentLink from './ContentLink';
 import {
   ActionIcon,
   Box,
@@ -10,7 +12,6 @@ import {
   Indicator,
   Menu,
   NavLink,
-  SimpleGrid,
   Stack,
   Text,
   TextInput,
@@ -23,103 +24,9 @@ import SkeletonBlock from './skeletons/SkeletonBlock';
 import SkeletonRegion from './skeletons/SkeletonRegion';
 import { getCartCount } from '../utils/cart';
 import classes from './Nav.module.css';
-const SERVICES = [
-  {
-    icon: '🤝',
-    label: 'Affiliate Marketing',
-    desc: 'Earn commissions promoting top products',
-  },
-  {
-    icon: '🔍',
-    label: 'SEO',
-    desc: 'Rank higher on Google organically',
-  },
-  {
-    icon: '🏢',
-    label: 'LLC Formation Assistance',
-    desc: 'Start your business the right way',
-  },
-  {
-    icon: '💻',
-    label: 'Website Design',
-    desc: 'Custom professional websites built for you',
-  },
-  {
-    icon: '📱',
-    label: 'Social Media Management',
-    desc: 'Grow your audience consistently',
-  },
-  {
-    icon: '📍',
-    label: 'Google Business Optimization',
-    desc: 'Dominate local search results',
-  },
-  {
-    icon: '📣',
-    label: 'Facebook & Google Ads',
-    desc: 'Paid advertising that converts',
-  },
-  {
-    icon: '🤖',
-    label: 'AI Automation Services',
-    desc: 'Automate repetitive tasks with AI',
-  },
-  {
-    icon: '🎨',
-    label: 'Branding & Graphic Design',
-    desc: 'Premium brand identity design',
-  },
-  {
-    icon: '📦',
-    label: 'Digital Product Creation',
-    desc: 'We create your digital products for you',
-  },
-];
-const DOMAIN_CATS = [
-  {
-    icon: '⭐',
-    label: 'Premium Domains',
-    desc: 'High-value short & memorable domains',
-  },
-  {
-    icon: '🏷️',
-    label: 'Brandable Domains',
-    desc: 'Perfect for startups and new brands',
-  },
-  {
-    icon: '📍',
-    label: 'Local Business Domains',
-    desc: 'City and region-specific domains',
-  },
-  {
-    icon: '🤖',
-    label: 'AI-Related Domains',
-    desc: 'Future-proof AI and tech domains',
-  },
-  {
-    icon: '📈',
-    label: 'Marketing Domains',
-    desc: 'High-converting niche domains',
-  },
-  {
-    icon: '🏠',
-    label: 'Real Estate Domains',
-    desc: 'Premium property and realtor domains',
-  },
-];
-const LINKS = [
-  ['home', 'Home'],
-  ['services', 'Services'],
-  ['courses', 'Courses'],
-  ['domains', 'Domains'],
-  ['shop', 'Digital Products'],
-  ['about', 'About'],
-  ['contact', 'Contact'],
-];
 export default function Nav({
   settings,
   settingsStatus,
-  page,
   setPage,
   annBarHidden,
   scrolled,
@@ -139,13 +46,13 @@ export default function Nav({
   setActiveDropdown,
 }) {
   const { brand, contact, announcement } = settings;
+  const navigation = useNavigationContent();
   const showAnnouncement = announcement.enabled && Boolean(announcement.message);
   const announcementLink = announcement.cta;
   const [headerRef, headerRect] = useResizeObserver();
   const [announcementRef, announcementRect] = useResizeObserver();
   const cartCount = getCartCount(cart);
-  const navigate = (id) => {
-    setPage(id);
+  const closeNavigation = () => {
     setMenuOpen(false);
     setActiveDropdown(null);
   };
@@ -215,7 +122,10 @@ export default function Nav({
           >
             <UnstyledButton
               className={classes.brand}
-              onClick={() => navigate('home')}
+              onClick={() => {
+                setPage('home');
+                closeNavigation();
+              }}
               aria-label={`${brand.name || 'Storefront'} home`}
             >
               <Group gap={10} wrap="nowrap">
@@ -247,75 +157,66 @@ export default function Nav({
               </Group>
             </UnstyledButton>
             <Group visibleFrom="xl" gap={4} wrap="nowrap" ml="auto">
-              {LINKS.map(([id, label]) => {
-                const items = id === 'services' ? SERVICES : id === 'domains' ? DOMAIN_CATS : null;
-                if (!items)
-                  return (
-                    <Button
-                      key={id}
-                      variant="subtle"
-                      size="sm"
-                      px={10}
-                      color={page === id ? 'brand' : 'dark'}
-                      aria-current={page === id ? 'page' : undefined}
-                      onClick={() => navigate(id)}
-                    >
-                      {label}
-                    </Button>
-                  );
-                return (
+              {navigation.header.map((item) =>
+                item.children.length ? (
                   <Menu
-                    key={id}
+                    key={item.id}
                     trigger="click-hover"
-                    opened={activeDropdown === id}
-                    onChange={(opened) => setActiveDropdown(opened ? id : null)}
-                    position="bottom"
-                    width={560}
-                    shadow="lg"
+                    opened={activeDropdown === item.id}
+                    onChange={(opened) => setActiveDropdown(opened ? item.id : null)}
                     withinPortal
                     zIndex={150}
+                    width={320}
                   >
                     <Menu.Target>
-                      <Button
-                        variant="subtle"
-                        size="sm"
-                        px={10}
-                        aria-label={label}
-                        color={page === id ? 'brand' : 'dark'}
-                        rightSection="▾"
-                        aria-current={page === id ? 'page' : undefined}
-                      >
-                        {label}
+                      <Button variant="subtle" color="dark" size="sm" px={10} rightSection="▾">
+                        {item.title}
                       </Button>
                     </Menu.Target>
                     <Menu.Dropdown>
-                      <Menu.Label>
-                        {id === 'services' ? 'Our Services' : 'Domains For Sale'}
-                      </Menu.Label>
-                      <SimpleGrid cols={2} spacing={4}>
-                        {items.map((item) => (
-                          <Menu.Item
-                            key={item.label}
-                            leftSection={<Text size="xl">{item.icon}</Text>}
-                            onClick={() => navigate(id)}
-                          >
-                            <Text size="sm" fw={600}>
-                              {item.label}
-                            </Text>
-                            <Text size="xs" c="dimmed">
-                              {item.desc}
-                            </Text>
-                          </Menu.Item>
-                        ))}
-                      </SimpleGrid>
-                      <Menu.Divider />
-                      <Menu.Item ta="center" c="brand" fw={700} onClick={() => navigate(id)}>
-                        {id === 'services' ? 'View All Services →' : 'Browse All Domains →'}
+                      <Menu.Item
+                        component={ContentLink}
+                        item={item}
+                        website={brand.website}
+                        onClick={closeNavigation}
+                      >
+                        View {item.title}
                       </Menu.Item>
+                      <Menu.Divider />
+                      {item.children.map((child) => (
+                        <Menu.Item
+                          key={child.id}
+                          component={ContentLink}
+                          item={child}
+                          website={brand.website}
+                          onClick={closeNavigation}
+                        >
+                          {child.icon} {child.title}
+                          {child.description && (
+                            <Text size="xs" c="dimmed">
+                              {child.description}
+                            </Text>
+                          )}
+                        </Menu.Item>
+                      ))}
                     </Menu.Dropdown>
                   </Menu>
-                );
-              })}
+                ) : (
+                  <Button
+                    key={item.id}
+                    component={ContentLink}
+                    item={item}
+                    website={brand.website}
+                    variant="subtle"
+                    size="sm"
+                    px={10}
+                    color="dark"
+                    onClick={closeNavigation}
+                  >
+                    {item.title}
+                  </Button>
+                ),
+              )}
             </Group>
             <Group
               gap={{
@@ -423,14 +324,27 @@ export default function Nav({
               View search results
             </Button>
           )}
-          {[...LINKS, ['blog', 'Blog']].map(([id, label]) => (
-            <NavLink
-              component="button"
-              key={id}
-              active={page === id}
-              label={label}
-              onClick={() => navigate(id)}
-            />
+          {navigation.header.map((item) => (
+            <Box key={item.id}>
+              <NavLink
+                component={ContentLink}
+                item={item}
+                website={brand.website}
+                label={item.title}
+                onClick={closeNavigation}
+              />
+              {item.children.map((child) => (
+                <NavLink
+                  key={child.id}
+                  pl="xl"
+                  component={ContentLink}
+                  item={child}
+                  website={brand.website}
+                  label={child.title}
+                  onClick={closeNavigation}
+                />
+              ))}
+            </Box>
           ))}
           <NavLink
             component="button"

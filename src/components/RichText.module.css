@@ -1,0 +1,100 @@
+.content {
+  color: #4b5563;
+  font-size: 1rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.content > :first-child {
+  margin-top: 0;
+}
+.content > :last-child {
+  margin-bottom: 0;
+}
+.content p,
+.content ul,
+.content ol,
+.content blockquote,
+.content figure,
+.content pre {
+  margin: 0 0 1.25em;
+}
+.content ul {
+  list-style: disc;
+  padding-left: 1.5em;
+}
+.content ol {
+  list-style: decimal;
+  padding-left: 1.5em;
+}
+.content li {
+  margin-block: 0.25em;
+}
+.content li > p {
+  margin-block: 0.25em;
+}
+.content li > ul,
+.content li > ol {
+  margin-block: 0.5em;
+}
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  color: #111827;
+  line-height: 1.3;
+  margin: 1.5em 0 0.6em;
+}
+.content h2 {
+  font-size: 1.6em;
+}
+.content h3 {
+  font-size: 1.3em;
+}
+.content a {
+  color: #7e22ce;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+.content blockquote {
+  padding: 0.75em 1em;
+  border-left: 3px solid #9333ea;
+  background: #f9f7ff;
+}
+.content figure {
+  max-width: 100%;
+}
+.content figcaption {
+  font-size: 0.875em;
+  text-align: center;
+  color: #6b7280;
+}
+.content pre {
+  padding: 1em;
+  overflow-x: auto;
+  background: #f3f4f6;
+  border-radius: 8px;
+  white-space: pre;
+}
+.content code {
+  font-family: monospace;
+}
+.content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin-block: 1em;
+}
+.content th,
+.content td {
+  padding: 0.5em 0.75em;
+  border: 1px solid #d1d5db;
+  text-align: left;
+}

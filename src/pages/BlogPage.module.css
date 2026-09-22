@@ -1,0 +1,60 @@
+.header {
+  background: #f9fafb;
+  padding-block: 40px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.header h1,
+.article h1 {
+  color: #111827;
+  font:
+    700 clamp(28px, 5vw, 48px)/1.2 'Playfair Display',
+    serif;
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+}
+.header p {
+  color: #6b7280;
+  font-size: 15px;
+  margin: 0;
+}
+.list {
+  padding-block: 48px;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+.article {
+  padding-block: clamp(32px, 5vw, 64px);
+}
+.back {
+  color: #7e22ce;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 24px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.back:hover {
+  text-decoration: underline;
+}
+.category {
+  color: #7e22ce;
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+.date {
+  font-size: 14px;
+  color: #6b7280;
+}
+.heroImage {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-top: 32px;
+  border-radius: 12px;
+}
+.body {
+  margin-top: 32px;
+}

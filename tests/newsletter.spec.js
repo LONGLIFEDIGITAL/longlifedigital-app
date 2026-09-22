@@ -81,7 +81,9 @@ test('an earlier page subscription suppresses the popup on this visit and later 
   await page.getByPlaceholder('e.g. john@email.com', { exact: true }).fill('reader@example.com');
   await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: /Subscribe — It's Free/ }).click();
-  await expect(page.getByText("✦ You're subscribed! Welcome aboard.")).toBeVisible();
+  await expect(
+    page.locator('main').getByText("✦ You're subscribed! Welcome aboard."),
+  ).toBeVisible();
   await page.clock.fastForward(180001);
   await expect(popup(page)).toHaveCount(0);
   await page.reload();

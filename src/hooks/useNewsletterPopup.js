@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-const DELAY = 3 * 60 * 1000;
 const FIRST_VISIT_KEY = 'longlife.newsletter.first-visit.v1';
 const SHOWN_KEY = 'longlife.newsletter.shown.v1';
 
@@ -44,7 +43,7 @@ function rememberShown() {
   write(SHOWN_KEY, '1');
 }
 
-export default function useNewsletterPopup({ subscribed, blocked }) {
+export default function useNewsletterPopup({ subscribed, blocked, delaySeconds = 180 }) {
   const [showPopup, setShowPopup] = useState(false);
   const [popupDone, setPopupDone] = useState(false);
 
@@ -79,7 +78,10 @@ export default function useNewsletterPopup({ subscribed, blocked }) {
     const schedule = () => {
       clearTimeout(timer);
       if (cancelled || blocked || document.visibilityState !== 'visible' || hasShown()) return;
-      timer = setTimeout(display, Math.max(0, startedAt + DELAY - Date.now()));
+      timer = setTimeout(
+        display,
+        Math.max(0, startedAt + Math.max(180, delaySeconds) * 1000 - Date.now()),
+      );
     };
     const syncTabs = (event) => {
       if (event.key === SHOWN_KEY || event.key === FIRST_VISIT_KEY) schedule();
@@ -93,7 +95,7 @@ export default function useNewsletterPopup({ subscribed, blocked }) {
       document.removeEventListener('visibilitychange', schedule);
       window.removeEventListener('storage', syncTabs);
     };
-  }, [subscribed, popupDone, showPopup, blocked]);
+  }, [subscribed, popupDone, showPopup, blocked, delaySeconds]);
 
   return { showPopup, setShowPopup, popupDone, setPopupDone };
 }
