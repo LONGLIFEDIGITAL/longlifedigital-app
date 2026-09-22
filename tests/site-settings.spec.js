@@ -136,7 +136,7 @@ for (const preview of [true, false]) {
     expect(updated.body.contact.email).toBe('updated@store.example');
     expect(updated.body.brand.logo.src).toBe('https://images.example/updated-logo.png');
     expect(updated.headers['Cache-Control']).toBe(
-      preview ? 'no-store' : 'public, max-age=0, s-maxage=30, stale-while-revalidate=30',
+      preview ? 'no-store' : 'public, max-age=0, s-maxage=5, must-revalidate',
     );
   });
 }
@@ -218,7 +218,7 @@ test('missing, malformed and unpublished settings fail without sample content', 
 
 test('production content uses a short shared cache and upstream failures remain uncached', async () => {
   const success = await runHandler({ config: { preview: false } });
-  expect(success.headers['Cache-Control']).toContain('s-maxage=30');
+  expect(success.headers['Cache-Control']).toContain('s-maxage=5');
   const failure = await runHandler({
     config: {
       preview: false,

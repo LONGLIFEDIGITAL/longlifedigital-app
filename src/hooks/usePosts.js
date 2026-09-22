@@ -1,25 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
-import { DEMO_POSTS, fetchPosts, normalizePosts } from '../services/posts';
-import { initialPublished, postsContentKey } from '../services/publishedContent';
+import { DEMO_POSTS, normalizePosts } from '../services/posts';
+import usePublishedContent from './usePublishedContent';
 import { wordpressApiUrl } from '../services/siteSettings';
 
 export default function usePosts({ slug, page = 1, limit = 9, include = [], enabled = true } = {}) {
   const managed = Boolean(wordpressApiUrl);
-  const query = useQuery({
-    queryKey: ['wordpress', 'posts', wordpressApiUrl, { slug, page, limit, include }],
-    queryFn: ({ signal }) => fetchPosts({ signal, slug, page, limit, include }),
-    enabled: managed && enabled,
-    ...initialPublished(postsContentKey({ slug, page, limit, include }), (data) =>
-      normalizePosts(data, slug),
-    ),
-    staleTime: 30_000,
-    refetchInterval: 30_000,
-    refetchIntervalInBackground: false,
-    refetchOnWindowFocus: 'always',
-    refetchOnReconnect: 'always',
-    refetchOnMount: 'always',
-    retry: false,
-  });
+  const params = new URLSearchParams({ resource: slug ? 'post' : 'posts' });
+  if (slug) params.set('slug', slug);
+  else {
+    params.set('limit', String(limit));
+    if (include.length) params.set('include', include.join(','));
+    else params.set('page', String(page));
+  }
+  const query = usePublishedContent(params, (data) => normalizePosts(data, slug), enabled);
   const data = managed
     ? query.data
     : slug

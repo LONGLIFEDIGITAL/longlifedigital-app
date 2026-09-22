@@ -1,3 +1,6 @@
+import { requestWordPress } from '../server/wordpressRequest.js';
+import { contentCacheControl } from '../shared/contentSync.js';
+
 // Public catalog only. No WooCommerce credentials or write operations are used here.
 export default async function handler(req, res) {
   // Never cache errors or preview responses in a browser or shared cache.
@@ -18,8 +21,7 @@ export default async function handler(req, res) {
     if (url.protocol !== 'https:') throw new Error('HTTPS is required.');
     url.search = new URLSearchParams({ per_page: '100', page });
     if (query.get('featured') === 'true') url.searchParams.set('featured', 'true');
-    const response = await fetch(url, {
-      headers: { Accept: 'application/json' },
+    const response = await requestWordPress(url, {
       signal: AbortSignal.timeout(12000),
     });
     if (!response.ok) throw new Error('Upstream catalog unavailable.');
@@ -28,9 +30,7 @@ export default async function handler(req, res) {
     for (const header of ['X-WP-Total', 'X-WP-TotalPages']) {
       if (response.headers.has(header)) res.setHeader(header, response.headers.get(header));
     }
-    if (process.env.VERCEL_ENV !== 'preview') {
-      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, must-revalidate');
-    }
+    res.setHeader('Cache-Control', contentCacheControl(process.env.VERCEL_ENV !== 'production'));
     return res.status(200).json(products);
   } catch {
     return res.status(502).json({ error: 'The catalog is temporarily unavailable.' });

@@ -4,7 +4,6 @@ import { INIT_PRODUCTS, CATS } from '../constants/data';
 import { catalogCategories, fetchCatalog, storeApiUrl } from '../services/catalog';
 
 const EMPTY_PRODUCTS = [];
-const REFRESH_INTERVAL = 30_000;
 
 export default function useCatalog() {
   const managed = Boolean(storeApiUrl);
@@ -14,12 +13,6 @@ export default function useCatalog() {
     queryKey: ['woocommerce', 'catalog', storeApiUrl],
     queryFn: ({ signal }) => fetchCatalog(signal),
     enabled: managed,
-    staleTime: REFRESH_INTERVAL,
-    refetchInterval: REFRESH_INTERVAL,
-    refetchIntervalInBackground: false,
-    refetchOnWindowFocus: 'always',
-    refetchOnReconnect: 'always',
-    retry: 2,
   });
 
   const retry = useCallback(() => refetch(), [refetch]);

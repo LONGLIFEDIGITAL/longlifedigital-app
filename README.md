@@ -35,7 +35,7 @@ browser restrictions. All catalog pages are fetched, and errors show a retry
 action rather than demo products.
 
 Catalog data is cached in the browser with TanStack Query. The storefront checks
-for published changes every 30 seconds while its tab is visible and online, and
+for published changes every 15 seconds while its tab is visible and online, and
 refreshes when the tab becomes visible again or the network reconnects. Product
 details, categories, featured selections, availability and prices update together
 without reloading the document or resetting navigation, filters or cart selections.
@@ -46,12 +46,12 @@ successful load. The local cart remains a separate in-memory snapshot; authorita
 cart pricing and order validation are still part of the WooCommerce checkout work.
 
 Local development and Vercel Preview catalog responses use `Cache-Control: no-store`.
-Production responses have no browser freshness window and a 30-second shared CDN
-cache. Production changes can therefore take longer than one polling interval to
-appear; upstream WordPress caching can add delay too. This is background polling,
+Production responses have no browser freshness window and a five-second shared CDN
+cache. Upstream requests bypass WordPress REST caching. Production changes can
+take an extra short cache interval plus network time to appear. This is background polling,
 not an immediate server-push subscription. No WordPress plugin, webhook or Vercel
 deployment is needed to use it locally. The refresh policy lives in
-`src/hooks/useCatalog.js`; production cache headers live in `api/catalog.js`.
+`shared/contentSync.js` and `src/services/queryClient.js`, shared by the catalog and every editorial resource.
 
 References: [TanStack Query refresh and caching defaults](https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults)
 and [Vercel cache-control headers](https://vercel.com/docs/caching/cache-control-headers).
@@ -106,15 +106,15 @@ only the fields used in this migration. It accepts no arbitrary CMS resource or
 URL. Optional blank fields stay blank, and disabled announcements stay hidden.
 An initial failure shows a retry action without substituting demo contact details
 or promotions. Product browsing remains available. TanStack Query retains the last
-successful settings and refreshes every 30 seconds while visible/online, on tab
+successful settings and refreshes every 15 seconds while visible/online, on tab
 return and on reconnect. Settings requests bypass the browser HTTP cache. The
 handler also requests fresh WordPress settings and logo metadata with a unique
 upstream query value, because the CMS edge can reuse REST responses even with
 `Cache-Control: no-cache`. This value is generated per request, not at Vite startup.
-Local and Preview responses are uncached; Production retains a 30-second shared
+Local and Preview responses are uncached; Production retains a five-second shared
 cache at Vercel to limit WordPress traffic. Published field edits therefore appear
-on the next successful refresh locally (normally within 30 seconds in an active
-tab); Production can take an additional cache interval. Returning to the tab or
+on the next successful refresh locally (a 15-second polling interval in an active
+tab, plus the CMS response time); Production can take an additional cache interval. Returning to the tab or
 reloading also fetches settings. Editing content does not require restarting Vite;
 changing the CMS environment URL still does.
 
@@ -173,20 +173,34 @@ linked in the content checklist. Builds without a CMS URL retain demo mode. Test
 network calls. A configured build with neither available published content nor a
 previous snapshot fails explicitly rather than deploying an empty homepage.
 
-Published content still refreshes every 30 seconds while the tab is visible and
+Published content refreshes every 15 seconds while the tab is visible and
 on tab return/reconnect. Reopening a page checks in the background while showing
 its last content. Successful browser reads are retained for up to 24 hours to keep
 reloads fast; confirmed removals take priority over older build snapshots. If
 browser storage is blocked, the embedded snapshot still provides the first render.
 The last successful content remains visible during temporary CMS failures.
 
-Identical concurrent API requests are combined, with a 10-second process cache.
-Production also uses a 30-second CDN cache with 30 seconds of stale-while-revalidate.
-Only cache misses bypass WordPress edge caching. A cache miss has a 6-second
+Identical concurrent API requests are combined. Local/Preview reads are uncached;
+Production has a five-second process cache and a five-second CDN cache, with no
+extra stale-while-revalidate window. Page-list reads share in-flight work but have
+no second timed cache. Every upstream read bypasses WordPress edge caching using
+the shared `server/wordpressRequest.js` transport. A cache miss has a 6-second
 upstream deadline and at most one rate-limit retry; the client has an 8-second
 deadline and no stacked retry loop. An uncached failure shows a retry action instead
 of a minute-long skeleton. Cache expiry and background refresh bring in published
 edits and remove unpublished records without restarting Vite or rebuilding.
+
+Every editorial hook uses `usePublishedContent`, including Home, About, all other
+pages, related content blocks, settings, posts, menus, services, assets and FAQs.
+It centralizes request deadlines, validation, browser persistence and removal
+handling. Query scheduling is configured globally in `src/services/queryClient.js`;
+`shared/contentSync.js` owns the timing and public API cache constants.
+
+During development, successful public API reads update the running Vite HTML
+snapshot and `.cache/content-*.json` automatically. Errors do not overwrite good
+content, and confirmed removals update both copies. These generated cache files
+are not an editing interface. On Vercel, runtime content refreshes automatically;
+the deployed static HTML/crawler snapshot still updates on rebuild/redeployment.
 
 References: [TanStack initial query data](https://tanstack.com/query/latest/docs/framework/react/guides/initial-query-data),
 [Vercel cache headers](https://vercel.com/docs/caching/cache-control-headers).

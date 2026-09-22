@@ -121,6 +121,7 @@ async function fetchPages(query, signal) {
     const url = new URL('/api/catalog', window.location.origin);
     url.search = new URLSearchParams({ per_page: '100', page: String(page), ...query });
     const response = await fetch(url, {
+      cache: 'no-store',
       signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]),
       credentials: 'omit',
       headers: { Accept: 'application/json' },

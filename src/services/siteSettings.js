@@ -80,16 +80,7 @@ export const EMPTY_SITE_SETTINGS = {
   },
 };
 
-export async function fetchSiteSettings(signal) {
-  const response = await fetch('/api/content?resource=settings', {
-    cache: 'no-store',
-    signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]),
-    credentials: 'omit',
-    headers: { Accept: 'application/json' },
-  });
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error('Site settings could not be loaded.');
-  const settings = await response.json();
+export function normalizeSiteSettings(settings) {
   if (
     !settings?.brand?.name ||
     !settings.contact?.email ||

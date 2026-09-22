@@ -1,5 +1,4 @@
 import { plainText } from './catalog';
-import { rememberPublished } from './publishedContent';
 
 export const DEMO_HOME_HERO = {
   eyebrow: 'Premium Digital Products',
@@ -12,25 +11,6 @@ export const DEMO_HOME_HERO = {
   primaryCta: { label: 'Shop Now', destination: '/products' },
   secondaryCta: { label: 'Learn More', destination: '/about' },
 };
-
-export async function fetchHomeContent(signal) {
-  const response = await fetch('/api/content?resource=home', {
-    cache: 'no-store',
-    signal: AbortSignal.any([signal, AbortSignal.timeout(8000)]),
-    credentials: 'omit',
-    headers: { Accept: 'application/json' },
-  });
-  // A deleted/unpublished page must clear the previous hero on the next refresh.
-  if (response.status === 404) {
-    rememberPublished('home', null);
-    return null;
-  }
-  if (!response.ok) throw new Error('Homepage content could not be loaded.');
-  const page = await response.json();
-  const normalized = normalizeHomeContent(page);
-  rememberPublished('home', page);
-  return normalized;
-}
 
 export function normalizeHomeContent(page) {
   const hero = page?.hero;

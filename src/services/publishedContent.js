@@ -55,6 +55,3 @@ export function initialPublished(key, normalize) {
   }
   return {};
 }
-
-export const postsContentKey = ({ slug, page = 1, limit = 9, include = [] }) =>
-  slug ? `post:${slug}` : `posts:${page}:${limit}:${include.join(',')}`;

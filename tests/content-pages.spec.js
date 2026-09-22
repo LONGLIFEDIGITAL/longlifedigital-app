@@ -2,6 +2,11 @@ import { test, expect } from '@playwright/test';
 import { createContentHandler } from '../api/content.js';
 import { CONTENT_PAGES } from '../src/contentPages.js';
 import { initialMarkup, metadataMarkup } from '../server/initialMarkup.js';
+import { contentBootstrapPlugin } from '../server/contentBootstrap.js';
+import { mkdtemp, readFile, readdir, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createServer } from 'vite';
 
 const pageRecord = (key, acf = {}, body = '<p>Published page body.</p>') => ({
   id: 100 + Object.keys(CONTENT_PAGES).indexOf(key),
@@ -35,7 +40,7 @@ const settings = {
   announcement: { enabled: false, cta: {} },
 };
 
-function mockCms() {
+function mockCms(options = {}) {
   const state = {
     pages: [],
     blocks: [],
@@ -43,23 +48,32 @@ function mockCms() {
     collections: {},
     fail: false,
   };
+  const edge = new Map();
+  const origin = async (url) => {
+    if (state.fail) return Response.json({ error: 'internal secret' }, { status: 503 });
+    if (url.pathname.endsWith('/pages')) {
+      const slugs = url.searchParams.get('slug')?.split(',');
+      return Response.json(state.pages.filter((page) => !slugs || slugs.includes(page.slug)));
+    }
+    if (url.pathname.endsWith('/lld-blocks')) return Response.json(state.blocks);
+    const endpoint = url.pathname.split('/').pop();
+    const data = state.collections[endpoint] || [];
+    return Response.json(
+      data.slice(
+        (Number(url.searchParams.get('page') || 1) - 1) * 100,
+        Number(url.searchParams.get('page') || 1) * 100,
+      ),
+      { headers: { 'X-WP-TotalPages': String(Math.max(1, Math.ceil(data.length / 100))) } },
+    );
+  };
   state.handler = createContentHandler({
     baseUrl: 'https://cms.example/wp-json/wp/v2',
-    cacheTtl: 0,
+    ...options,
     fetcher: async (url) => {
       state.calls.push(url);
-      if (state.fail) return Response.json({ error: 'internal secret' }, { status: 503 });
-      if (url.pathname.endsWith('/pages')) return Response.json(state.pages);
-      if (url.pathname.endsWith('/lld-blocks')) return Response.json(state.blocks);
-      const endpoint = url.pathname.split('/').pop();
-      const data = state.collections[endpoint] || [];
-      return Response.json(
-        data.slice(
-          (Number(url.searchParams.get('page') || 1) - 1) * 100,
-          Number(url.searchParams.get('page') || 1) * 100,
-        ),
-        { headers: { 'X-WP-TotalPages': String(Math.max(1, Math.ceil(data.length / 100))) } },
-      );
+      // Model a host that retains public REST responses despite request headers.
+      if (!edge.has(url.href)) edge.set(url.href, await origin(url));
+      return edge.get(url.href).clone();
     },
   });
   return state;
@@ -86,13 +100,168 @@ async function routeCms(page, state) {
   );
   await page.route('**/api/content?**', async (route) => {
     const query = new URL(route.request().url()).searchParams;
-    if (query.get('resource') === 'settings') return route.fulfill({ json: settings });
+    if (query.get('resource') === 'settings')
+      return route.fulfill({ json: state.settings || settings });
     if (query.get('resource') === 'posts')
       return route.fulfill({ json: { posts: [], page: 1, totalPages: 0 } });
     const result = await invoke(state.handler, query.toString());
     return route.fulfill({ status: result.status, json: result.body });
   });
 }
+
+test('one refresh policy updates About fields, related blocks and shared content without a reload', async ({
+  page,
+  context,
+}) => {
+  const state = mockCms();
+  state.pages = [
+    pageRecord('about', { lld_about: { tagline: 'Original introduction', sections: [1] } }),
+  ];
+  state.blocks = [item(1, 'lld_block', 'Our Mission', { lld_kind: 'value' })];
+  state.collections['lld-navigation'] = [
+    item(20, 'lld_nav_item', 'Original footer link', {
+      lld_area: 'footer_company',
+      lld_destination: '/about',
+    }),
+  ];
+  let documentLoads = 0;
+  page.on('request', (request) => {
+    if (request.isNavigationRequest()) documentLoads++;
+  });
+  await page.clock.install();
+  await routeCms(page, state);
+  await page.goto('/about');
+  await expect(page.getByRole('heading', { name: 'Our Mission' })).toBeVisible();
+  state.pages[0].acf.lld_heading = 'Updated About heading';
+  state.pages[0].acf.lld_about.tagline = 'Updated brand introduction';
+  state.blocks[0].content.rendered = '<p>Updated mission body.</p>';
+  state.collections['lld-navigation'][0].title.rendered = 'Updated footer link';
+  state.settings = { ...settings, footer: { description: 'Updated footer description' } };
+  await page.clock.fastForward(15_001);
+  await expect(page.locator('main h1')).toHaveText('Updated About heading');
+  await expect(page.locator('main')).toContainText('Updated brand introduction');
+  await expect(page.locator('main')).toContainText('Updated mission body.');
+  await expect(page.locator('footer')).toContainText('Updated footer description');
+  await expect(page.locator('footer')).toContainText('Updated footer link');
+  expect(documentLoads).toBe(1);
+
+  await context.setOffline(true);
+  state.blocks[0].content.rendered = '<p>Mission after reconnect.</p>';
+  await page.clock.fastForward(15_001);
+  await expect(page.locator('main')).toContainText('Updated mission body.');
+  await context.setOffline(false);
+  await expect(page.locator('main')).toContainText('Mission after reconnect.');
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+    document.dispatchEvent(new Event('visibilitychange', { bubbles: true }));
+  });
+  const reads = state.calls.length;
+  state.blocks[0].content.rendered = '<p>Mission after tab return.</p>';
+  await page.clock.fastForward(60_001);
+  expect(state.calls).toHaveLength(reads);
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      get: () => 'visible',
+    });
+    document.dispatchEvent(new Event('visibilitychange', { bubbles: true }));
+  });
+  await expect(page.locator('main')).toContainText('Mission after tab return.');
+  // A removed relationship is reflected even if the block remains published.
+  state.pages[0].acf.lld_about.sections = [];
+  await page.clock.fastForward(15_001);
+  await expect(page.getByRole('heading', { name: 'Our Mission' })).toHaveCount(0);
+  expect(documentLoads).toBe(1);
+});
+
+test('About refresh does not inherit a second page-list cache after the response cache expires', async () => {
+  let clock = 1000;
+  const state = mockCms({ preview: false, now: () => clock });
+  state.pages = [pageRecord('about'), pageRecord('privacy')];
+  expect((await invoke(state.handler, 'resource=page&key=about')).body.heading).toBe('CMS about');
+  clock += 4999;
+  await invoke(state.handler, 'resource=page&key=privacy');
+  state.pages[0].acf.lld_heading = 'Published just now';
+  clock += 2;
+  expect((await invoke(state.handler, 'resource=page&key=about')).body.heading).toBe(
+    'Published just now',
+  );
+  state.pages = [];
+  clock += 5001;
+  expect((await invoke(state.handler, 'resource=page&key=about')).status).toBe(404);
+});
+
+test('a running Vite server updates initial HTML and the disk snapshot after published reads', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'lld-sync-'));
+  let server;
+  const listeners = new Set();
+  const state = mockCms({ onRead: (entry) => listeners.forEach((listener) => listener(entry)) });
+  state.pages = [pageRecord('about')];
+  try {
+    await writeFile(
+      join(root, 'index.html'),
+      '<html><head><!--page-metadata--></head><body><!--initial-content--><div id="root"></div></body></html>',
+    );
+    server = await createServer({
+      configFile: false,
+      root,
+      logLevel: 'silent',
+      server: { host: '127.0.0.1', port: 0, watch: { ignored: ['**/.cache/**'] } },
+      plugins: [
+        contentBootstrapPlugin({
+          handler: state.handler,
+          cmsUrl: 'https://cms.example/wp-json/wp/v2',
+          mode: 'development',
+          root,
+          subscribe: (listener) => {
+            listeners.add(listener);
+            return () => listeners.delete(listener);
+          },
+        }),
+        {
+          name: 'test-content-api',
+          configureServer(vite) {
+            vite.middlewares.use('/api/content', (req, res) => state.handler(req, res));
+          },
+        },
+      ],
+    });
+    await server.listen();
+    const origin = `http://127.0.0.1:${server.httpServer.address().port}`;
+    expect(await (await fetch(`${origin}/about`)).text()).toContain('CMS about');
+    state.pages[0].acf.lld_heading = 'Fresh without Vite restart';
+    const refreshed = await (await fetch(`${origin}/api/content?resource=page&key=about`)).json();
+    expect(refreshed.heading).toBe('Fresh without Vite restart');
+    expect(await (await fetch(`${origin}/about`)).text()).toContain(
+      '<h1>Fresh without Vite restart</h1>',
+    );
+    const cachePath = join(
+      root,
+      '.cache',
+      (await readdir(join(root, '.cache'))).find((name) => name.endsWith('.json')),
+    );
+    await expect
+      .poll(
+        async () =>
+          JSON.parse(await readFile(cachePath, 'utf8')).entries['page:about'].data.heading,
+      )
+      .toBe('Fresh without Vite restart');
+    state.fail = true;
+    expect((await fetch(`${origin}/api/content?resource=page&key=about`)).status).toBe(502);
+    expect(await (await fetch(`${origin}/about`)).text()).toContain(
+      '<h1>Fresh without Vite restart</h1>',
+    );
+    state.fail = false;
+    state.pages = [];
+    expect((await fetch(`${origin}/api/content?resource=page&key=about`)).status).toBe(404);
+    const removed = await (await fetch(`${origin}/about`)).text();
+    expect(removed).not.toContain('Fresh without Vite restart');
+    expect(removed).toContain('This content is being prepared');
+  } finally {
+    await server?.close();
+    await rm(root, { recursive: true, force: true });
+  }
+});
 
 test('page contracts require the correct slug/key and select published About value blocks in order', async () => {
   const state = mockCms();

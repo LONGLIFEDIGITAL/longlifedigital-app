@@ -1,23 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
-import { DEMO_HOME_CONTENT, fetchHomeContent, normalizeHomeContent } from '../services/homePage';
-import { initialPublished } from '../services/publishedContent';
+import { DEMO_HOME_CONTENT, normalizeHomeContent } from '../services/homePage';
+import usePublishedContent from './usePublishedContent';
 import { wordpressApiUrl } from '../services/siteSettings';
 
 export default function useHomeHero() {
   const managed = Boolean(wordpressApiUrl);
-  const { data, isPending, isFetching, refetch } = useQuery({
-    queryKey: ['wordpress', 'home-content', wordpressApiUrl],
-    queryFn: ({ signal }) => fetchHomeContent(signal),
-    enabled: managed,
-    ...initialPublished('home', normalizeHomeContent),
-    staleTime: 30_000,
-    refetchInterval: 30_000,
-    refetchIntervalInBackground: false,
-    refetchOnWindowFocus: 'always',
-    refetchOnReconnect: 'always',
-    refetchOnMount: 'always',
-    retry: false,
-  });
+  const { data, isPending, isFetching, refetch } = usePublishedContent(
+    new URLSearchParams({ resource: 'home' }),
+    normalizeHomeContent,
+  );
   return {
     managed,
     content: managed ? data : DEMO_HOME_CONTENT,

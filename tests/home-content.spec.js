@@ -183,7 +183,7 @@ test('missing, private, duplicated and mismatched homepage records are rejected'
 
 test('homepage refresh bypasses CMS caches and accepts only safe CTA destinations', async () => {
   const server = cms({ preview: false });
-  expect((await invoke(server.handler)).headers['Cache-Control']).toContain('s-maxage=30');
+  expect((await invoke(server.handler)).headers['Cache-Control']).toContain('s-maxage=5');
   server.pages[0].acf.lld_home.hero_prefix = 'Published after the first request';
   expect((await invoke(server.handler)).body.hero.prefix).toBe('Published after the first request');
   for (const destination of [
@@ -626,6 +626,7 @@ test('warm content requests are shared and expire so publishing is still reflect
   });
   const handler = createContentHandler({
     baseUrl: 'https://content.example.test/wp-json/wp/v2',
+    preview: false,
     now: () => now,
     fetcher: async () => {
       calls++;

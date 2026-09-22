@@ -683,8 +683,10 @@ test('Vercel endpoint restricts requests and forwards only public pagination', a
     expect(response.code).toBe(200);
     expect(response.headers['X-WP-TotalPages']).toBe('2');
     expect(response.headers['Cache-Control']).toBe(
-      'public, max-age=0, s-maxage=30, must-revalidate',
+      'public, max-age=0, s-maxage=5, must-revalidate',
     );
+    expect(requested.searchParams.get('_lld_refresh')).toBeTruthy();
+    requested.searchParams.delete('_lld_refresh');
     expect(requested.href).toBe(
       'https://store.example.test/wp-json/wc/store/v1/products?per_page=100&page=2&featured=true',
     );

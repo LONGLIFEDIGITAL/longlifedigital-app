@@ -1,8 +1,50 @@
 import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import { CONTENT_PAGES } from '../src/contentPages.js';
 import { initialMarkup, metadataMarkup } from './initialMarkup.js';
+
+// Keep only content relevant to the initial document, not every visited article.
+export function updatePublishedSnapshot(snapshot, { key, data, updatedAt }) {
+  if (!snapshot || !Number.isFinite(updatedAt)) return false;
+  const home = key === 'home' ? data : snapshot.entries.home?.data;
+  const previewKey = `posts:1:3:${(home?.blog?.postIds || []).join(',')}`;
+  const preview = snapshot.entries[previewKey]?.data?.posts || [];
+  const known =
+    [
+      'home',
+      'settings',
+      'navigation',
+      'services',
+      'assets',
+      'asset-categories',
+      'faqs',
+      'posts:1:9:',
+    ].includes(key) ||
+    (key?.startsWith('page:') && Object.hasOwn(CONTENT_PAGES, key.slice(5)));
+  const isPreview = key === previewKey;
+  const isArticle = preview.some((post) => key === `post:${post.slug}`);
+  if (!known && !isPreview && !isArticle) return false;
+  const previous = snapshot.entries[key];
+  if (
+    previous &&
+    (previous.updatedAt > updatedAt || JSON.stringify(previous.data) === JSON.stringify(data))
+  )
+    return false;
+  snapshot.entries[key] = { data, updatedAt };
+  for (const name of Object.keys(snapshot.entries)) {
+    if (name.startsWith('posts:') && name !== 'posts:1:9:' && name !== previewKey)
+      delete snapshot.entries[name];
+    if (
+      name.startsWith('post:') &&
+      !(snapshot.entries[previewKey]?.data?.posts || []).some(
+        (post) => name === `post:${post.slug}`,
+      )
+    )
+      delete snapshot.entries[name];
+  }
+  return true;
+}
 
 export function bootstrapTag(snapshot) {
   return {
@@ -97,18 +139,53 @@ export async function createBootstrap({ handler, cmsUrl, previous, now = Date.no
   };
 }
 
-export function contentBootstrapPlugin({ handler, cmsUrl, mode, root }) {
+export function contentBootstrapPlugin({ handler, cmsUrl, mode, root, subscribe }) {
   let snapshot;
   const enabled = Boolean(cmsUrl) && mode !== 'test';
+  const directory = join(root, '.cache');
+  const filename = join(
+    directory,
+    `content-${createHash('sha256')
+      .update(cmsUrl || '')
+      .digest('hex')
+      .slice(0, 12)}.json`,
+  );
+  let writing = Promise.resolve();
+  const persist = () => {
+    const encoded = JSON.stringify(snapshot);
+    writing = writing
+      .catch(() => {})
+      .then(async () => {
+        await mkdir(directory, { recursive: true });
+        const temporary = `${filename}.${randomUUID()}.tmp`;
+        await writeFile(temporary, encoded);
+        await rename(temporary, filename);
+      });
+    return writing;
+  };
   return {
     name: 'published-content-bootstrap',
+    configureServer(server) {
+      if (!enabled || !subscribe) return;
+      let timer;
+      const persistLater = () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          persist().catch((error) =>
+            server.config.logger.warn(`Could not save the public CMS snapshot: ${error.message}`),
+          );
+        }, 250);
+      };
+      const unsubscribe = subscribe((entry) => {
+        if (updatePublishedSnapshot(snapshot, entry)) persistLater();
+      });
+      server.httpServer?.once('close', () => {
+        unsubscribe();
+        clearTimeout(timer);
+      });
+    },
     async buildStart() {
       if (!enabled) return;
-      const directory = join(root, '.cache');
-      const filename = join(
-        directory,
-        `content-${createHash('sha256').update(cmsUrl).digest('hex').slice(0, 12)}.json`,
-      );
       let previous;
       try {
         previous = JSON.parse(await readFile(filename, 'utf8'));
@@ -117,9 +194,7 @@ export function contentBootstrapPlugin({ handler, cmsUrl, mode, root }) {
       }
       try {
         snapshot = await createBootstrap({ handler, cmsUrl, previous });
-        await mkdir(directory, { recursive: true });
-        await writeFile(`${filename}.tmp`, JSON.stringify(snapshot));
-        await rename(`${filename}.tmp`, filename);
+        await persist();
       } catch (error) {
         this.error(
           `Cannot prepare published homepage content: ${error.message} Check VITE_WORDPRESS_API_URL and CMS availability.`,

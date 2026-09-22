@@ -1,6 +1,6 @@
 import { cacheContent } from '../server/contentCache.js';
-import { randomUUID } from 'node:crypto';
-import { setTimeout as delay } from 'node:timers/promises';
+import { requestWordPress } from '../server/wordpressRequest.js';
+import { CONTENT_SYNC, contentCacheControl } from '../shared/contentSync.js';
 import { homeSections, postContent, postRequest, validPostQuery } from '../server/editorial.js';
 import { COLLECTIONS, readSiteContent, resolveSeo, validSiteQuery } from '../server/siteContent.js';
 import { CONTENT_PAGES } from '../src/contentPages.js';
@@ -43,8 +43,7 @@ function send(res, status, body) {
 }
 
 function sendContent(res, body, preview) {
-  if (!preview)
-    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=30');
+  res.setHeader('Cache-Control', contentCacheControl(preview));
   return send(res, 200, body);
 }
 
@@ -53,13 +52,12 @@ export function createContentHandler({
   baseUrl,
   preview = true,
   fetcher = fetch,
-  cacheTtl = 10_000,
+  cacheTtl = preview ? 0 : CONTENT_SYNC.serverCacheMs,
   now = Date.now,
+  onRead,
 }) {
-  let pagesCache;
   let pagesPending;
   const readPages = async (read) => {
-    if (pagesCache && pagesCache.expires > now()) return pagesCache.records;
     if (pagesPending) return pagesPending;
     const slugs = Object.entries(CONTENT_PAGES)
       .filter(([key]) => key !== 'home')
@@ -69,7 +67,6 @@ export function createContentHandler({
     )
       .then((records) => {
         if (!Array.isArray(records)) throw new Error('Invalid pages.');
-        pagesCache = { records, expires: now() + cacheTtl };
         return records;
       })
       .finally(() => {
@@ -106,36 +103,7 @@ export function createContentHandler({
         throw new Error('Invalid CMS configuration.');
       }
       const signal = AbortSignal.timeout(6000);
-      const request = async (path) => {
-        const url = new URL(path, base);
-        // WordPress's edge can serve a cached REST response even with no-cache headers.
-        // Refresh upstream on every handler request; Vercel controls the shared TTL.
-        url.searchParams.set('_lld_refresh', randomUUID());
-        for (let attempt = 0; ; attempt++) {
-          const response = await fetcher(url, {
-            cache: 'no-store',
-            headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' },
-            signal,
-            redirect: 'error',
-          });
-          if (response.status !== 429 || attempt === 1) return response;
-          // WordPress.com can throttle a burst of otherwise valid public reads.
-          // Honor Retry-After; the shared deadline bounds the entire request.
-          const retryAfter = response.headers.get('Retry-After');
-          const waitMs =
-            retryAfter && /^\d+$/.test(retryAfter)
-              ? Number(retryAfter) * 1000
-              : retryAfter
-                ? Date.parse(retryAfter) - Date.now()
-                : NaN;
-          await response.body?.cancel();
-          await delay(
-            Number.isFinite(waitMs) ? Math.max(0, waitMs) : 1000 * (attempt + 1),
-            undefined,
-            { signal },
-          );
-        }
-      };
+      const request = (path) => requestWordPress(new URL(path, base), { fetcher, signal });
       const read = async (path) => {
         const response = await request(path);
         if (!response.ok) throw new Error('Content unavailable.');
@@ -371,7 +339,7 @@ export function createContentHandler({
       });
     }
   };
-  return cacheContent(content, { ttl: cacheTtl, now });
+  return cacheContent(content, { ttl: cacheTtl, now, onRead });
 }
 
 let activeHandler;

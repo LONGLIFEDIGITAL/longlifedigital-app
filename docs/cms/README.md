@@ -38,4 +38,4 @@ PDF rendering uses the project's existing Playwright dependency and a locally in
 
 ## Remaining content migration
 
-Use [CONTENT-CHECKLIST.md](CONTENT-CHECKLIST.md) as the current implementation checklist. The existing ACF import remains compatible. Home and Storefront settings are published; About needs its page key selected, and the remaining page/collection records need authoring.
+Use [CONTENT-CHECKLIST.md](CONTENT-CHECKLIST.md) as the current implementation checklist. The existing ACF import remains compatible. Home, About and Storefront settings are published; the remaining page/collection records need authoring. All content uses the global refresh setup described in the checklist.

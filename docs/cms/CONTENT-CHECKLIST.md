@@ -10,7 +10,7 @@ Updated September 22, 2026. The React storefront now reads the content below fro
 4. For separate cards such as **Our Mission**, **What We Sell**, and **Our Promise**, create one **Content Block** per card. Select **Value / story card** as the block kind, use its title as the heading, and write its paragraphs in the normal editor.
 5. Select those blocks under the About page's **About → Sections**, in the order they should appear. Fill the optional tagline and closing button, then **Save/Publish**.
 
-The last staging check found an existing About page with no Storefront page selection. Its old sample text is no longer used by React. Until you select About and publish, the storefront displays a preparation message and the published contact email.
+The About page is now published and connected, including its selected Mission, Offering and Promise cards. Edit each card under Content Blocks and save it; editing a card's text does not require re-selecting it on About. Changes to which cards appear or their order are saved on the About page itself.
 
 ## Pages to publish
 
@@ -33,7 +33,7 @@ For every page, set the matching **Storefront page** selection, use the exact sl
 
 **Keep WooCommerce's existing Shop (`shop`), Cart, Checkout and My Account pages separate.** Leave their Storefront page field empty. The React products listing uses the new `products` content page.
 
-At the September 21 check, only Home had its storefront page key configured. The remaining rows are connected in code and ready for content; they display a neutral preparation message until published. Network failures display a retry message instead. Blank optional fields are omitted.
+Home and About are now published with their storefront page keys. The remaining rows are connected in code and ready for content; they display a neutral preparation message until published. Network failures display a retry message instead. Blank optional fields are omitted.
 
 ## Shared content and collections
 
@@ -82,10 +82,14 @@ This completes the storefront **content-reading** connections. It does not imple
 
 ## Publishing and loading
 
-- React revalidates visible content every 30 seconds and on tab focus/reconnection. Short server/CDN caching can add a brief delay. No Vite restart is needed for text changes.
+- All WordPress/ACF pages, shared collections, settings, posts and WooCommerce products inherit one refresh policy: every 15 seconds while visible and online, plus tab return/reconnection. Opening an editorial page also rechecks it immediately. This is automatic polling, so publishing is reflected on the next successful read, not synchronously at the instant Save is clicked.
+- Local and Preview API responses are not cached. Production has short five-second server/CDN caches, without an additional stale-while-revalidate window. Every upstream read bypasses WordPress's public REST cache, including related blocks and media. Network/WordPress response time still affects when a change arrives.
 - A successful response is saved as the last-known published copy for repeat visits. Failed refreshes retain that copy; a confirmed removal clears it.
 - Home copy and available blog cards are also included in initial HTML at dev startup/build. They appear before React executes. Published page headers and metadata are generated for the other fixed routes and the prefetched articles.
-- Runtime React refreshes that build snapshot from the CMS. To update the HTML seen before JavaScript runs (including social crawlers), rebuild/redeploy after publishing. A WordPress-triggered Vercel deploy hook can automate that when the Preview/production deployment is configured.
+- During local development, successful CMS reads also update Vite's in-memory initial HTML snapshot and its `.cache/content-*.json` file. Refreshing the page therefore uses the latest observed content without restarting Vite. The cache files are generated: do not edit them or delete them to publish updates.
+- Deployed static HTML is refreshed by a rebuild/redeploy; React still updates its content automatically at runtime. A WordPress-triggered Vercel deploy hook can update crawler/initial HTML when the deployment is configured.
 - On Vercel, configure both public CMS environment URLs for the intended environment. The filesystem routes serve generated pages first; new articles and products use the React route fallback.
+
+Developer entry points: `shared/contentSync.js` owns refresh timing and API cache policy; `src/services/queryClient.js` applies WordPress and WooCommerce query defaults; `src/hooks/usePublishedContent.js` owns editorial fetching, validation, persistence and confirmed removals. New editorial resources should use that hook rather than implement another fetch or polling timer. The shared upstream transport is `server/wordpressRequest.js`.
 
 The local performance check is reproducible with a configured build and `node scripts/check-content-performance.mjs`. It measures cold-profile Chrome on localhost and keeps CMS requests unavailable during the measurement; it is not a production-network guarantee.
