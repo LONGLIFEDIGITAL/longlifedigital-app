@@ -34,6 +34,9 @@ export default defineConfig(({ mode }) => {
         },
       },
     ],
+    optimizeDeps: {
+      entries: ['index.html'],
+    },
     server: {
       watch: { ignored: ['**/.cache/**'] },
       proxy: store
