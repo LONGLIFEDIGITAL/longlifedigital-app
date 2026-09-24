@@ -5,8 +5,8 @@
 }
 .heading {
   font:
-    700 clamp(28px, 5vw, 48px)/1.22 'Playfair Display',
-    serif;
+    700 clamp(28px, 5vw, 48px)/1.22 'Plus Jakarta Sans',
+    sans-serif;
   color: #111827;
   margin: 0 0 12px;
   overflow-wrap: anywhere;
@@ -42,7 +42,7 @@
 .section h3 {
   margin: 0 0 14px;
   color: #1a0533;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 .grid {
   display: grid;

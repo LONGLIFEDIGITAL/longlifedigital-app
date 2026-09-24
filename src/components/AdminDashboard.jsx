@@ -58,7 +58,7 @@ export default function AdminDashboard({
           <Flex align="center" gap={12} wrap="wrap">
             <LDLogo size={32} />
             <div>
-              <Box c="#fff" fz={18} ff="'Playfair Display',serif">
+              <Box c="#fff" fz={18} ff="'Plus Jakarta Sans',sans-serif">
                 Longlife Digital Dashboard
               </Box>
               <Box c="#C084FC" fz={11}>
@@ -172,7 +172,7 @@ export default function AdminDashboard({
                     <Box fz={24} mb={6}>
                       {icon}
                     </Box>
-                    <Box c={color} fz={24} fw={700} ff="'Playfair Display',serif" mb={2}>
+                    <Box c={color} fz={24} fw={700} ff="'Plus Jakarta Sans',sans-serif" mb={2}>
                       {val}
                     </Box>
                     <Box c="#6B7280" fz={11}>
@@ -234,7 +234,7 @@ export default function AdminDashboard({
           )}
           {dashTab === 'orders' && canDo('orders') && (
             <div>
-              <Title order={3} c="#1a0533" fz={18} ff="'Playfair Display',serif" mb={14}>
+              <Title order={3} c="#1a0533" fz={18} ff="'Plus Jakarta Sans',sans-serif" mb={14}>
                 All Orders
               </Title>
               <Box
@@ -308,7 +308,7 @@ export default function AdminDashboard({
           {dashTab === 'products' && canDo('products') && (
             <div>
               <Flex align="center" justify="space-between" wrap="wrap" mb={14}>
-                <Title order={3} c="#1a0533" fz={18} ff="'Playfair Display',serif">
+                <Title order={3} c="#1a0533" fz={18} ff="'Plus Jakarta Sans',sans-serif">
                   Products
                 </Title>
                 <Button
@@ -354,7 +354,7 @@ export default function AdminDashboard({
                       inherit
                       c="#9333EA"
                       fw={700}
-                      ff="'Playfair Display',serif"
+                      ff="'Plus Jakarta Sans',sans-serif"
                     >
                       ${p.price}
                     </Text>
@@ -398,7 +398,7 @@ export default function AdminDashboard({
           {dashTab === 'members' && canDo('members') && (
             <div>
               <Flex align="center" justify="space-between" wrap="wrap" mb={14}>
-                <Title order={3} c="#1a0533" fz={18} ff="'Playfair Display',serif">
+                <Title order={3} c="#1a0533" fz={18} ff="'Plus Jakarta Sans',sans-serif">
                   Team & Access
                 </Title>
                 <Button
@@ -776,7 +776,7 @@ export default function AdminDashboard({
           )}
           {dashTab === 'subs' && canDo('subscribers') && (
             <div>
-              <Title order={3} c="#1a0533" fz={18} ff="'Playfair Display',serif" mb={14}>
+              <Title order={3} c="#1a0533" fz={18} ff="'Plus Jakarta Sans',sans-serif" mb={14}>
                 Email Subscribers ({subscribers.length})
               </Title>
               {subscribers.length === 0 ? (
@@ -825,7 +825,7 @@ export default function AdminDashboard({
           )}
           {dashTab === 'store' && canDo('store') && (
             <div>
-              <Title order={3} c="#1a0533" fz={18} ff="'Playfair Display',serif" mb={14}>
+              <Title order={3} c="#1a0533" fz={18} ff="'Plus Jakarta Sans',sans-serif" mb={14}>
                 Store Settings
               </Title>
               <SimpleGrid

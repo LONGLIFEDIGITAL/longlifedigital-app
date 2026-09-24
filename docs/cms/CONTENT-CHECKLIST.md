@@ -4,7 +4,7 @@ Updated September 22, 2026. The React storefront now reads the content below fro
 
 ## Start with About
 
-1. Open **Pages → About** in the staging WordPress dashboard.
+1. Open **Pages → About** in the main WordPress dashboard.
 2. Set **Storefront page → About**. Keep the slug `about`.
 3. Enter the display heading and introduction. Use the normal WordPress editor for the main story, if desired.
 4. For separate cards such as **Our Mission**, **What We Sell**, and **Our Promise**, create one **Content Block** per card. Select **Value / story card** as the block kind, use its title as the heading, and write its paragraphs in the normal editor.
@@ -53,7 +53,7 @@ Home and About are now published with their storefront page keys. The remaining 
 
 Navigation destinations use storefront paths such as `/about`, `/products`, `/contact` or `/blog`, or public HTTPS URLs. Navigation also accepts `mailto:` and `tel:` links. For a dropdown, select **Manual children**, **Services**, or **Asset categories**. Manual children must have a parent in the same area. Essential route links remain available until you publish navigation records, so missing menus never make the site unusable.
 
-For service/asset **Linked WooCommerce product** pricing, the CMS and WooCommerce feed must point to the same WordPress installation. The current staging content and product feeds use different installations; the storefront deliberately shows a contact-for-pricing fallback until those sources are aligned. This prevents an identical numeric ID on another site from displaying the wrong product or price. An indicative amount is display copy only.
+For service/asset **Linked WooCommerce product** pricing, the CMS and WooCommerce feed must point to the same WordPress installation. The content and product feeds now both use the main installation; recheck linked product IDs after migration. This prevents an identical numeric ID on another site from displaying the wrong product or price. An indicative amount is display copy only.
 
 ## Product-specific ACF extras: one installation step
 
@@ -64,9 +64,9 @@ The frontend is ready for **What is included**, skill level, duration, compatibi
 3. Fill the extra fields on a product and save it. The public product response will contain `extensions.longlife-content`; the storefront reads only its approved display fields.
 
 **Current product installation:** `longlifedigital-zmuro.wpcomstaging.com`.
-**Current content installation:** `staging-a7b0-longlifedigital-zmuro.wpcomstaging.com`.
+**Current content installation:** `longlifedigital-zmuro.wpcomstaging.com` (same as products).
 
-Installing only on the content installation will not change the product feed. If you later move the products to the content staging site, switch the WooCommerce environment URL after the products are ready and activate the plugin there. Product IDs and relationships must be checked during that move. No passwords or API keys belong in these public fields.
+Activate the content plugin on this main installation. Recheck migrated product IDs and relationships. No passwords or API keys belong in public ACF fields.
 
 The plugin source is [wordpress/longlife-storefront/longlife-storefront.php](../../wordpress/longlife-storefront/longlife-storefront.php). It is prepared locally; it has **not** been installed or run inside your WordPress environment. This repository does not include a PHP runtime, so the installation check must be completed in staging.
 
@@ -78,7 +78,7 @@ Product category and AI-prompt-product counts are calculated from the catalog. T
 
 The unconfigured demo mode retains example products and Home content for local UI work. When the WordPress and WooCommerce URLs are configured, those examples do not substitute for missing or unavailable published content.
 
-This completes the storefront **content-reading** connections. It does not implement WooCommerce checkout, protected downloads, contact-form delivery or newsletter subscriber storage. Those existing workflows are separate integrations; keep signup disabled until subscription persistence is available. Service/asset per-item SEO fields are retained in the API for future dedicated detail routes; the current shared listing pages use their Page SEO fields.
+This completes the storefront **content-reading** connections. Guest checkout and native WooCommerce download access now have a separate test-mode implementation; see [checkout setup](../HEADLESS-CHECKOUT-SETUP.md). Contact-form delivery and newsletter subscriber storage remain separate integrations. Those existing workflows are separate integrations; keep signup disabled until subscription persistence is available. Service/asset per-item SEO fields are retained in the API for future dedicated detail routes; the current shared listing pages use their Page SEO fields.
 
 ## Publishing and loading
 

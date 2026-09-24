@@ -86,10 +86,10 @@ export default function CheckoutModal({
             >
               {CATS.find((c) => c.id === checkoutItem.cat)?.icon || '📦'}
             </Flex>
-            <Title order={3} c="#1a0533" fz={18} ff="'Playfair Display',serif" mb={4}>
+            <Title order={3} c="#1a0533" fz={18} ff="'Plus Jakarta Sans',sans-serif" mb={4}>
               {checkoutItem.name}
             </Title>
-            <Box c="#9333EA" fz={28} fw={700} ff="'Playfair Display',serif">
+            <Box c="#9333EA" fz={28} fw={700} ff="'Plus Jakarta Sans',sans-serif">
               {fmtPrice(total, checkoutItem.currency, checkoutItem.minorUnit)}
             </Box>
             {quantity > 1 && (
@@ -116,7 +116,7 @@ export default function CheckoutModal({
               >
                 ✓
               </Flex>
-              <Title order={3} c="#1a0533" fz={20} ff="'Playfair Display',serif" mb={8}>
+              <Title order={3} c="#1a0533" fz={20} ff="'Plus Jakarta Sans',sans-serif" mb={8}>
                 Payment Successful!
               </Title>
               <Text component="p" inherit c="#6B7280" fz={13} mb={16}>

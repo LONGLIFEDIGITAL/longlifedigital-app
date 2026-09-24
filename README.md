@@ -20,7 +20,7 @@ directory before starting Vite. The supported Node.js versions are declared in
 Local development reads published products from the configured WordPress store,
 configured in `.env.development`. Restart Vite after changing environment values.
 The homepage product highlights, shop, product details, categories, search and
-local cart use this feed. Product descriptions retain their WordPress paragraphs,
+product displays use this feed. Product descriptions retain their WordPress paragraphs,
 lists, headings, emphasis and links. `src/utils/richText.js` uses DOMPurify to
 sanitize that HTML before rendering; pasted styles and editor attributes are
 removed, and `src/pages/ProductPage.module.css` controls the presentation.
@@ -42,8 +42,7 @@ without reloading the document or resetting navigation, filters or cart selectio
 Existing content stays visible during background requests. Failed requests retry
 twice with backoff; a background failure retains the last successful catalog and
 later refreshes recover automatically. Skeletons appear only before the first
-successful load. The local cart remains a separate in-memory snapshot; authoritative
-cart pricing and order validation are still part of the WooCommerce checkout work.
+successful load. With `VITE_HEADLESS_COMMERCE=true`, carts use the native Store API and authoritative WooCommerce totals. Cart operations are independent of editorial refreshes.
 
 Local development and Vercel Preview catalog responses use `Cache-Control: no-store`.
 Production responses have no browser freshness window and a five-second shared CDN
@@ -65,16 +64,9 @@ Production must use its own production CMS URL when ready; the local staging
 configuration is not loaded by a production build. With the variable unset,
 the existing demo catalog and workflows remain available during migration.
 
-WooCommerce products can be added to the
-local cart, but checkout is disabled until WooCommerce orders, payment and
-fulfillment are connected. They never use the old standalone Stripe flow.
-The React admin entry points are hidden in CMS mode; edit these products in
-WordPress. Editorial content also reads WordPress; checkout and delivery integrations remain separate work.
+Guest checkout is now implemented locally inside React, with WooCommerce owning the cart, orders, payments and downloads. It remains **test-only and pending installation acceptance**. Follow [HEADLESS-CHECKOUT-SETUP.md](docs/HEADLESS-CHECKOUT-SETUP.md) to install the bridge and configure server-only secrets. Customer accounts/dashboard/verified guest linking remain the next phase.
 
-The local cart supports quantity controls, repeated additions and immediate
-removal. Item totals, the subtotal and navigation badge update together.
-Quantity controls respect the minimum, maximum, increment and sold-individually
-limits supplied by WooCommerce. Cart contents remain in memory until page reload.
+The Store API cart persists in an encrypted HttpOnly cookie, and quantity controls, discounts and totals use WooCommerce responses. `VITE_HEADLESS_COMMERCE=false` retains an in-memory demo cart with payment disabled. Neither mode invokes the old standalone Stripe flow. React admin entry points stay hidden in CMS mode; manage the store in WordPress.
 
 ```sh
 npm run test:catalog
@@ -92,7 +84,7 @@ social links now read the published ACF **Site Settings → Storefront** record
 (slug `storefront`). Set the public REST root in `VITE_WORDPRESS_API_URL`:
 
 ```dotenv
-VITE_WORDPRESS_API_URL=https://staging-a7b0-longlifedigital-zmuro.wpcomstaging.com/wp-json/wp/v2
+VITE_WORDPRESS_API_URL=https://longlifedigital-zmuro.wpcomstaging.com/wp-json/wp/v2
 ```
 
 This is the CMS address. The **Public storefront URL** field in WordPress remains

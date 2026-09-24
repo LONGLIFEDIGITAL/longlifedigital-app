@@ -79,7 +79,7 @@ export default function NewsletterPopup({
             🎁
           </Box>
           <Box c="#E8C97A" fz={10} lts={3} tt="uppercase" mb={10}></Box>
-          <Title order={2} c="#fff" fz={28} fw={700} ff="'Playfair Display',serif" mb={8}>
+          <Title order={2} c="#fff" fz={28} fw={700} ff="'Plus Jakarta Sans',sans-serif" mb={8}>
             {newsletter.popup_heading || newsletter.heading || 'Newsletter'}
           </Title>
           <Text component="p" inherit c="#C084FC" fz={13} lh={1.75}>

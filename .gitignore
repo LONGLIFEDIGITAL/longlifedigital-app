@@ -12,6 +12,23 @@ dist
 dist-ssr
 *.local
 
+# Environment values stay local; only the blank setup template is shared.
+.env
+.env.*
+!.env.example
+.envrc
+
+# Private credentials and local certificates
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account*.json
+serviceAccount*.json
+*-firebase-adminsdk-*.json
+.secrets/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -23,8 +40,27 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+.firebase/
+.firebaserc
 test-results/
 playwright-report/
+playwright/.cache/
+playwright/.auth/
+blob-report/
+coverage/
+.nyc_output/
 
-# Generated public CMS snapshots for local development/build reuse
 .cache/
+
+/temp
+/tmp/
+/src/App.txt
+/backups/
+/exports/
+*.bak
+*.orig
+*.sql.gz
+*.sql.zip
+*.wpress
+__pycache__/
+*.py[cod]

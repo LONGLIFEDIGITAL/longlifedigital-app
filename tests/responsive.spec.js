@@ -91,32 +91,8 @@ test('mobile navigation, search, cart and checkout retain their behavior', async
     .click();
   await expect(cart.getByLabel('Cart subtotal', { exact: true })).toHaveText('$24');
   await expectFits(page);
-  await cart.getByRole('button', { name: /Checkout —/ }).click();
-  const checkout = page.getByRole('dialog', { name: 'Secure checkout' });
-  await expect(checkout).toBeVisible();
-  await expectFits(page);
-  await checkout.getByPlaceholder('John Smith').fill('Responsive Test');
-  await checkout.getByPlaceholder('john@email.com').fill('responsive@example.com');
-  // Exercise the existing request and error path without contacting a payment provider.
-  let requested;
-  await page.route('**/api/create-payment-intent', async (route) => {
-    requested = route.request().postDataJSON();
-    await route.fulfill({
-      status: 400,
-      contentType: 'application/json',
-      body: JSON.stringify({ error: 'Test payment unavailable' }),
-    });
-  });
-  await checkout.getByRole('button', { name: 'Continue to Payment →' }).click();
-  await expect(checkout).toContainText('Test payment unavailable');
-  expect(requested).toBeTruthy();
-  expect(requested.amount).toBe(24);
-  expect(requested.productName).toBe('Migraine & Headache Tracker × 2');
-  await checkout.getByRole('button', { name: '← Back' }).click();
-  await expect(checkout.getByPlaceholder('John Smith')).toHaveValue('Responsive Test');
-  await page.keyboard.press('Escape');
-  await expect(checkout).toHaveCount(0);
-  await page.getByRole('button', { name: 'Open cart (2)', exact: true }).click();
+  // Demo catalog items have no WooCommerce identity and cannot take payments.
+  await expect(cart.getByRole('button', { name: 'Proceed to Checkout' })).toBeDisabled();
   await cart.getByRole('button', { name: 'Remove Migraine & Headache Tracker from cart' }).click();
   await expect(cart).toContainText('Your cart is empty');
 });

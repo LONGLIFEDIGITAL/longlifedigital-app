@@ -4,7 +4,7 @@
     { "handle": "filesystem" },
     { "src": "^/(?:products|blog)(?:/.*)?$", "dest": "/index.html" },
     {
-      "src": "^/(?:about|services|courses|domains|contact|faq|refund-policy|privacy-policy|terms-of-service)/?$",
+      "src": "^/(?:checkout|order-confirmation|about|services|courses|domains|contact|faq|refund-policy|privacy-policy|terms-of-service)/?$",
       "dest": "/index.html"
     }
   ]

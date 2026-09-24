@@ -134,13 +134,13 @@ for (const width of [320, 393, 1440]) {
     await description.screenshot({ path: `test-results/product-description-${width}.png` });
     await expect(page.locator('main')).toContainText('Business Startup Toolkits');
     await expect(page.getByText('$29', { exact: true }).first()).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Checkout coming soon' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Buy Now', exact: true })).toBeDisabled();
     await page.getByRole('button', { name: 'Add to Cart', exact: true }).click();
     await page.getByRole('button', { name: 'Open cart (1)' }).click();
     const cart = page.getByRole('dialog', { name: 'Shopping cart' });
     await expect(cart).toContainText(product.name);
     await expect(cart).toContainText('$29');
-    await expect(cart.getByRole('button', { name: 'Checkout coming soon' })).toBeDisabled();
+    await expect(cart.getByRole('button', { name: 'Proceed to Checkout' })).toBeDisabled();
     await cart.getByRole('button', { name: `Remove ${product.name} from cart` }).click();
     await expect(cart).toContainText('Your cart is empty');
     await page.keyboard.press('Escape');
@@ -207,7 +207,7 @@ for (const [width, height] of [
     await expect(
       cart.getByRole('button', { name: `Decrease quantity of ${secondProduct.name}` }),
     ).toBeDisabled();
-    await expect(cart.getByRole('button', { name: 'Checkout coming soon' })).toBeDisabled();
+    await expect(cart.getByRole('button', { name: 'Proceed to Checkout' })).toBeDisabled();
     await expect
       .poll(() => cart.evaluate((element) => element.scrollWidth - element.clientWidth))
       .toBeLessThanOrEqual(1);

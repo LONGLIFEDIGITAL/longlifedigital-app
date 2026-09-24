@@ -492,3 +492,89 @@ test('initial hero paints from escaped HTML even while every app script is block
   expect(initialMarkup(snapshot, '/')).toContain('&lt;script&gt;');
   expect(await page.evaluate(() => window.injected)).toBeUndefined();
 });
+
+test('confirmation matches product downloads and expiry, with general and product CMS FAQs', async ({
+  page,
+}) => {
+  const state = mockCms();
+  state.collections['lld-faqs'] = [
+    item(1, 'lld_faq', 'Where are my files?', { lld_topics: ['products'] }),
+    item(2, 'lld_faq', 'How do I contact support?', { lld_topics: ['general', 'products'] }),
+    item(3, 'lld_faq', 'How are domains transferred?', { lld_topics: ['domains'] }),
+  ];
+  await routeCms(page, state);
+  await page.route('**/api/commerce?**', (route) =>
+    route.fulfill({
+      json: {
+        number: '341',
+        status: 'completed',
+        paid: true,
+        currency: 'USD',
+        total: '36.00',
+        items: [
+          { id: 318, name: 'Local SEO Starter Toolkit', quantity: 1 },
+          { id: 320, name: 'Social Media Content Pack', quantity: 1 },
+        ],
+        // Deliberately different from order-item order, with two files for one product.
+        downloads: [
+          {
+            productId: 320,
+            productName: 'Social Media Content Pack',
+            downloadId: 'a',
+            name: 'raw-file-a.pdf',
+            url: 'https://woo.test/?download_file=320&key=a',
+            expires: null,
+          },
+          {
+            productId: 318,
+            productName: 'Local SEO Starter Toolkit',
+            downloadId: 'b',
+            name: 'raw-file-b.pdf',
+            url: 'https://woo.test/?download_file=318&key=b',
+            expires: '2099-03-12T00:00:00+05:30',
+          },
+          {
+            productId: 320,
+            productName: 'Social Media Content Pack',
+            downloadId: 'c',
+            name: 'raw-file-c.pdf',
+            url: 'https://woo.test/?download_file=320&key=c',
+          },
+        ],
+      },
+    }),
+  );
+  await page.goto('/order-confirmation?attempt=11111111-1111-4111-8111-111111111111');
+  const table = page.getByRole('table', { name: 'Purchased downloads' });
+  const seo = table.getByRole('row').filter({ hasText: 'Local SEO Starter Toolkit' });
+  await expect(seo.getByRole('link')).toHaveAttribute(
+    'href',
+    'https://woo.test/?download_file=318&key=b',
+  );
+  await expect(seo.locator('time')).toHaveText('Mar 12, 2099');
+  const social = table.getByRole('row').filter({ hasText: 'Social Media Content Pack' });
+  await expect(social.nth(0).getByRole('link')).toHaveAttribute('href', /key=a$/);
+  await expect(social.nth(0)).toContainText('Never');
+  await expect(social.nth(1).getByRole('link')).toHaveAttribute('href', /key=c$/);
+  await expect(social.nth(1)).toContainText('See purchase email');
+  await expect(table).not.toContainText('raw-file');
+  await expect(table.getByRole('link').first()).toHaveCSS('font-size', '14px');
+  await expect(page.getByRole('heading', { name: 'Downloads', exact: true })).toHaveCSS(
+    'font-family',
+    /Plus Jakarta Sans/,
+  );
+  await expect(page.getByRole('button', { name: 'Where are my files?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'How do I contact support?' })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'How are domains transferred?' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Where are my files?' }).click();
+  await expect(
+    page.getByRole('region', { name: 'Where are my files?' }).locator('strong'),
+  ).toHaveText('details');
+  await expect(page.getByRole('link', { name: 'Contact support', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Continue shopping', exact: true })).toBeVisible();
+  await page.screenshot({ path: 'test-results/confirmation-desktop.png', fullPage: true });
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await table.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: 'test-results/confirmation-mobile.png' });
+});

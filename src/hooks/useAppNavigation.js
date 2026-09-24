@@ -2,6 +2,8 @@ import { matchPath, useLocation, useMatch, useNavigate } from 'react-router';
 
 export const PAGE_PATHS = {
   home: '/',
+  checkout: '/checkout',
+  'order-confirmation': '/order-confirmation',
   shop: '/products',
   about: '/about',
   blog: '/blog',

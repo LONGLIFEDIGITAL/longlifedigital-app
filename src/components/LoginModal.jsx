@@ -65,7 +65,7 @@ export default function LoginModal({
           ✕
         </ActionIcon>
         <LDLogo size={48} />
-        <Title order={2} c="#111827" fz={20} fw="700" ff="'Playfair Display',serif" mt={14} mb={6}>
+        <Title order={2} c="#111827" fz={20} fw="700" ff="'Plus Jakarta Sans',sans-serif" mt={14} mb={6}>
           Admin Login
         </Title>
         <Text component="p" inherit c="#9CA3AF" fz={13} mb={20}>

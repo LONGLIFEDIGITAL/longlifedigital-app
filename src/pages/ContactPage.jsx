@@ -42,7 +42,7 @@ export default function ContactPage({ fire, contact, settings }) {
                 border: '1px solid rgba(201,150,63,0.2)',
               }}
             >
-              <Title order={3} c="#fff" fz={22} ff="'Playfair Display',serif" mb={28}>
+              <Title order={3} c="#fff" fz={22} ff="'Plus Jakarta Sans',sans-serif" mb={28}>
                 {content.data?.contact.information_heading || 'Contact Information'}
               </Title>
               {[
@@ -150,7 +150,7 @@ export default function ContactPage({ fire, contact, settings }) {
                 <Box fz={48} mb={16}>
                   ✦
                 </Box>
-                <Title order={3} c="#9333EA" fz={24} ff="'Playfair Display',serif" mb={12}>
+                <Title order={3} c="#9333EA" fz={24} ff="'Plus Jakarta Sans',sans-serif" mb={12}>
                   {content.data?.contact.success_heading || 'Thank you'}
                 </Title>
                 <Text component="p" inherit c="#9CA3AF" mb={24}>
@@ -169,7 +169,7 @@ export default function ContactPage({ fire, contact, settings }) {
               </Box>
             ) : (
               <Box pos="relative">
-                <Title order={3} c="#1a0533" fz={20} ff="'Playfair Display',serif" mb={20}>
+                <Title order={3} c="#1a0533" fz={20} ff="'Plus Jakarta Sans',sans-serif" mb={20}>
                   {content.data?.contact.form_heading || 'Send Us a Message'}
                 </Title>
                 {content.data?.contact.form_intro && (

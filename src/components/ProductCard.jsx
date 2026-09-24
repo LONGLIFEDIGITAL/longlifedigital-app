@@ -72,7 +72,7 @@ export default function ProductCard({
                 zIndex: 2,
               }}
             >
-              <Box c="#fff" fz={26} fw={700} ff="'Playfair Display',serif" lh={1}>
+              <Box c="#fff" fz={26} fw={700} ff="'Plus Jakarta Sans',sans-serif" lh={1}>
                 {fmtPrice(p.price, p.currency, p.minorUnit)}
               </Box>
               {p.oldPrice && (
@@ -192,7 +192,7 @@ export default function ProductCard({
                 c={getProdTheme(p.id).priceColor}
                 fz={26}
                 fw={700}
-                ff="'Playfair Display',serif"
+                ff="'Plus Jakarta Sans',sans-serif"
                 lh={1}
               >
                 {fmtPrice(p.price, p.currency, p.minorUnit)}

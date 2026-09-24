@@ -3,7 +3,10 @@ import { ContentState } from './components/ContentPage';
 import { Alert, Box, Button } from '@mantine/core';
 import { useState, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
 import { ScrollRestoration } from 'react-router';
-import { useStripePayment } from './payments/useStripePayment';
+import useCart from './hooks/useCart';
+import { headlessEnabled } from './services/checkout';
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
 import { EMPTY_FORM, DEFAULT_CONTACT } from './constants/data';
 import useCatalog from './hooks/useCatalog';
 import useSiteSettings from './hooks/useSiteSettings';
@@ -12,7 +15,7 @@ import useAppNavigation from './hooks/useAppNavigation';
 import CatalogStatus from './components/CatalogStatus';
 import ProductDetailsSkeleton from './components/skeletons/ProductDetailsSkeleton';
 import { matchesCategory } from './services/catalog';
-import { addCartItem, adjustCartQuantity, getItemQuantity, getQuantityLimits } from './utils/cart';
+import { getItemQuantity, getQuantityLimits } from './utils/cart';
 import Nav from './components/Nav';
 import Toast from './components/Toast';
 import AIChat from './components/AIChat';
@@ -24,7 +27,6 @@ const ContactEditor = lazy(() => import('./components/ContactEditor'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 import NewsletterPopup from './components/NewsletterPopup';
 import CartDrawer from './components/CartDrawer';
-const CheckoutModal = lazy(() => import('./components/CheckoutModal'));
 const LoginModal = lazy(() => import('./components/LoginModal'));
 const ShopPage = lazy(() => import('./pages/ShopPage'));
 const ProductPage = lazy(() => import('./pages/ProductPage'));
@@ -59,7 +61,8 @@ export default function App() {
     retry: retrySettings,
   } = useSiteSettings();
   const selProduct = products.find((product) => String(product.id) === productId);
-  const [cart, setCart] = useState([]);
+  const cartState = useCart(products);
+  const { cart, busy: leaving } = cartState;
   const [showCart, setShowCart] = useState(false);
   const [filterCat, setFilterCat] = useState('all');
   const [sortBy, setSortBy] = useState('default');
@@ -78,28 +81,6 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [subscribers, setSubscribers] = useState([]);
-  const [showCheckout, setShowCheckout] = useState(false);
-  const [checkoutItem, setCheckoutItem] = useState(null);
-  const [checkoutStep, setCheckoutStep] = useState(1);
-  const [orderInfo, setOrderInfo] = useState({
-    name: '',
-    email: '',
-    phone: '',
-  });
-  const [, setPayMethod] = useState('card');
-  const [, setCardNum] = useState('');
-  const [, setCardExp] = useState('');
-  const [, setCardCvc] = useState('');
-  const [, setCardName] = useState('');
-  const [orderNum, setOrderNum] = useState('');
-  const [, setProcessing] = useState(false);
-  const {
-    clientSecret,
-    loading: stripeLoading,
-    error: stripeError,
-    createPaymentIntent,
-    reset: resetStripe,
-  } = useStripePayment();
   const [subName, setSubName] = useState('');
   const [subEmail, setSubEmail] = useState('');
   const [subConsent, setSubConsent] = useState(false);
@@ -193,7 +174,9 @@ export default function App() {
       !settings.newsletter?.enabled ||
       !settings.newsletter?.popupEnabled ||
       showCart ||
-      showCheckout ||
+      leaving ||
+      page === 'checkout' ||
+      page === 'order-confirmation' ||
       showLogin ||
       showForm ||
       showDashboard ||
@@ -229,7 +212,6 @@ export default function App() {
       setMenuOpen(false);
       setActiveDropdown(null);
       setShowCart(false);
-      setShowCheckout(false);
     };
     window.addEventListener('popstate', closeNavigationOverlays);
     return () => window.removeEventListener('popstate', closeNavigationOverlays);
@@ -262,7 +244,7 @@ export default function App() {
     });
     setTimeout(() => setToast(null), 3000);
   };
-  const addCart = (p) => {
+  const addCart = async (p) => {
     if (p.canAddToCart === false) {
       fire(p.availability || 'This product is currently unavailable.', 'info');
       return;
@@ -276,12 +258,16 @@ export default function App() {
       fire('The maximum quantity is already in your cart.', 'info');
       return;
     }
-    setCart((prev) => addCartItem(prev, p));
-    fire(existing ? `Quantity updated for "${p.name}".` : `"${p.name}" added to cart!`);
+    try {
+      await cartState.add(p);
+      fire(existing ? `Quantity updated for "${p.name}".` : `"${p.name}" added to cart!`);
+    } catch (error) {
+      fire(error.message, 'err');
+    }
   };
-  const rmCart = (id) => setCart((prev) => prev.filter((i) => i.id !== id));
+  const rmCart = (id) => cartState.remove(id).catch((error) => fire(error.message, 'err'));
   const changeCartQuantity = (id, direction) =>
-    setCart((prev) => adjustCartQuantity(prev, id, direction));
+    cartState.change(id, direction).catch((error) => fire(error.message, 'err'));
   const login = () => {
     const role = Object.keys(ROLE_PASSWORDS).find((r) => ROLE_PASSWORDS[r] === loginPass);
     if (role) {
@@ -385,26 +371,18 @@ export default function App() {
     setDelId(null);
     fire('Product removed.', 'info');
   };
-  const openCheckout = (p) => {
-    if (p.source === 'woocommerce') {
-      fire('Checkout is not available yet.', 'info');
+  const openCheckout = async (product) => {
+    if (!headlessEnabled) {
+      fire('Checkout is being configured.', 'info');
       return;
     }
-    setCheckoutItem(p);
-    setCheckoutStep(1);
-    setOrderInfo({
-      name: '',
-      email: '',
-      phone: '',
-    });
-    setCardNum('');
-    setCardExp('');
-    setCardCvc('');
-    setCardName('');
-    setPayMethod('card');
-    setProcessing(false);
-    resetStripe();
-    setShowCheckout(true);
+    try {
+      if (product) await cartState.add(product);
+      setShowCart(false);
+      setPage('checkout');
+    } catch (error) {
+      fire(error.message, 'err');
+    }
   };
 
   const filtered = products
@@ -460,6 +438,8 @@ export default function App() {
               </Button>
             </Alert>
           )}
+          {page === 'checkout' && <CheckoutPage cartState={cartState} />}
+          {page === 'order-confirmation' && <OrderConfirmationPage reloadCart={cartState.reload} />}
           {page === 'home' && (
             <HomePage
               settings={settings}
@@ -523,6 +503,8 @@ export default function App() {
           {page === 'product' && selProduct && (
             <ProductPage
               selProduct={selProduct}
+              openCheckout={openCheckout}
+              checkoutLoading={leaving}
               products={products}
               setPage={setPage}
               addCart={addCart}
@@ -577,7 +559,11 @@ export default function App() {
             changeCartQuantity={changeCartQuantity}
             setPage={setPage}
             openCheckout={openCheckout}
-            setCart={setCart}
+            checkoutLoading={leaving}
+            checkoutEnabled={headlessEnabled && !!cartState.data}
+            clearCart={() => cartState.clear().catch((error) => fire(error.message, 'err'))}
+            serverTotals={cartState.data?.totals}
+            cartError={cartState.error}
           />
         )}
         {showLogin && (
@@ -650,29 +636,8 @@ export default function App() {
             setSubscribers={setSubscribers}
           />
         )}
-        {showCheckout && (
-          <CheckoutModal
-            showCheckout={showCheckout}
-            checkoutItem={checkoutItem}
-            setShowCheckout={setShowCheckout}
-            checkoutStep={checkoutStep}
-            setCheckoutStep={setCheckoutStep}
-            orderInfo={orderInfo}
-            setOrderInfo={setOrderInfo}
-            stripeLoading={stripeLoading}
-            stripeError={stripeError}
-            clientSecret={clientSecret}
-            createPaymentIntent={createPaymentIntent}
-            resetStripe={resetStripe}
-            setCart={setCart}
-            fire={fire}
-            setPage={setPage}
-            orderNum={orderNum}
-            setOrderNum={setOrderNum}
-          />
-        )}
       </Suspense>
-      <AIChat settings={settings} />
+      {page !== 'checkout' && page !== 'order-confirmation' && <AIChat settings={settings} />}
       <ScrollRestoration />
     </Box>
   );

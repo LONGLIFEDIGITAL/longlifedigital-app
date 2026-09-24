@@ -1,4 +1,5 @@
 import { ActionIcon, Button, Drawer } from '@mantine/core';
+import { moneyMinor } from '../services/checkout';
 import LoadingImage from './LoadingImage';
 import { fmtPrice, catLabel } from '../utils/helpers';
 import {
@@ -45,11 +46,15 @@ export default function CartDrawer({
   changeCartQuantity,
   setPage,
   openCheckout,
-  setCart,
+  checkoutLoading,
+  checkoutEnabled,
+  clearCart,
+  serverTotals,
+  cartError,
 }) {
   const cartCount = getCartCount(cart);
   const cartTotal = getCartTotal(cart);
-  const checkoutPending = cart.some((item) => item.source === 'woocommerce');
+  const unavailable = cart.some((item) => item.canAddToCart === false);
   const money = (item, amount) => fmtPrice(amount, item.currency, item.minorUnit);
   const browseProducts = () => {
     setShowCart(false);
@@ -91,6 +96,7 @@ export default function CartDrawer({
               </ActionIcon>
             </header>
 
+            {cartError && <p role="alert">{cartError}</p>}
             {cart.length === 0 ? (
               <div className={classes.empty}>
                 <span className={classes.emptyIcon}>
@@ -130,7 +136,11 @@ export default function CartDrawer({
                               <p className={classes.category}>
                                 {item.categoryLabel || catLabel(item.cat)}
                               </p>
-                              <p className={classes.unitPrice}>{money(item, item.price)} each</p>
+                              <p className={classes.unitPrice}>
+                                {item.canAddToCart === false
+                                  ? item.availability
+                                  : `${money(item, item.price)} each`}
+                              </p>
                             </div>
                           </div>
                           <div className={classes.itemControls}>
@@ -145,7 +155,7 @@ export default function CartDrawer({
                                 size={44}
                                 radius="md"
                                 aria-label={`Decrease quantity of ${item.name}`}
-                                disabled={quantity <= minimum}
+                                disabled={checkoutLoading || quantity <= minimum}
                                 onClick={() => changeCartQuantity(item.id, -1)}
                               >
                                 <CartIcon name="minus" />
@@ -163,7 +173,7 @@ export default function CartDrawer({
                                 size={44}
                                 radius="md"
                                 aria-label={`Increase quantity of ${item.name}`}
-                                disabled={quantity >= maximum}
+                                disabled={checkoutLoading || quantity >= maximum}
                                 onClick={() => changeCartQuantity(item.id, 1)}
                               >
                                 <CartIcon name="plus" />
@@ -174,9 +184,10 @@ export default function CartDrawer({
                                 className={classes.lineTotal}
                                 aria-label={`Total for ${item.name}`}
                               >
-                                {money(item, getLineTotal(item))}
+                                {money(item, item.serverLineTotal ?? getLineTotal(item))}
                               </output>
                               <ActionIcon
+                                disabled={checkoutLoading}
                                 onClick={() => rmCart(item.id)}
                                 variant="light"
                                 color="red"
@@ -196,42 +207,35 @@ export default function CartDrawer({
                 </div>
                 <footer className={classes.footer}>
                   <div className={classes.totalRow}>
-                    <span>{checkoutPending ? 'Subtotal' : 'Order Total'}</span>
+                    <span>Subtotal</span>
                     <output aria-label="Cart subtotal" aria-live="polite">
-                      {money(cart[0], cartTotal)}
+                      {serverTotals
+                        ? moneyMinor(serverTotals.total_items, serverTotals)
+                        : money(cart[0], cartTotal)}
                     </output>
                   </div>
                   <p className={classes.checkoutNote}>
-                    {checkoutPending
-                      ? 'Checkout is not available yet.'
-                      : 'Secure checkout powered by Stripe. Google Pay & Apple Pay accepted.'}
+                    {unavailable
+                      ? 'Remove unavailable items before checkout.'
+                      : checkoutEnabled
+                        ? 'Final prices, discounts and taxes are confirmed at checkout.'
+                        : 'Checkout is unavailable while the store is loading or using demo products.'}
                   </p>
                   <div className={classes.checkoutActions}>
-                    {checkoutPending ? (
-                      <Button disabled fullWidth>
-                        Checkout coming soon
-                      </Button>
-                    ) : (
-                      cart.map((item) => (
-                        <Button
-                          key={item.id}
-                          className={classes.checkoutButton}
-                          color="brand"
-                          fullWidth
-                          onClick={() => {
-                            setShowCart(false);
-                            openCheckout(item);
-                          }}
-                        >
-                          {cart.length === 1
-                            ? `✦ Checkout — ${money(item, getLineTotal(item))}`
-                            : `${item.name} × ${getItemQuantity(item)} — ${money(item, getLineTotal(item))}`}
-                        </Button>
-                      ))
-                    )}
+                    <Button
+                      className={classes.checkoutButton}
+                      color="brand"
+                      fullWidth
+                      loading={checkoutLoading}
+                      disabled={!checkoutEnabled || unavailable}
+                      onClick={() => openCheckout()}
+                    >
+                      Proceed to Checkout
+                    </Button>
                   </div>
                   <Button
-                    onClick={() => setCart([])}
+                    disabled={checkoutLoading}
+                    onClick={clearCart}
                     variant="subtle"
                     color="gray"
                     fullWidth

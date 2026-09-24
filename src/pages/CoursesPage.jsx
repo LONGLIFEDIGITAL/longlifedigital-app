@@ -62,7 +62,7 @@ export default function CoursesPage({
             c="#111827"
             fz="clamp(24px,4vw,36px)"
             fw="700"
-            ff="'Playfair Display',serif"
+            ff="'Plus Jakarta Sans',sans-serif"
             mb={28}
           >
             Also Available

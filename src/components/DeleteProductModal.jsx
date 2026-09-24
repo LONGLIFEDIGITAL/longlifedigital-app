@@ -20,7 +20,7 @@ export default function DeleteProductModal({ delId, delProduct, setDelId }) {
         <Box fz={40} mb={12}>
           ⚠️
         </Box>
-        <Title order={3} c="#111827" fz={20} fw="700" ff="'Playfair Display',serif">
+        <Title order={3} c="#111827" fz={20} fw="700" ff="'Plus Jakarta Sans',sans-serif">
           Delete this product?
         </Title>
         <Text component="p" inherit c="#9CA3AF" fz={13} mb={24}>

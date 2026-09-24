@@ -54,7 +54,7 @@ export default function ContactEditor({
         </ActionIcon>
         <Flex align="center" gap={10} wrap="wrap" mb={22}>
           <LDLogo size={32} />
-          <Title order={2} c="#111827" fz={20} fw="700" ff="'Playfair Display',serif">
+          <Title order={2} c="#111827" fz={20} fw="700" ff="'Plus Jakarta Sans',sans-serif">
             Edit Contact Info
           </Title>
         </Flex>

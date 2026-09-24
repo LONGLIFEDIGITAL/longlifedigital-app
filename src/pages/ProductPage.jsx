@@ -1,3 +1,4 @@
+import { headlessEnabled } from '../services/checkout';
 import RichText from '../components/RichText';
 import PageMetadata from '../components/PageMetadata';
 import CmsFaqs from '../components/CmsFaqs';
@@ -12,6 +13,8 @@ export default function ProductPage({
   setPage,
   addCart,
   fire,
+  openCheckout,
+  checkoutLoading,
   isAdmin,
   openEdit,
   openDel,
@@ -177,7 +180,7 @@ export default function ProductPage({
                   c={getProdTheme(p.id).priceColor}
                   fz={40}
                   fw={700}
-                  ff="'Playfair Display',serif"
+                  ff="'Plus Jakarta Sans',sans-serif"
                   lh={1}
                 >
                   {fmtPrice(p.price, p.currency, p.minorUnit)}
@@ -214,7 +217,7 @@ export default function ProductPage({
               c="#111827"
               fz="clamp(24px,4vw,40px)"
               fw="700"
-              ff="'Playfair Display',serif"
+              ff="'Plus Jakarta Sans',sans-serif"
               lh={1.2}
               mb={14}
             >
@@ -237,7 +240,7 @@ export default function ProductPage({
                 c="#111827"
                 fz={36}
                 fw="700"
-                ff="'Playfair Display',serif"
+                ff="'Plus Jakarta Sans',sans-serif"
               >
                 {fmtPrice(p.price, p.currency, p.minorUnit)}
               </Text>
@@ -360,12 +363,9 @@ export default function ProductPage({
               </Button>
               <Button
                 className="btn-h"
-                disabled={p.source === 'woocommerce'}
-                onClick={() =>
-                  p.payhipUrl
-                    ? window.open(p.payhipUrl, '_blank')
-                    : fire('Payhip link coming soon!', 'info')
-                }
+                disabled={!headlessEnabled || p.source !== 'woocommerce' || p.canAddToCart === false}
+                loading={checkoutLoading}
+                onClick={() => openCheckout(p)}
                 variant="gradient"
                 color="brand"
                 px="lg"
@@ -380,38 +380,13 @@ export default function ProductPage({
                 p="14px"
                 flex={1}
               >
-                {p.source === 'woocommerce' ? 'Checkout coming soon' : 'Buy Now'}
+                Buy Now
               </Button>
             </Flex>
             {p.availability && (
               <Text size="sm" c="dimmed" mb="md">
                 {p.availability}
               </Text>
-            )}
-            {p.stripeUrl && (
-              <Button
-                className="btn-h"
-                onClick={() => window.open(p.stripeUrl, '_blank')}
-                variant="transparent"
-                color="dark"
-                px={0}
-                type="button"
-                c="#635BFF"
-                bg="#fff"
-                fz={13}
-                fw="700"
-                ff="'Inter',sans-serif"
-                w="100%"
-                mb={20}
-                p="11px"
-                style={{
-                  border: '2px solid #635BFF',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                }}
-              >
-                💳 Pay with Stripe
-              </Button>
             )}
             <Flex
               gap={8}
@@ -493,7 +468,7 @@ export default function ProductPage({
               c="#111827"
               fz="clamp(24px,4vw,36px)"
               fw="700"
-              ff="'Playfair Display',serif"
+              ff="'Plus Jakarta Sans',sans-serif"
               mb={24}
             >
               You May Also Like

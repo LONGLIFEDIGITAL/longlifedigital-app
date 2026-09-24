@@ -30,7 +30,7 @@ export const theme = createTheme({
     ],
   },
   fontFamily: 'Inter, sans-serif',
-  headings: { fontFamily: '"Playfair Display", serif', fontWeight: '700' },
+  headings: { fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: '700' },
   defaultRadius: 'md',
   respectReducedMotion: true,
   components: {

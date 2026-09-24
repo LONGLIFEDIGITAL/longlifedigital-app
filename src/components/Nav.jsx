@@ -234,7 +234,7 @@ export default function Nav({
                 }}
                 aria-label="Search products"
                 placeholder="Search products..."
-                leftSection="⌕"
+                leftSection={<span style={{ fontSize: 28 }}>⌕</span>}
                 value={search}
                 onChange={updateSearch}
               />

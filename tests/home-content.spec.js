@@ -228,6 +228,14 @@ for (const width of [320, 393, 1440]) {
       'Created in WordPress Digital Essentials For your business',
     );
     await expect(page.getByText('Published badge')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCSS(
+      'font-family',
+      /Playfair Display/,
+    );
+    await expect(page.getByRole('heading', { name: 'Featured Products', exact: true })).toHaveCSS(
+      'font-family',
+      /Plus Jakarta Sans/,
+    );
     await expect(page.getByText(homeRecord.acf.lld_intro)).toBeVisible();
     await expect(
       page.getByRole('heading', { name: 'Featured Products', exact: true }),

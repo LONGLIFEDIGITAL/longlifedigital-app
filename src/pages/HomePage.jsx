@@ -169,7 +169,7 @@ export default function HomePage({
                   ]
               ).map(([val, lbl]) => (
                 <Box key={lbl} ta="center">
-                  <Box c="#E8C97A" fz={20} fw={800} ff="'Playfair Display',serif">
+                  <Box c="#E8C97A" fz={20} fw={800} ff="'Plus Jakarta Sans',sans-serif">
                     {loading ? (
                       <SkeletonRegion label="Loading product count">
                         <SkeletonBlock tone="light" height={25} width={48} mx="auto" />
@@ -224,7 +224,7 @@ export default function HomePage({
                   >
                     {!highlighted.image && getProdTheme(highlighted.id).icon}
                   </Box>
-                  <Box c="#fff" fz={18} fw="700" ff="'Playfair Display',serif" lh={1.3} mb={12}>
+                  <Box c="#fff" fz={18} fw="700" ff="'Plus Jakarta Sans',sans-serif" lh={1.3} mb={12}>
                     {highlighted.name}
                   </Box>
                   <Flex align="center" gap={10} wrap="wrap" mb={10}>
@@ -234,7 +234,7 @@ export default function HomePage({
                       c="#E8C97A"
                       fz={28}
                       fw="700"
-                      ff="'Playfair Display',serif"
+                      ff="'Plus Jakarta Sans',sans-serif"
                     >
                       {money(highlighted)}
                     </Text>
@@ -412,7 +412,7 @@ export default function HomePage({
         <Box bg="linear-gradient(135deg,#9333EA,#7C3AED)" p="32px 24px">
           <Flex align="center" justify="space-between" gap={20} wrap="wrap" maw={1280} m="0 auto">
             <div>
-              <Title order={3} c="#fff" fz={22} fw="700" ff="'Playfair Display',serif" mb={6}>
+              <Title order={3} c="#fff" fz={22} fw="700" ff="'Plus Jakarta Sans',sans-serif" mb={6}>
                 {content.offer.title}
               </Title>
               <Text component="p" inherit c="rgba(255,255,255,0.85)" fz={15}>
@@ -500,7 +500,7 @@ export default function HomePage({
               order={2}
               c="#fff"
               fz="clamp(22px,4vw,36px)"
-              ff="'Playfair Display',serif"
+              ff="'Plus Jakarta Sans',sans-serif"
               mb={10}
             >
               {newsletter.heading || 'Newsletter'}

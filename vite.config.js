@@ -3,12 +3,16 @@ import react from '@vitejs/plugin-react';
 import { createContentHandler } from './api/content.js';
 import { contentBootstrapPlugin } from './server/contentBootstrap.js';
 import { freshWordPressUrl } from './server/wordpressRequest.js';
+import { createCommerceHandler } from './api/commerce.js';
+import retiredPaymentHandler from './api/create-payment-intent.js';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), 'VITE_');
+  // Server handlers need private settings too; Vite still exposes only VITE_ values to React.
+  const env = { ...process.env, ...loadEnv(mode, process.cwd(), '') };
   const storeApiUrl = env.VITE_WOOCOMMERCE_STORE_API_URL?.trim();
   const store = storeApiUrl ? new URL(storeApiUrl) : null;
+  const commerceHandler = createCommerceHandler({ env });
   const contentListeners = new Set();
   const contentHandler = createContentHandler({
     baseUrl: env.VITE_WORDPRESS_API_URL,
@@ -31,6 +35,18 @@ export default defineConfig(({ mode }) => {
         name: 'wordpress-content',
         configureServer(server) {
           server.middlewares.use('/api/content', (req, res) => contentHandler(req, res));
+          // Give local Vite responses the same small interface as Vercel Functions.
+          const adapt = (handler) => (req, res) => {
+            res.status = (code) => { res.statusCode = code; return res; };
+            res.json = (body) => {
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify(body));
+            };
+            return handler(req, res);
+          };
+          server.middlewares.use('/api/commerce', commerceHandler);
+          server.middlewares.use('/api/create-payment-intent', adapt(retiredPaymentHandler));
+          server.middlewares.use('/api/stripe-webhook', adapt(retiredPaymentHandler));
         },
       },
     ],
