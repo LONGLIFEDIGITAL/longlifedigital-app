@@ -37,7 +37,10 @@ export default defineConfig(({ mode }) => {
           server.middlewares.use('/api/content', (req, res) => contentHandler(req, res));
           // Give local Vite responses the same small interface as Vercel Functions.
           const adapt = (handler) => (req, res) => {
-            res.status = (code) => { res.statusCode = code; return res; };
+            res.status = (code) => {
+              res.statusCode = code;
+              return res;
+            };
             res.json = (body) => {
               res.setHeader('Content-Type', 'application/json');
               res.end(JSON.stringify(body));
@@ -79,6 +82,9 @@ export default defineConfig(({ mode }) => {
             },
           }
         : undefined,
+    },
+    build: {
+      cssCodeSplit: false,
     },
   };
 });
