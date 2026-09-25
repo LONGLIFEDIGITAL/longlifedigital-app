@@ -31,11 +31,14 @@ h3,
 h4 {
   font-family: var(--mantine-font-family-headings);
 }
-button,
-input,
-textarea,
-select {
-  font: inherit;
+/* Keep native control defaults below component classes when using layered Mantine CSS. */
+@layer mantine {
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
 }
 button {
   cursor: pointer;
