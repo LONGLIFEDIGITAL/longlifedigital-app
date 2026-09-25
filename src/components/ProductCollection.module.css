@@ -16,6 +16,41 @@
   align-content: start;
 }
 
+.singleCard {
+  display: grid;
+  height: 100%;
+  min-width: 0;
+}
+.horizontalRow {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(100%, 280px);
+  gap: 20px;
+  min-width: 0;
+  overflow-x: auto;
+  padding-block: 4px 12px;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c9963f #f3eeff;
+}
+.horizontalRow > * {
+  scroll-snap-align: start;
+}
+.horizontalRow:focus-visible {
+  outline: 2px solid #9333ea;
+  outline-offset: 4px;
+}
+.peekSkeleton {
+  display: flex;
+  gap: 12px;
+  overflow: hidden;
+  padding-block: 4px 8px;
+}
+.peekSkeleton > * {
+  flex: 0 0 calc((100% - 12px) / 1.5);
+}
+
 .pagination {
   display: flex;
   align-items: center;

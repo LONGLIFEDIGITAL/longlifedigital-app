@@ -1,10 +1,11 @@
 import PageMetadata from '../components/PageMetadata';
+import { formatCompactCount } from '../utils/numbers';
 import { Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
-import LoadingImage from '../components/LoadingImage';
+import { cardEmoji, cardReviews, heroPreviewStatistics } from '../utils/cardPresentation';
 import HomeHeroContent from '../components/HomeHeroContent';
 import HomeEditorial, { EditorialStatistics, SectionHeading } from '../components/HomeEditorial';
 import useHomeHero from '../hooks/useHomeHero';
-import { fmtPrice, getProdTheme, stars } from '../utils/helpers';
+import { fmtPrice, stars } from '../utils/helpers';
 import { matchesCategory } from '../services/catalog';
 import CatalogStatus from '../components/CatalogStatus';
 import ProductCollection from '../components/ProductCollection';
@@ -24,6 +25,7 @@ export default function HomePage({
   setFilterCat,
   goProduct,
   addCart,
+  openCheckout,
   fire,
   isAdmin,
   openAdd,
@@ -51,6 +53,18 @@ export default function HomePage({
   const loading = catalogStatus === 'loading';
   const featured = products.filter((product) => product.featured);
   const highlighted = featured[0] || products[0];
+  const highlightedReview = highlighted ? cardReviews(highlighted) : null;
+  const previewStats = heroPreviewStatistics(brand.name).filter(
+    (stat) =>
+      !content?.heroStats?.some(
+        (published) => published.title?.trim().toLowerCase() === stat.label.toLowerCase(),
+      ),
+  );
+  const heroStats = [
+    ...previewStats.filter((stat) => stat.label === 'Happy Customers'),
+    { value: String(products.length), label: 'Digital Products' },
+    ...previewStats.filter((stat) => stat.label === 'Avg Rating'),
+  ];
   const saleProduct = products.find((product) => product.oldPrice);
   const homeProducts = featured.length ? featured : products;
   const money = (product, amount = product.price) =>
@@ -138,48 +152,32 @@ export default function HomePage({
             pointerEvents: 'none',
           }}
         />
-        <SimpleGrid
-          cols={{
-            base: 1,
-            md: 2,
-          }}
-          spacing={{
-            base: 32,
-            lg: 60,
-          }}
-          w="100%"
-          maw={1280}
-          m="0 auto"
-          pos="relative"
-          style={{
-            zIndex: 1,
-            alignItems: 'center',
-          }}
-        >
+        <Box className={classes.heroGrid}>
           <Box miw={0}>
             <HomeHeroContent website={brand.website} />
-            <EditorialStatistics items={content?.heroStats} light />
+            <EditorialStatistics
+              items={content?.heroStats?.map((stat) =>
+                stat.title?.trim().toLowerCase() === 'happy customers'
+                  ? { ...stat, value: formatCompactCount(stat.value) }
+                  : stat,
+              )}
+              light
+            />
             <Flex gap={24} wrap="wrap" mt={32}>
-              {(cmsManaged
-                ? [[String(products.length), 'Digital Products']]
-                : [
-                    ['500+', 'Happy Customers'],
-                    ['11+', 'Digital Products'],
-                    ['4.9★', 'Avg Rating'],
-                  ]
-              ).map(([val, lbl]) => (
-                <Box key={lbl} ta="center">
+              {heroStats.map(({ value, label, demo }) => (
+                <Box key={label} ta="center">
                   <Box c="#E8C97A" fz={20} fw={800} ff="'Plus Jakarta Sans',sans-serif">
-                    {loading ? (
+                    {loading && !demo ? (
                       <SkeletonRegion label="Loading product count">
                         <SkeletonBlock tone="light" height={25} width={48} mx="auto" />
                       </SkeletonRegion>
                     ) : (
-                      val
+                      value
                     )}
                   </Box>
                   <Box c="rgba(255,255,255,0.45)" fz={11} mt={2}>
-                    {lbl}
+                    {label}
+                    {demo && <span className={classes.previewLabel}>Preview</span>}
                   </Box>
                 </Box>
               ))}
@@ -187,47 +185,31 @@ export default function HomePage({
           </Box>
           <Box miw={0}>
             {highlighted ? (
-              <Box
-                className={classes.featuredCard}
-                data-with-image={highlighted.image ? true : undefined}
-              >
-                {highlighted.image && (
-                  <LoadingImage
-                    className={classes.featuredImage}
-                    src={highlighted.image}
-                    alt=""
-                    aria-hidden="true"
-                  />
-                )}
+              <Box className={classes.featuredCard} aria-label="Featured product">
                 <Box className={classes.featuredContent}>
                   <Box
                     c="#E8C97A"
                     bg="rgba(201,150,63,0.2)"
                     fz={11}
                     fw="700"
-                    mb={16}
                     p="4px 12px"
                     style={{
                       borderRadius: 20,
                       display: 'inline-block',
+                      alignSelf: 'flex-start',
                       border: '1px solid rgba(201,150,63,0.4)',
                     }}
                   >
                     {highlighted.tag ||
                       (highlighted.featured ? 'Featured Product' : 'Explore Our Products')}
                   </Box>
-                  <Box
-                    className={highlighted.image ? classes.featuredImageSpace : undefined}
-                    aria-hidden="true"
-                    fz={56}
-                    mb={12}
-                  >
-                    {!highlighted.image && getProdTheme(highlighted.id).icon}
+                  <Box aria-hidden="true" className={classes.featuredEmoji}>
+                    {cardEmoji(highlighted)}
                   </Box>
-                  <Box c="#fff" fz={18} fw="700" ff="'Plus Jakarta Sans',sans-serif" lh={1.3} mb={12}>
+                  <Box c="#fff" fz={18} fw="700" ff="'Plus Jakarta Sans',sans-serif" lh={1.3}>
                     {highlighted.name}
                   </Box>
-                  <Flex align="center" gap={10} wrap="wrap" mb={10}>
+                  <Flex align="center" gap={10} wrap="wrap">
                     <Text
                       component="span"
                       inherit
@@ -266,14 +248,22 @@ export default function HomePage({
                       </>
                     )}
                   </Flex>
-                  {highlighted.reviews > 0 && (
-                    <Box fz={13} mb={4}>
-                      <Text component="span" inherit c="#F59E0B">
-                        {stars(highlighted.rating)}
+                  {highlightedReview && (
+                    <Box fz={13} className={classes.featuredReviews}>
+                      <Text
+                        component="span"
+                        inherit
+                        c="#F59E0B"
+                        aria-label={`${highlightedReview.rating} out of 5 stars`}
+                      >
+                        {stars(highlightedReview.rating)}
                       </Text>{' '}
                       <Text component="span" inherit c="rgba(255,255,255,0.5)" fz={12}>
-                        {highlighted.rating} ({highlighted.reviews} reviews)
+                        {highlightedReview.rating.toFixed(1)} ({highlightedReview.count} reviews)
                       </Text>
+                      {highlightedReview.demo && (
+                        <span className={classes.previewLabel}>Preview</span>
+                      )}
                     </Box>
                   )}
                   <Button
@@ -290,7 +280,7 @@ export default function HomePage({
                     c="#1a0533"
                     type="button"
                     w="100%"
-                    mt={12}
+                    mt={4}
                   >
                     View Details →
                   </Button>
@@ -305,7 +295,7 @@ export default function HomePage({
               />
             )}
           </Box>
-        </SimpleGrid>
+        </Box>
       </Flex>
       <Box
         bg="#fff"
@@ -347,6 +337,7 @@ export default function HomePage({
                     component="span"
                     inherit
                     fz={28}
+                    c="#C9963F"
                     mb={6}
                     style={{
                       display: 'block',
@@ -381,12 +372,14 @@ export default function HomePage({
             loading={contentStatus === 'loading'}
           />
           <ProductCollection
+            mobilePeek
             products={homeProducts}
             loading={loading}
             label={collection?.title || 'Products'}
             desktopLimit={featured.length ? undefined : 4}
             minColWidth={260}
             addCart={addCart}
+            openCheckout={openCheckout}
             goProduct={goProduct}
             isAdmin={isAdmin}
             openEdit={openEdit}
@@ -409,7 +402,11 @@ export default function HomePage({
         </Container>
       </Box>
       {saleProduct && content?.offer?.title && (
-        <Box bg="linear-gradient(135deg,#9333EA,#7C3AED)" p="32px 24px">
+        <Box
+          bg="linear-gradient(
+357deg, rgb(132 61 196), rgb(59 24 119))"
+          p="32px 24px"
+        >
           <Flex align="center" justify="space-between" gap={20} wrap="wrap" maw={1280} m="0 auto">
             <div>
               <Title order={3} c="#fff" fz={22} fw="700" ff="'Plus Jakarta Sans',sans-serif" mb={6}>
@@ -427,14 +424,14 @@ export default function HomePage({
                 variant="transparent"
                 color="dark"
                 type="button"
-                c="#9333EA"
-                bg="#fff"
+                c="#f2e7fd"
+                bg="#370664"
                 fz={14}
                 fw="700"
                 ff="'Inter',sans-serif"
                 p="13px 20px"
                 style={{
-                  border: 'none',
+                  border: 'solid 1px #dbb8fe',
                   borderRadius: 8,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
@@ -463,12 +460,14 @@ export default function HomePage({
             loading={contentStatus === 'loading'}
           />
           <ProductCollection
+            mobilePeek
             products={[...products].sort((a, b) => b.reviews - a.reviews)}
             loading={loading}
             label={more?.title || 'More products'}
             desktopLimit={4}
             minColWidth={260}
             addCart={addCart}
+            openCheckout={openCheckout}
             goProduct={goProduct}
             isAdmin={isAdmin}
             openEdit={openEdit}

@@ -18,6 +18,7 @@ export default defineConfig({
       VITE_WOOCOMMERCE_STORE_API_URL: 'https://catalog.example.test/wp-json/wc/store/v1',
       VITE_WORDPRESS_API_URL: '',
       VITE_HEADLESS_COMMERCE: 'false',
+      VITE_DEMO_REVIEWS: 'true',
     },
   },
 });

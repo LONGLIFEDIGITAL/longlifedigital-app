@@ -1,239 +1,83 @@
+import { useRef, useState } from 'react';
 import { Box, Button, Flex, Text } from '@mantine/core';
-import { stars, fmtPrice, catLabel, getProdTheme } from '../utils/helpers';
+import { stars, fmtPrice, catLabel } from '../utils/helpers';
+import { cardEmoji, cardReviews, cardTheme } from '../utils/cardPresentation';
+import { headlessEnabled } from '../services/checkout';
 import classes from './ProductCard.module.css';
-import LoadingImage from './LoadingImage';
+
+const cardButtonStyles = { root: { minHeight: 36, paddingBlock: 6 } };
 
 export default function ProductCard({
   p,
   addCart,
+  openCheckout,
   goProduct,
   isAdmin,
   openEdit,
   openDel,
   compact = false,
+  peek = false,
 }) {
-  const summary = p.summary || p.desc;
+  const [pending, setPending] = useState('');
+  const actionLock = useRef(false);
+  const theme = cardTheme(p);
+  const emoji = cardEmoji(p);
+  const review = cardReviews(p);
+  const category = p.categoryLabel || catLabel(p.cat);
+  const onSale = p.oldPrice > p.price && p.price !== null;
+  const run = async (action) => {
+    if (actionLock.current) return;
+    actionLock.current = true;
+    setPending(action);
+    try {
+      if (action === 'buy') await openCheckout(p);
+      else await addCart(p);
+    } finally {
+      actionLock.current = false;
+      setPending('');
+    }
+  };
   return (
     <Box
       component="article"
       className={`pcard ${classes.card}`}
       data-compact={compact || undefined}
+      data-peek={peek || undefined}
     >
-      <Flex
-        align="center"
-        justify="center"
-        wrap="wrap"
-        bg={p.image ? 'transparent' : getProdTheme(p.id).bg}
+      <div
         className={classes.media}
+        style={{ background: theme.bg, '--card-accent': theme.accent }}
       >
-        {p.image ? (
-          <>
-            <LoadingImage
-              src={p.image}
-              alt={p.imageAlt || p.name}
-              className={classes.image}
-              loading="lazy"
-            />
-            <Box bg={getProdTheme(p.id).bar} h={3} pos="absolute" top={0} left={0} right={0} />
-            {p.tag && (
-              <Box
-                className={classes.tag}
-                c="#E8C97A"
-                bg="rgba(0,0,0,0.55)"
-                fz={9}
-                fw={700}
-                lts={1}
-                p="3px 10px"
-                pos="absolute"
-                top={10}
-                right={10}
-                style={{
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: 20,
-                  zIndex: 2,
-                }}
-              >
-                {p.tag}
-              </Box>
-            )}
-            <Flex
-              className={classes.imagePrice}
-              align="center"
-              justify="space-between"
-              wrap="wrap"
-              bg="linear-gradient(0deg,rgba(0,0,0,0.75) 0%,transparent 100%)"
-              p="12px 14px"
-              pos="absolute"
-              left={0}
-              right={0}
-              bottom={0}
-              style={{
-                zIndex: 2,
-              }}
-            >
-              <Box c="#fff" fz={26} fw={700} ff="'Plus Jakarta Sans',sans-serif" lh={1}>
-                {fmtPrice(p.price, p.currency, p.minorUnit)}
-              </Box>
-              {p.oldPrice && (
-                <Box
-                  c="#E8C97A"
-                  bg="rgba(201,150,63,0.25)"
-                  fz={8}
-                  fw={700}
-                  p="2px 7px"
-                  style={{
-                    border: '1px solid rgba(201,150,63,0.4)',
-                    borderRadius: 20,
-                  }}
-                >
-                  -{Math.round((1 - p.price / p.oldPrice) * 100)}%
-                </Box>
-              )}
-            </Flex>
-          </>
-        ) : (
-          <>
-            <Box
-              bg={`radial-gradient(circle,${getProdTheme(p.id).orb1} 0%,transparent 70%)`}
-              w="70%"
-              h="70%"
-              pos="absolute"
-              top="-20%"
-              right="-15%"
-              style={{
-                borderRadius: '50%',
-                pointerEvents: 'none',
-              }}
-            />
-            <Box
-              bg={`radial-gradient(circle,${getProdTheme(p.id).orb2} 0%,transparent 70%)`}
-              w="50%"
-              h="50%"
-              pos="absolute"
-              left="-10%"
-              bottom="-15%"
-              style={{
-                borderRadius: '50%',
-                pointerEvents: 'none',
-              }}
-            />
-            <Box bg={getProdTheme(p.id).bar} h={3} pos="absolute" top={0} left={0} right={0} />
-            <Box
-              className={classes.imageCategory}
-              c={getProdTheme(p.id).tagColor}
-              bg="rgba(0,0,0,0.4)"
-              fz={9}
-              fw={700}
-              lts={2}
-              tt="uppercase"
-              p="3px 10px"
-              pos="absolute"
-              top={10}
-              left={10}
-              style={{
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255,255,255,0.15)',
-                borderRadius: 20,
-                zIndex: 2,
-              }}
-            >
-              {getProdTheme(p.id).icon} {(p.categoryLabel || catLabel(p.cat)).toUpperCase()}
-            </Box>
-            {p.tag && (
-              <Box
-                className={classes.tag}
-                c="#E8C97A"
-                bg="rgba(0,0,0,0.4)"
-                fz={9}
-                fw={700}
-                lts={1}
-                p="3px 10px"
-                pos="absolute"
-                top={10}
-                right={10}
-                style={{
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: 20,
-                  zIndex: 2,
-                }}
-              >
-                {p.tag}
-              </Box>
-            )}
-            <Box
-              fz={80}
-              opacity={0.08}
-              style={{
-                pointerEvents: 'none',
-                userSelect: 'none',
-                zIndex: 1,
-              }}
-            >
-              {getProdTheme(p.id).icon}
-            </Box>
-            <Flex
-              className={classes.imagePrice}
-              align="center"
-              justify="space-between"
-              wrap="wrap"
-              bg="linear-gradient(0deg,rgba(0,0,0,0.88) 0%,transparent 100%)"
-              p="12px 14px"
-              pos="absolute"
-              left={0}
-              right={0}
-              bottom={0}
-              style={{
-                zIndex: 2,
-              }}
-            >
-              <Box
-                c={getProdTheme(p.id).priceColor}
-                fz={26}
-                fw={700}
-                ff="'Plus Jakarta Sans',sans-serif"
-                lh={1}
-              >
-                {fmtPrice(p.price, p.currency, p.minorUnit)}
-              </Box>
-              <Flex align="center" gap={6} wrap="wrap">
-                {p.oldPrice && (
-                  <Box c="rgba(255,255,255,0.35)" fz={11} td="line-through">
-                    {fmtPrice(p.oldPrice, p.currency, p.minorUnit)}
-                  </Box>
-                )}
-                {p.oldPrice && (
-                  <Box
-                    c="#E8C97A"
-                    bg="rgba(201,150,63,0.2)"
-                    fz={8}
-                    fw={700}
-                    p="2px 7px"
-                    style={{
-                      border: '1px solid rgba(201,150,63,0.3)',
-                      borderRadius: 20,
-                    }}
-                  >
-                    -{Math.round((1 - p.price / p.oldPrice) * 100)}%
-                  </Box>
-                )}
-              </Flex>
-            </Flex>
-          </>
-        )}
-      </Flex>
-      <Box className={classes.details}>
-        <Flex className={classes.categoryRow} align="center" gap={6} wrap="wrap">
-          <Text component="p" className={classes.category}>
-            {p.categoryLabel || catLabel(p.cat)}
-          </Text>
-          {p.pdfFile && (
-            <Text component="span" className={classes.fileBadge}>
-              📄 PDF READY
-            </Text>
+        <div
+          className={classes.orb}
+          style={{ background: `radial-gradient(circle,${theme.orb1},transparent 70%)` }}
+        />
+        <div className={classes.accent} style={{ background: theme.bar }} />
+        <div className={classes.badges}>
+          <span className={classes.imageCategory}>
+            <span aria-hidden="true">{emoji}</span> {category}
+          </span>
+          {p.tag && <span className={classes.tag}>{p.tag}</span>}
+        </div>
+        <span className={classes.emoji} aria-hidden="true">
+          {emoji}
+        </span>
+        <div className={classes.imagePrice} aria-hidden="true">
+          <span>{fmtPrice(p.price, p.currency, p.minorUnit)}</span>
+          {onSale && (
+            <div>
+              <del>{fmtPrice(p.oldPrice, p.currency, p.minorUnit)}</del>
+              <span className={classes.discount}>
+                -{Math.round((1 - p.price / p.oldPrice) * 100)}%
+              </span>
+            </div>
           )}
-        </Flex>
+        </div>
+      </div>
+      <Box className={classes.details}>
+        <Text component="p" className={classes.category}>
+          {category}
+        </Text>
         <h3 className={classes.title}>
           <button
             type="button"
@@ -244,56 +88,67 @@ export default function ProductCard({
             <span className={classes.productName}>{p.name}</span>
           </button>
         </h3>
-        {summary && (
-          <Text component="p" className={classes.summary} lineClamp={3}>
-            {summary}
-          </Text>
-        )}
-        {p.reviews > 0 && (
-          <Flex className={classes.reviews} align="center" gap={6} wrap="wrap">
-            <Text component="span" inherit c="#F59E0B" fz={12}>
-              {stars(p.rating).slice(0, 5)}
-            </Text>
-            <Text component="span" className={classes.reviewCount}>
-              {p.rating} ({p.reviews})
-            </Text>
-          </Flex>
+        {review && (
+          <div
+            className={classes.reviews}
+            aria-label={`${review.demo ? 'Preview: ' : ''}${review.rating} out of 5 stars, ${review.count} reviews`}
+          >
+            <span className={classes.stars} aria-hidden="true">
+              {stars(review.rating).slice(0, 5)}
+            </span>
+            <span>
+              {review.rating.toFixed(1)} ({review.count})
+            </span>
+            {review.demo && <span className={classes.previewLabel}>Preview</span>}
+          </div>
         )}
         <Flex align="center" gap={8} wrap="wrap">
           <Text component="span" className={classes.price}>
             {fmtPrice(p.price, p.currency, p.minorUnit)}
           </Text>
-          {p.oldPrice && (
+          {onSale && (
             <Text component="span" className={classes.oldPrice}>
               {fmtPrice(p.oldPrice, p.currency, p.minorUnit)}
             </Text>
           )}
         </Flex>
         {p.availability && <Text className={classes.availability}>{p.availability}</Text>}
-        <Box className={classes.actions}>
+        <div className={classes.actions}>
           <Button
-            className={`btn-h ${classes.addButton}`}
-            disabled={p.canAddToCart === false}
-            onClick={(event) => {
-              event.stopPropagation();
-              addCart(p);
-            }}
-            variant="gradient"
-            gradient={{ from: '#C9963F', to: '#E8C97A', deg: 135 }}
-            c="#24113d"
-            fullWidth
+            className={classes.addButton}
+            styles={cardButtonStyles}
+            disabled={p.canAddToCart === false || !!pending}
+            loading={pending === 'add'}
+            onClick={() => run('add')}
+            color="dark"
             type="button"
           >
             Add to Cart
           </Button>
-        </Box>
+          <Button
+            className={classes.buyButton}
+            styles={cardButtonStyles}
+            disabled={
+              !headlessEnabled ||
+              !openCheckout ||
+              p.source !== 'woocommerce' ||
+              p.canAddToCart === false ||
+              !!pending
+            }
+            loading={pending === 'buy'}
+            onClick={() => run('buy')}
+            color="brand"
+            type="button"
+          >
+            Buy Now
+          </Button>
+        </div>
         {isAdmin && (
           <Flex className={classes.adminActions} gap={8} wrap="wrap" mt={10} pt={10}>
             <Button
               onClick={() => openEdit(p)}
               variant="light"
               color="gray"
-              px="lg"
               size="xs"
               type="button"
             >
@@ -303,7 +158,6 @@ export default function ProductCard({
               onClick={() => openDel(p.id)}
               variant="light"
               color="red"
-              px="lg"
               size="xs"
               type="button"
             >

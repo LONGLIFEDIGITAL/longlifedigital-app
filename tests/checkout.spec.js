@@ -688,3 +688,45 @@ test('real Stripe test-mode payment fields mount without submitting a payment', 
   await page.screenshot({ path: 'test-results/stripe-fields-real.png' });
   expect(calls.some((call) => call.action === 'checkout')).toBe(false);
 });
+
+test('Buy Now waits for Woo cart success, prevents repeat clicks, and preserves the cart', async ({
+  page,
+}) => {
+  const calls = await setup(page);
+  let release;
+  const ready = new Promise((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/api/commerce?action=add', async (route) => {
+    await ready;
+    await route.fallback();
+  });
+  await page.goto('/products');
+  const card = page.getByRole('article').filter({ hasText: product.name });
+  await card.getByRole('button', { name: 'Buy Now', exact: true }).click();
+  await expect(card.getByRole('button', { name: 'Buy Now', exact: true })).toBeDisabled();
+  await expect(page).toHaveURL(/\/products$/);
+  release();
+  await expect(page).toHaveURL(/\/checkout$/);
+  await expect(page.getByRole('button', { name: 'Open cart (2)' })).toBeVisible();
+  expect(calls.filter((call) => call.action === 'add')).toHaveLength(1);
+  expect(calls.some((call) => call.action === 'checkout')).toBe(false);
+});
+
+test('Buy Now stays on the listing when Woo cannot add the product', async ({ page }) => {
+  await setup(page);
+  await page.route('**/api/commerce?action=add', (route) =>
+    route.fulfill({ status: 409, json: { error: 'This product is out of stock.' } }),
+  );
+  await page.goto('/products');
+  const buy = page
+    .getByRole('article')
+    .filter({ hasText: product.name })
+    .getByRole('button', { name: 'Buy Now', exact: true });
+  await buy.click();
+  await expect(
+    page.getByRole('status').filter({ hasText: 'This product is out of stock.' }),
+  ).toBeVisible();
+  await expect(buy).toBeEnabled();
+  await expect(page).toHaveURL(/\/products$/);
+});

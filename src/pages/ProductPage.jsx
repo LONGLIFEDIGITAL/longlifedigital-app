@@ -209,8 +209,16 @@ export default function ProductPage({
             </Flex>
           </div>
           <div>
-            <Box c="#9333EA" fz={12} fw="600" lts={1.5} tt="uppercase" mb={10}>
-              {p.categoryLabel || catLabel(p.cat)}
+            <Box c="#9333EA" fz={10} fw="600" lts={1.5} tt="uppercase" mb={10}>
+              <Text component="span" inherit c="#C9963F" aria-hidden="true">
+                ✦
+              </Text>
+              <span style={{ marginLeft: 8, marginRight: 8 }}>
+                {p.categoryLabel || catLabel(p.cat)}
+              </span>
+              <Text component="span" inherit c="#C9963F" aria-hidden="true">
+                ✦
+              </Text>
             </Box>
             <Title
               order={1}
@@ -363,7 +371,9 @@ export default function ProductPage({
               </Button>
               <Button
                 className="btn-h"
-                disabled={!headlessEnabled || p.source !== 'woocommerce' || p.canAddToCart === false}
+                disabled={
+                  !headlessEnabled || p.source !== 'woocommerce' || p.canAddToCart === false
+                }
                 loading={checkoutLoading}
                 onClick={() => openCheckout(p)}
                 variant="gradient"
@@ -479,6 +489,7 @@ export default function ProductPage({
                   key={r.id}
                   p={r}
                   addCart={addCart}
+                  openCheckout={openCheckout}
                   goProduct={goProduct}
                   fire={fire}
                   isAdmin={isAdmin}

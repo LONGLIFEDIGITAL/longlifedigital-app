@@ -5,12 +5,12 @@ import SkeletonRegion from './skeletons/SkeletonRegion';
 import classes from './CatalogStatistics.module.css';
 
 export default function CatalogStatistics({ products, status }) {
-  const { categoryCount, aiPromptProductCount } = catalogStatistics(products);
+  const { categoryCount, aiToolsProductCount: aiToolsProductCount } = catalogStatistics(products);
   return (
     <SimpleGrid cols={2} spacing={16} w="100%" role="group" aria-label="Store statistics">
       {[
         { label: 'Product Categories', value: categoryCount, dynamic: true },
-        { label: 'AI Prompt Products', value: aiPromptProductCount, dynamic: true },
+        { label: 'AI Tools', value: aiToolsProductCount, dynamic: true },
         { label: 'Support', value: '24hr' },
         { label: 'Digital', value: '100%' },
       ].map(({ label, value, dynamic }) => (

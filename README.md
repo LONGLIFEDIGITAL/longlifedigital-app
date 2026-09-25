@@ -258,12 +258,14 @@ component defaults live in `src/theme.js`; `src/main.jsx` installs the provider.
 Pages use Mantine containers, grids, flex layouts, buttons, and inputs. Custom
 gradients and decorative effects remain in component styles and CSS modules.
 
-Below the Mantine `sm` breakpoint, the homepage product sections and shop use
-`ProductCollection`: Mantine Carousel/Embla pages with two columns and two rows.
-Cards show compact images, titles, prices and cart buttons; descriptions remain
-on the product page. Touch swipes, arrow buttons and keyboard navigation move
-between groups of four, and filtering/sorting resets to the first group. Desktop
-grids retain their existing layout. Styles live in the collection and card CSS modules.
+Below the Mantine `sm` breakpoint, homepage product sections and `/products` use `ProductCollection`
+with `mobilePeek`: a single horizontal row showing one full card and half the next.
+These cards retain the desktop artwork, prices, reviews and paired cart/checkout buttons.
+Other collections retain compact two-column, two-row pages, advancing in groups of four.
+Both layouts support swipes, arrow buttons and keyboard navigation; filtering/sorting
+resets to the start. Desktop grids retain their existing layout. Styles live in the
+collection and card CSS modules. Happy Customers counts use compact K/M/B notation
+with an optional trailing plus sign, through `src/utils/numbers.js`.
 
 Loading states use Mantine's built-in `Skeleton`, with reusable components in
 `src/components/skeletons`. The homepage, shop, courses and product details show
@@ -274,7 +276,7 @@ loaded cards. Static content and navigation remain available while requests run.
 retry and empty states separate from loading.
 
 `LoadingImage` handles product photos independently after catalog data arrives,
-including featured images, product details and cart thumbnails. It reserves the
+including product details and cart thumbnails. Listing cards use category/tag emojis. It reserves the
 image's container, removes the skeleton when the image loads and shows a fallback
 on failure. Skeleton colors live in `Skeletons.module.css`; loading regions are
 labelled for assistive technology and animation stops with reduced motion enabled.

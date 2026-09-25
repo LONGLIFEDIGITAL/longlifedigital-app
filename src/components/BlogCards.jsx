@@ -1,16 +1,17 @@
 import { Alert, Button } from '@mantine/core';
 import { Link } from 'react-router';
 import { postDate } from '../services/posts';
-import LoadingImage from './LoadingImage';
+import { cardEmoji } from '../utils/cardPresentation';
 import SkeletonBlock from './skeletons/SkeletonBlock';
 import SkeletonRegion from './skeletons/SkeletonRegion';
 import classes from './BlogCards.module.css';
 
-export default function BlogCards({ data, status, retry }) {
+export default function BlogCards({ data, status, retry, mobilePeek = false }) {
+  const gridClass = `${classes.grid}${mobilePeek ? ` ${classes.mobilePeek}` : ''}`;
   if (status === 'loading')
     return (
       <SkeletonRegion label="Loading blog posts">
-        <div className={classes.grid}>
+        <div className={gridClass}>
           {[0, 1, 2].map((id) => (
             <div key={id} className={classes.card}>
               <SkeletonBlock height={180} radius={0} />
@@ -36,7 +37,12 @@ export default function BlogCards({ data, status, retry }) {
   if (!data?.posts.length)
     return <p className={classes.empty}>No articles have been published here yet.</p>;
   return (
-    <div className={classes.grid}>
+    <div
+      className={gridClass}
+      role={mobilePeek ? 'region' : undefined}
+      aria-label={mobilePeek ? 'Recent articles' : undefined}
+      tabIndex={mobilePeek ? 0 : undefined}
+    >
       {data.posts.map((post) => (
         <article key={post.id} className={classes.card}>
           <Link
@@ -45,11 +51,7 @@ export default function BlogCards({ data, status, retry }) {
             aria-hidden="true"
             className={classes.imageLink}
           >
-            {post.image.src ? (
-              <LoadingImage src={post.image.src} alt="" className={classes.image} loading="lazy" />
-            ) : (
-              <div className={classes.placeholder}>{post.img || '📖'}</div>
-            )}
+            <div className={classes.placeholder}>{cardEmoji(post, '📖')}</div>
           </Link>
           <div className={classes.details}>
             {!!post.categories.length && (

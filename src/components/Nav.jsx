@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import useNavigationContent from '../hooks/useNavigationContent';
 import ContentLink from './ContentLink';
 import {
@@ -18,7 +19,7 @@ import {
   UnstyledButton,
 } from '@mantine/core';
 import { useResizeObserver } from '@mantine/hooks';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import LDLogo from './LDLogo';
 import SkeletonBlock from './skeletons/SkeletonBlock';
 import SkeletonRegion from './skeletons/SkeletonRegion';
@@ -46,12 +47,39 @@ export default function Nav({
   setActiveDropdown,
 }) {
   const { brand, contact, announcement } = settings;
+  const location = useLocation();
+  const isCurrent = (item) => {
+    if (!item.destination) return false;
+    try {
+      const url = new URL(item.destination, window.location.origin);
+      if (
+        url.origin !== window.location.origin &&
+        (!brand.website || url.origin !== new URL(brand.website).origin)
+      )
+        return false;
+      const path = url.pathname.replace(/\/$/, '') || '/';
+      const currentPath = location.pathname.replace(/\/$/, '') || '/';
+      return (
+        (currentPath === path || (path !== '/' && currentPath.startsWith(`${path}/`))) &&
+        (!url.search || url.search === location.search) &&
+        (!url.hash || url.hash === location.hash)
+      );
+    } catch {
+      return false;
+    }
+  };
+  const isActive = (item) => isCurrent(item) || item.children?.some(isCurrent);
   const navigation = useNavigationContent();
   const showAnnouncement = announcement.enabled && Boolean(announcement.message);
   const announcementLink = announcement.cta;
   const [headerRef, headerRect] = useResizeObserver();
   const [announcementRef, announcementRect] = useResizeObserver();
   const cartCount = getCartCount(cart);
+  useEffect(() => {
+    const closeDropdown = () => setActiveDropdown(null);
+    window.addEventListener('resize', closeDropdown);
+    return () => window.removeEventListener('resize', closeDropdown);
+  }, [setActiveDropdown]);
   const closeNavigation = () => {
     setMenuOpen(false);
     setActiveDropdown(null);
@@ -109,7 +137,7 @@ export default function Nav({
             </Text>
           )}
         </Box>
-        <Container size={1440} py={10}>
+        <Container size={1680} py={10}>
           <Flex
             component="nav"
             aria-label="Main navigation"
@@ -156,68 +184,100 @@ export default function Nav({
                 </Box>
               </Group>
             </UnstyledButton>
-            <Group visibleFrom="xl" gap={4} wrap="nowrap" ml="auto">
-              {navigation.header.map((item) =>
-                item.children.length ? (
-                  <Menu
-                    key={item.id}
-                    trigger="click-hover"
-                    opened={activeDropdown === item.id}
-                    onChange={(opened) => setActiveDropdown(opened ? item.id : null)}
-                    withinPortal
-                    zIndex={150}
-                    width={320}
-                  >
-                    <Menu.Target>
-                      <Button variant="subtle" color="dark" size="sm" px={10} rightSection="▾">
-                        {item.title}
-                      </Button>
-                    </Menu.Target>
-                    <Menu.Dropdown>
-                      <Menu.Item
-                        component={ContentLink}
-                        item={item}
-                        website={brand.website}
-                        onClick={closeNavigation}
-                      >
-                        View {item.title}
-                      </Menu.Item>
-                      <Menu.Divider />
-                      {item.children.map((child) => (
+            <div className={classes.inlineNav} aria-label="Quick navigation">
+              {navigation.header.map((item) => (
+                <div key={item.id} className={classes.navItem}>
+                  {item.children.length ? (
+                    <Menu
+                      trigger="click-hover"
+                      openDelay={80}
+                      closeDelay={150}
+                      opened={activeDropdown === item.id}
+                      onChange={(opened) => setActiveDropdown(opened ? item.id : null)}
+                      withinPortal
+                      zIndex={150}
+                      width="min(620px, calc(100vw - 32px))"
+                      position="bottom-start"
+                    >
+                      <Menu.Target>
+                        <Button
+                          className={classes.navButton}
+                          data-active={isActive(item) || undefined}
+                          aria-current={isCurrent(item) ? 'page' : undefined}
+                          variant="subtle"
+                          color="dark"
+                          size="sm"
+                          rightSection={<span aria-hidden="true">▾</span>}
+                          title={item.title}
+                        >
+                          {item.title}
+                        </Button>
+                      </Menu.Target>
+                      <Menu.Dropdown className={classes.dropdown}>
+                        <Menu.Label className={classes.menuHeading}>{item.title}</Menu.Label>
+                        <Menu.Divider />
+                        <div className={classes.menuGrid}>
+                          {item.children.map((child) => (
+                            <Menu.Item
+                              key={child.id}
+                              component={ContentLink}
+                              item={child}
+                              website={brand.website}
+                              onClick={closeNavigation}
+                              className={classes.menuItem}
+                              data-active={isCurrent(child) || undefined}
+                              aria-current={isCurrent(child) ? 'page' : undefined}
+                            >
+                              <div className={classes.menuEntry}>
+                                <span className={classes.menuIcon} aria-hidden="true">
+                                  {child.icon || '✦'}
+                                </span>
+                                <div>
+                                  <Text fw={600} size="sm">
+                                    {child.title}
+                                  </Text>
+                                  {child.description && (
+                                    <Text size="xs" c="dimmed" mt={4}>
+                                      {child.description}
+                                    </Text>
+                                  )}
+                                </div>
+                              </div>
+                            </Menu.Item>
+                          ))}
+                        </div>
+                        <Menu.Divider />
                         <Menu.Item
-                          key={child.id}
                           component={ContentLink}
-                          item={child}
+                          item={item}
                           website={brand.website}
                           onClick={closeNavigation}
+                          className={classes.viewAll}
                         >
-                          {child.icon} {child.title}
-                          {child.description && (
-                            <Text size="xs" c="dimmed">
-                              {child.description}
-                            </Text>
-                          )}
+                          View {item.title} →
                         </Menu.Item>
-                      ))}
-                    </Menu.Dropdown>
-                  </Menu>
-                ) : (
-                  <Button
-                    key={item.id}
-                    component={ContentLink}
-                    item={item}
-                    website={brand.website}
-                    variant="subtle"
-                    size="sm"
-                    px={10}
-                    color="dark"
-                    onClick={closeNavigation}
-                  >
-                    {item.title}
-                  </Button>
-                ),
-              )}
-            </Group>
+                      </Menu.Dropdown>
+                    </Menu>
+                  ) : (
+                    <Button
+                      component={ContentLink}
+                      item={item}
+                      website={brand.website}
+                      variant="subtle"
+                      size="sm"
+                      color="dark"
+                      className={classes.navButton}
+                      data-active={isActive(item) || undefined}
+                      aria-current={isCurrent(item) ? 'page' : undefined}
+                      title={item.title}
+                      onClick={closeNavigation}
+                    >
+                      {item.title}
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
             <Group
               gap={{
                 base: 6,
@@ -227,7 +287,7 @@ export default function Nav({
               ml="auto"
             >
               <TextInput
-                visibleFrom="sm"
+                className={classes.desktopSearch}
                 w={{
                   sm: 180,
                   lg: 210,
@@ -270,19 +330,35 @@ export default function Nav({
                     onClick={() => setShowLogin(true)}
                   />
                 ))}
-              <Indicator label={cartCount} disabled={!cartCount} size={18} offset={3}>
+              <Indicator label={cartCount} disabled={!cartCount} size={16} offset={12}>
                 <ActionIcon
-                  size="lg"
-                  variant="filled"
-                  color="dark"
+                  size={44}
+                  variant="transparent"
+                  className={classes.cartButton}
                   onClick={() => setShowCart(true)}
                   aria-label={`Open cart (${cartCount})`}
                 >
-                  🛒
+                  <svg
+                    width="30"
+                    height="30"
+                    viewBox="0 0 32 32"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M2 4h4l4 17h15l4-13H7" />
+                    <path d="m10 21-1 4h17" />
+                    <path d="M8 12h19M9 16h17M12 8l2 13M18 8v13M24 8l-2 13" strokeWidth="1" />
+                    <circle cx="12" cy="28" r="1.7" />
+                    <circle cx="24" cy="28" r="1.7" />
+                  </svg>
                 </ActionIcon>
               </Indicator>
               <Burger
-                hiddenFrom="xl"
                 opened={menuOpen}
                 onClick={() => setMenuOpen(!menuOpen)}
                 aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
@@ -331,6 +407,9 @@ export default function Nav({
                 item={item}
                 website={brand.website}
                 label={item.title}
+                className={classes.drawerLink}
+                data-active={isActive(item) || undefined}
+                aria-current={isCurrent(item) ? 'page' : undefined}
                 onClick={closeNavigation}
               />
               {item.children.map((child) => (
@@ -341,6 +420,9 @@ export default function Nav({
                   item={child}
                   website={brand.website}
                   label={child.title}
+                  className={classes.drawerLink}
+                  data-active={isCurrent(child) || undefined}
+                  aria-current={isCurrent(child) ? 'page' : undefined}
                   onClick={closeNavigation}
                 />
               ))}

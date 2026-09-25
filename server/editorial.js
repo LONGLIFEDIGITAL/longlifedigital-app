@@ -149,6 +149,11 @@ export function postContent(post, detail, httpsUrl) {
     excerpt: text(post.excerpt?.rendered),
     date: text(post.date),
     categories: categories.map((term) => text(term.name)).filter(Boolean),
+    tags: (post._embedded?.['wp:term'] || [])
+      .flat()
+      .filter((term) => term.taxonomy === 'post_tag')
+      .map((term) => text(term.name))
+      .filter(Boolean),
     image: {
       src: media?.media_type === 'image' ? httpsUrl(media.source_url) : '',
       alt: text(media?.alt_text),

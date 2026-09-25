@@ -11,6 +11,7 @@ export default function CoursesPage({
   catalogStatus,
   retryCatalog,
   addCart,
+  openCheckout,
   goProduct,
   fire,
   isAdmin,
@@ -44,6 +45,7 @@ export default function CoursesPage({
                 key={p.id}
                 p={p}
                 addCart={addCart}
+                openCheckout={openCheckout}
                 goProduct={goProduct}
                 fire={fire}
                 isAdmin={isAdmin}
@@ -79,6 +81,7 @@ export default function CoursesPage({
                     key={p.id}
                     p={p}
                     addCart={addCart}
+                    openCheckout={openCheckout}
                     goProduct={goProduct}
                     fire={fire}
                     isAdmin={isAdmin}

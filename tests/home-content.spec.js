@@ -2,7 +2,23 @@ import { expect, test } from '@playwright/test';
 import { createContentHandler } from '../api/content.js';
 import { bootstrapTag, createBootstrap } from '../server/contentBootstrap.js';
 import { catalogStatistics } from '../src/utils/catalogStatistics.js';
+import { formatCompactCount } from '../src/utils/numbers.js';
 import { homeRecord } from './fixtures/home';
+
+test('customer counts use compact suffixes and preserve the plus sign', () => {
+  for (const [value, expected] of [
+    ['999+', '999+'],
+    ['1000+', '1K+'],
+    ['10,000+', '10K+'],
+    ['5048+', '5K+'],
+    ['12500', '12.5K'],
+    ['5,000,000+', '5M+'],
+    [5000000, '5M'],
+    ['1000000000+', '1B+'],
+    ['5K+', '5K+'],
+  ])
+    expect(formatCompactCount(value)).toBe(expected);
+});
 
 const product = {
   id: 26,
@@ -219,7 +235,7 @@ test('statistics count distinct categories and classified products once, without
   expect(catalogStatistics([])).toEqual({ categoryCount: 0, aiPromptProductCount: 0 });
 });
 
-for (const width of [320, 393, 1440]) {
+for (const width of [320, 393, 1024, 1440]) {
   test(`CMS hero preserves navigation and fits at ${width}px`, async ({ page }) => {
     await setup(page);
     await page.setViewportSize({ width, height: 900 });
@@ -241,6 +257,19 @@ for (const width of [320, 393, 1440]) {
       page.getByRole('heading', { name: 'Featured Products', exact: true }),
     ).toBeVisible();
     await expect(page.getByText('Featured in WordPress')).toBeVisible();
+    const heroCard = page.locator('[aria-label="Featured product"]');
+    const cardBounds = await heroCard.boundingBox();
+    const buttonBounds = await heroCard.getByRole('button', { name: /View Details/ }).boundingBox();
+    if (width >= 393) expect(Math.abs(cardBounds.width - cardBounds.height)).toBeLessThanOrEqual(1);
+    expect(buttonBounds.y + buttonBounds.height).toBeLessThan(cardBounds.y + cardBounds.height);
+    if (process.env.VITE_DEMO_REVIEWS === 'true') {
+      await expect(heroCard).toContainText(/5\.0 \(\d+ reviews\)/);
+      await expect(page.getByText('Happy Customers', { exact: false }).first()).toBeVisible();
+      await expect(page.getByText('Avg Rating', { exact: false }).first()).toBeVisible();
+    }
+    await heroCard.screenshot({ path: `test-results/hero-card-${width}.png` });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: `test-results/hero-spacing-${width}.png` });
     await expect(page.getByRole('group', { name: 'Product Categories', exact: true })).toHaveText(
       '1Product Categories',
     );
@@ -416,7 +445,10 @@ const article = (id, title = `Article ${id}`) => ({
     protected: false,
   },
   _embedded: {
-    'wp:term': [[{ taxonomy: 'category', name: 'Business &amp; Growth' }]],
+    'wp:term': [
+      [{ taxonomy: 'category', name: 'Business &amp; Growth' }],
+      [{ taxonomy: 'post_tag', name: 'SEO' }],
+    ],
     'wp:featuredmedia': [
       {
         media_type: 'image',
@@ -511,7 +543,12 @@ for (const width of [320, 1440]) {
     server.pages[0].acf.lld_home.about.body +=
       '<script>window.cmsInjected=true</script><img src="x" onerror="window.cmsInjected=true"><p style="width:5000px" class="untrusted">Safe copy</p>';
     await setup(page, server);
-    await page.route('https://images.example/**', (route) => route.fulfill({ status: 404 }));
+    await page.route('https://images.example/**', (route) =>
+      route.fulfill({
+        contentType: 'image/svg+xml',
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240"><rect width="400" height="240" fill="purple"/></svg>',
+      }),
+    );
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/');
     const trust = page.getByRole('region', { name: 'Store benefits' });
@@ -523,6 +560,10 @@ for (const width of [320, 1440]) {
       '✓Ready to use',
       '✓Lifetime access',
     ]);
+    await expect(
+      page.getByRole('article').filter({ hasText: 'Article 33' }).locator('img'),
+    ).toHaveCount(0);
+    await expect(page.getByRole('article').filter({ hasText: 'Article 33' })).toContainText('📈');
     await expect(page.getByRole('heading', { level: 3 }).filter({ hasText: /Article/ })).toHaveText(
       ['Article 33', 'Article 31'],
     );
@@ -544,6 +585,10 @@ for (const width of [320, 1440]) {
     await page.getByRole('link', { name: 'Read More: Article 33', exact: true }).click();
     await expect(page).toHaveURL(/\/blog\/article-33$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Article 33');
+    await expect(page.locator('article img')).toHaveAttribute(
+      'src',
+      'https://images.example/post.jpg',
+    );
     await expect(page.getByRole('listitem')).toHaveText(['First step', 'Second step']);
     await page.reload();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Article 33');

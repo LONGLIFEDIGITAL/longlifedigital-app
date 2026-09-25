@@ -6,18 +6,21 @@ import home from '../../pages/HomePage.module.css';
 export default function FeaturedProductSkeleton() {
   return (
     <SkeletonRegion label="Loading featured product" className={home.featuredCard}>
-      <SkeletonBlock tone="light" height={26} width={130} radius="xl" mb={16} />
-      <SkeletonBlock tone="light" height={160} mb={12} />
-      <Stack gap={8} mb={12}>
-        <SkeletonBlock tone="light" height={18} width="90%" />
+      <Box className={home.featuredContent}>
+        <SkeletonBlock tone="light" height={26} width={130} radius="xl" />
+        <Box className={home.featuredEmoji} style={{ transform: 'none' }}>
+          <SkeletonBlock tone="light" height={64} width={64} radius="md" />
+        </Box>
+        <Stack gap={8}>
+          <SkeletonBlock tone="light" height={18} width="90%" />
+          <SkeletonBlock tone="light" height={18} width="65%" />
+        </Stack>
+        <Group gap={10}>
+          <SkeletonBlock tone="light" height={38} width={80} />
+          <SkeletonBlock tone="light" height={20} width={50} />
+        </Group>
         <SkeletonBlock tone="light" height={18} width="65%" />
-      </Stack>
-      <Group gap={10} mb={10}>
-        <SkeletonBlock tone="light" height={38} width={80} />
-        <SkeletonBlock tone="light" height={20} width={50} />
-      </Group>
-      <Box pt={12}>
-        <SkeletonBlock tone="light" height={44} radius="md" />
+        <SkeletonBlock tone="light" height={44} radius="md" mt={4} />
       </Box>
     </SkeletonRegion>
   );

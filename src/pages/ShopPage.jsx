@@ -1,7 +1,7 @@
 import useContent from '../hooks/useContent';
 import { PageHeader, ContentState, PageCta } from '../components/ContentPage';
 import RichText from '../components/RichText';
-import { Box, Button, Container, Flex, NativeSelect, Text } from '@mantine/core';
+import { Box, Button, Container, Flex, NativeSelect, Text, Title } from '@mantine/core';
 import CatalogStatus from '../components/CatalogStatus';
 import { matchesCategory } from '../services/catalog';
 import ProductCollection from '../components/ProductCollection';
@@ -22,12 +22,42 @@ export default function ShopPage({
   isAdmin,
   openAdd,
   addCart,
+  openCheckout,
   goProduct,
   openEdit,
   openDel,
 }) {
   const loading = catalogStatus === 'loading';
   const content = useContent('page', 'shop');
+  const categorySections = categories
+    .filter(
+      (category) => category.id !== 'all' && (filterCat === 'all' || category.id === filterCat),
+    )
+    .map((category) => ({
+      ...category,
+      products: filtered.filter((product) => matchesCategory(product, category.id)),
+    }))
+    .filter((category) => category.products.length > 0);
+  // Keep products without a matching published category visible, too.
+  const groupedIds = new Set(
+    categorySections.flatMap((category) => category.products.map((product) => product.id)),
+  );
+  const ungrouped = filtered.filter((product) => !groupedIds.has(product.id));
+  if (ungrouped.length)
+    categorySections.push({
+      id: 'other-products',
+      label:
+        filterCat === 'all'
+          ? 'Other Products'
+          : categories.find((category) => category.id === filterCat)?.label || 'Products',
+      products: ungrouped,
+    });
+  // `filtered` already has the selected product order. Rank each section by its
+  // first product so sorting also works when a category contains only one item.
+  const productRanks = new Map(filtered.map((product, index) => [product.id, index]));
+  categorySections.sort(
+    (a, b) => productRanks.get(a.products[0].id) - productRanks.get(b.products[0].id),
+  );
   return (
     <div>
       <PageHeader pageKey="shop" content={content.data} />
@@ -135,7 +165,7 @@ export default function ShopPage({
               </Button>
             )}
           </Box>
-          <Box flex={1}>
+          <Box flex={1} miw={0}>
             <Flex align="center" justify="space-between" gap="sm" wrap="wrap" mb={20}>
               {loading ? (
                 <SkeletonRegion label="Loading product count">
@@ -166,7 +196,7 @@ export default function ShopPage({
               <CatalogStatus
                 status={catalogStatus}
                 retry={retryCatalog}
-                loading={<ProductGridSkeleton label="Loading All Products" />}
+                loading={<ProductGridSkeleton label="Loading All Products" mobilePeek />}
               />
             ) : filtered.length === 0 ? (
               <Box ta="center" p="60px 20px">
@@ -175,15 +205,43 @@ export default function ShopPage({
                 </Text>
               </Box>
             ) : (
-              <ProductCollection
-                products={filtered}
-                label="All Products"
-                addCart={addCart}
-                goProduct={goProduct}
-                isAdmin={isAdmin}
-                openEdit={openEdit}
-                openDel={openDel}
-              />
+              categorySections.map((category) => (
+                <Box
+                  component="section"
+                  key={category.id}
+                  aria-labelledby={`product-category-${category.id}`}
+                  mb={40}
+                >
+                  <Title
+                    order={2}
+                    size="h5"
+                    id={`product-category-${category.id}`}
+                    mb={20}
+                    ta="left"
+                  >
+                    <Text component="span" inherit c="#C9963F" aria-hidden="true">
+                      ✦
+                    </Text>
+                    <span style={{ marginLeft: 8, marginRight: 8 }}>{category.label}</span>
+                    <Text component="span" inherit c="#C9963F" aria-hidden="true">
+                      ✦
+                    </Text>
+                  </Title>
+                  <ProductCollection
+                    key={`${sortBy}:${category.products.map((product) => product.id).join(',')}`}
+                    mobilePeek
+                    horizontal
+                    products={category.products}
+                    label={category.label}
+                    addCart={addCart}
+                    openCheckout={openCheckout}
+                    goProduct={goProduct}
+                    isAdmin={isAdmin}
+                    openEdit={openEdit}
+                    openDel={openDel}
+                  />
+                </Box>
+              ))
             )}
           </Box>
         </Flex>

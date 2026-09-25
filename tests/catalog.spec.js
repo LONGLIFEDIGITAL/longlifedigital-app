@@ -1,6 +1,95 @@
 import { expect, test } from '@playwright/test';
 import catalogHandler from '../api/catalog.js';
 
+for (const width of [393, 1440]) {
+  for (const multiple of [false, true]) {
+    test(`category sorting updates sections and cards at ${width}px (${multiple ? 'multiple products' : 'one per category'})`, async ({
+      page,
+    }) => {
+      const categories = [
+        { id: 1, name: 'AI Prompt Packs', slug: 'ai-prompt-packs' },
+        { id: 2, name: 'SEO Toolkits', slug: 'seo-toolkits' },
+        { id: 3, name: 'Social Media', slug: 'social-media' },
+      ];
+      const rows = [
+        [101, 'Zeta AI', 50, 0],
+        [102, 'Alpha SEO', 10, 1],
+        [103, 'Gamma Social', 30, 2],
+        ...(multiple
+          ? [
+              [104, 'Beta AI', 5, 0],
+              [105, 'Delta SEO', 80, 1],
+              [106, 'Epsilon Social', 20, 2],
+            ]
+          : []),
+      ];
+      await mockCatalog(
+        page,
+        rows.map(([id, name, price, category]) => ({
+          ...product,
+          id,
+          name,
+          slug: name.toLowerCase().replaceAll(' ', '-'),
+          prices: { ...product.prices, price: String(price * 100) },
+          categories: [categories[category]],
+        })),
+      );
+      await page.setViewportSize({ width, height: 1000 });
+      await page.goto('/products');
+      const sections = page.locator('section[aria-labelledby^="product-category-"]');
+      const sort = page.getByLabel('Sort products', { exact: true });
+      const expected = multiple
+        ? {
+            'price-asc': ['AI Prompt Packs', 'SEO Toolkits', 'Social Media'],
+            'price-desc': ['SEO Toolkits', 'AI Prompt Packs', 'Social Media'],
+            name: ['SEO Toolkits', 'AI Prompt Packs', 'Social Media'],
+          }
+        : {
+            'price-asc': ['SEO Toolkits', 'Social Media', 'AI Prompt Packs'],
+            'price-desc': ['AI Prompt Packs', 'Social Media', 'SEO Toolkits'],
+            name: ['SEO Toolkits', 'Social Media', 'AI Prompt Packs'],
+          };
+      for (const value of ['price-asc', 'price-desc', 'name', 'default']) {
+        await sort.selectOption(value);
+        await expect(sections.locator('h2')).toHaveText(
+          (expected[value] || categories.map((c) => c.name)).map((name) => `✦${name}✦`),
+        );
+        if (multiple) {
+          const ai = sections.filter({
+            has: page.getByRole('heading', { name: 'AI Prompt Packs', exact: true }),
+          });
+          await expect(ai.locator('article h3')).toHaveText(
+            value === 'price-desc' || value === 'default'
+              ? ['Zeta AI', 'Beta AI']
+              : ['Beta AI', 'Zeta AI'],
+          );
+        }
+      }
+      if (width < 992)
+        await page.getByLabel('Category', { exact: true }).selectOption('ai-prompt-packs');
+      else await page.getByText('AI Prompt Packs', { exact: true }).first().click();
+      await expect(sections).toHaveCount(1);
+      if (multiple) {
+        await sort.selectOption('price-desc');
+        const row = sections.getByRole('region', { name: 'AI Prompt Packs', exact: true });
+        if (width < 768) {
+          await page
+            .getByRole('button', { name: 'Next products in AI Prompt Packs', exact: true })
+            .click();
+          await expect(row.getByRole('status')).toHaveText('Slide 2 of 2');
+        } else
+          await row.evaluate((node) => {
+            node.scrollLeft = 200;
+          });
+        await sort.selectOption('price-asc');
+        await expect(sections.locator('article h3')).toHaveText(['Beta AI', 'Zeta AI']);
+        if (width < 768) await expect(row.getByRole('status')).toHaveText('Slide 1 of 2');
+        else await expect.poll(() => row.evaluate((node) => node.scrollLeft)).toBe(0);
+      }
+    });
+  }
+}
+
 const product = {
   id: 15,
   name: 'Business Spreadsheet Toolkit',
@@ -64,16 +153,18 @@ for (const width of [393, 1440]) {
     const addButton = card.getByRole('button', { name: 'Add to Cart', exact: true });
     await expect(addButton).toHaveCount(1);
     await expect(card.getByRole('button', { name: 'View Details', exact: true })).toHaveCount(0);
-    await expect(card).toContainText('A practical spreadsheet toolkit.');
+    await expect(card.locator('img')).toHaveCount(0);
+    await expect(card.getByRole('button', { name: 'Buy Now', exact: true })).toHaveCount(1);
 
     const cardBox = await card.boundingBox();
     const buttonBox = await addButton.boundingBox();
-    const leftInset = buttonBox.x - cardBox.x;
-    const rightInset = cardBox.x + cardBox.width - buttonBox.x - buttonBox.width;
-    expect(leftInset).toBeGreaterThanOrEqual(width < 768 ? 10 : 16);
-    expect(rightInset).toBeGreaterThanOrEqual(width < 768 ? 10 : 16);
-    expect(Math.abs(leftInset - rightInset)).toBeLessThanOrEqual(1);
-    expect(buttonBox.width).toBeGreaterThan(cardBox.width - 64);
+    expect(buttonBox.height).toBeGreaterThanOrEqual(44);
+    expect(buttonBox.x).toBeGreaterThan(cardBox.x);
+    const buyBox = await card.getByRole('button', { name: 'Buy Now', exact: true }).boundingBox();
+    if (width >= 768) {
+      expect(Math.abs(buttonBox.y - buyBox.y)).toBeLessThan(1);
+      expect(buyBox.x).toBeGreaterThan(buttonBox.x);
+    } else expect(buyBox.y).toBeGreaterThan(buttonBox.y);
 
     await addButton.click();
     await expect(page.getByRole('heading', { name: 'All Products', exact: true })).toBeVisible();
@@ -329,7 +420,7 @@ test.describe('mobile product collections', () => {
   test.use({ hasTouch: true });
 
   for (const width of [320, 393, 430]) {
-    test(`all three product collections show compact 2 by 2 pages and swipe at ${width}px`, async ({
+    test(`homepage peeks at the next card while products keeps compact pages at ${width}px`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 852 });
@@ -341,6 +432,48 @@ test.describe('mobile product collections', () => {
           await page.getByRole('button', { name: 'Shop Now', exact: true }).click();
         }
         const region = page.getByRole('region', { name: label, exact: true });
+        if (label !== 'All Products') {
+          await region.scrollIntoViewIfNeeded();
+          const cards = region.getByRole('article');
+          await expect(cards).toHaveCount(2);
+          const first = await cards.nth(0).boundingBox();
+          const next = await cards.nth(1).boundingBox();
+          const bounds = await region.boundingBox();
+          expect(Math.abs(first.y - next.y)).toBeLessThan(1);
+          expect(first.x + first.width).toBeLessThan(bounds.x + bounds.width);
+          const visibleFraction = (bounds.x + bounds.width - next.x) / next.width;
+          expect(visibleFraction).toBeGreaterThan(0.45);
+          expect(visibleFraction).toBeLessThan(0.55);
+          await expect(cards.first()).not.toHaveAttribute('data-compact');
+          const add = await cards
+            .first()
+            .getByRole('button', { name: 'Add to Cart', exact: true })
+            .boundingBox();
+          const buy = await cards
+            .first()
+            .getByRole('button', { name: 'Buy Now', exact: true })
+            .boundingBox();
+          expect(add.y).toBe(buy.y);
+          await region.locator('..').screenshot({
+            path: `test-results/home-peek-${label.replaceAll(' ', '-')}-${width}.png`,
+          });
+          await swipeCollection(page, region, 'next');
+          await expect(region.getByRole('status')).not.toHaveText('Slide 1 of 9');
+          await swipeCollection(page, region, 'previous');
+          await region.focus();
+          await page.keyboard.press('Home');
+          await expect(region.getByRole('status')).toHaveText('Slide 1 of 9');
+          await page.keyboard.press('End');
+          await expect(region.getByRole('status')).toHaveText('Slide 9 of 9');
+          await expect(
+            page.getByRole('button', { name: `Next products in ${label}`, exact: true }),
+          ).toBeDisabled();
+          await page
+            .getByRole('button', { name: `Previous products in ${label}`, exact: true })
+            .click();
+          await expect(region.getByRole('status')).toHaveText('Slide 8 of 9');
+          continue;
+        }
         const firstPage = region.getByRole('group', { name: 'Product page 1 of 3', exact: true });
         await expect(firstPage.getByRole('article')).toHaveCount(4);
         await expect(region.getByRole('article')).toHaveCount(4);
@@ -357,8 +490,8 @@ test.describe('mobile product collections', () => {
         expect(boxes[1].x).toBeGreaterThan(boxes[0].x + boxes[0].width);
         expect(boxes[2].y).toBeGreaterThan(boxes[0].y + boxes[0].height);
         for (const box of boxes) {
-          expect(box.height).toBeLessThan(310);
-          expect(box.height / box.width).toBeLessThan(2.2);
+          expect(box.height).toBeLessThan(400);
+          expect(box.height / box.width).toBeLessThan(3.2);
         }
         const firstCard = firstPage.getByRole('article').first();
         await expect(
@@ -462,15 +595,12 @@ test('desktop grids remain full size and resizing replaces rather than duplicate
   await expect(explore.getByRole('article')).toHaveCount(4);
   await expect(more.getByRole('article')).toHaveCount(4);
   await expect(
-    explore
-      .getByRole('article')
-      .first()
-      .getByText('A practical spreadsheet toolkit.', { exact: true }),
+    explore.getByRole('article').first().getByRole('button', { name: 'Buy Now', exact: true }),
   ).toBeVisible();
   await page.setViewportSize({ width: 393, height: 852 });
   await expect(explore).toHaveAttribute('aria-roledescription', 'carousel');
   await expect(explore.locator('article')).toHaveCount(9);
-  await expect(explore.getByRole('article')).toHaveCount(4);
+  await expect(explore.getByRole('article')).toHaveCount(2);
   await page.setViewportSize({ width: 768, height: 1024 });
   await expect(explore.locator('article')).toHaveCount(4);
   await expect(page.getByRole('button', { name: /Next products in/ })).toHaveCount(0);
@@ -735,4 +865,36 @@ test('approved ACF product extras render safely without exposing unrelated exten
   await expect(page.locator('main')).not.toContainText('Never render this');
   await expect(page.locator('main')).not.toContainText('private.example.test');
   expect(await page.evaluate(() => window.productInjected)).toBeUndefined();
+});
+
+test('preview reviews vary by product and remain stable without replacing real ratings', async ({
+  page,
+}) => {
+  await mockCatalog(page, [
+    product,
+    { ...product, id: 16, name: 'Second toolkit', slug: 'second-toolkit' },
+    {
+      ...product,
+      id: 17,
+      name: 'Reviewed toolkit',
+      slug: 'reviewed-toolkit',
+      average_rating: '4.5',
+      review_count: 9,
+    },
+  ]);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/products');
+  const first = page.getByRole('article').filter({ hasText: product.name });
+  const second = page.getByRole('article').filter({ hasText: 'Second toolkit' });
+  const review = first.locator('[aria-label^="Preview:"]');
+  await expect(review).toContainText('5.0');
+  const label = await review.getAttribute('aria-label');
+  expect(await second.locator('[aria-label^="Preview:"]').getAttribute('aria-label')).not.toBe(
+    label,
+  );
+  await page.reload();
+  await expect(review).toHaveAttribute('aria-label', label);
+  const actual = page.getByRole('article').filter({ hasText: 'Reviewed toolkit' });
+  await expect(actual).toContainText('4.5 (9)');
+  await expect(actual).not.toContainText('Preview');
 });

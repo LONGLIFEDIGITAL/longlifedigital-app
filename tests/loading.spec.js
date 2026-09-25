@@ -90,9 +90,9 @@ for (const width of [320, 393, 1440]) {
     if (width < 768) {
       expect(skeletons[0].y).toBe(skeletons[1].y);
       expect(skeletons[2].y).toBe(skeletons[3].y);
-      expect(skeletons[2].y).toBeGreaterThan(skeletons[0].y);
+      expect(skeletons[2].y).toBe(skeletons[0].y);
       expect(skeletons[0].width).toBeGreaterThan(125);
-      expect(skeletons[0].height).toBeLessThan(310);
+      expect(skeletons[0].height).toBeLessThan(550);
     }
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
@@ -205,33 +205,24 @@ test('skeletons respect reduced motion and navigation stays usable while loading
   await expect(loadingRegions(page)).toHaveCount(0);
 });
 
-test('images have independent placeholders without blocking cart actions', async ({ page }) => {
+test('cards use emojis while detail images load independently of cart actions', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 393, height: 900 });
   const images = gate();
   await mockCatalog(page);
   await mockImages(page, images.ready);
   await page.goto('/products', { waitUntil: 'domcontentloaded' });
-  await expect(loadingRegions(page)).toHaveCount(0);
   const card = page.getByRole('article').first();
-  const image = card.locator('[data-image-state]');
-  await expect(image).toHaveAttribute('data-image-state', 'loading');
-  await expect(image.locator('.mantine-Skeleton-root')).toBeVisible();
-  const before = await image.boundingBox();
-  expect(before.height).toBeGreaterThan(90);
+  await expect(card.locator('img')).toHaveCount(0);
+  await expect(card).toContainText('💼');
   await card.getByRole('button', { name: 'Add to Cart', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Open cart (1)' })).toBeVisible();
+  await card.getByRole('button', { name: `View ${products[0].name}` }).click();
+  const image = page.locator('main [data-image-state]').first();
+  await expect(image).toHaveAttribute('data-image-state', 'loading');
   images.release();
   await expect(image).toHaveAttribute('data-image-state', 'loaded');
-  await expect(image.locator('.mantine-Skeleton-root')).toHaveCount(0);
-  const after = await image.boundingBox();
-  // Browser transforms can introduce tiny fractional-pixel rounding differences.
-  expect(after.width).toBeCloseTo(before.width, 2);
-  expect(after.height).toBeCloseTo(before.height, 2);
-  await card.getByRole('button', { name: `View ${products[0].name}` }).click();
-  await expect(page.locator('main [data-image-state]').first()).toHaveAttribute(
-    'data-image-state',
-    'loaded',
-  );
 });
 
 test('failed product images settle into a fallback and remain navigable', async ({ page }) => {
@@ -239,12 +230,11 @@ test('failed product images settle into a fallback and remain navigable', async 
   await mockImages(page, Promise.resolve(), true);
   await page.goto('/products');
   const card = page.getByRole('article').first();
-  const image = card.locator('[data-image-state]');
-  await expect(image).toHaveAttribute('data-image-state', 'error');
-  await expect(image.locator('.mantine-Skeleton-root')).toHaveCount(0);
-  await expect(
-    card.getByRole('img', { name: `${products[0].name} preview (image unavailable)` }),
-  ).toBeVisible();
+  await expect(card.locator('img')).toHaveCount(0);
   await card.getByRole('button', { name: `View ${products[0].name}` }).click();
   await expect(page.getByRole('heading', { name: products[0].name, level: 1 })).toBeVisible();
+  await expect(page.locator('main [data-image-state]').first()).toHaveAttribute(
+    'data-image-state',
+    'error',
+  );
 });

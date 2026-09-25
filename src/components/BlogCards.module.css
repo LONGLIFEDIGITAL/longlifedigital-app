@@ -92,6 +92,31 @@
   padding-block: 24px;
 }
 
+@media (max-width: 47.99em) {
+  .mobilePeek {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    /* Keep the full blog-card proportions, with a 16px glimpse after the gap. */
+    grid-auto-columns: calc(100% - 28px);
+    gap: 12px;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-block: 4px 12px;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #c084fc #f3eeff;
+  }
+  .mobilePeek > .card {
+    scroll-snap-align: start;
+  }
+  .mobilePeek:focus-visible {
+    outline: 2px solid #9333ea;
+    outline-offset: 4px;
+  }
+}
+
 @media (min-width: 48em) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

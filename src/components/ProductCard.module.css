@@ -4,74 +4,116 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(120, 75, 153, 0.18);
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(38, 15, 63, 0.1);
+  min-width: 0;
+  border: 1px solid #ede9f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 10px #260f3f12;
   transition:
     transform 200ms ease,
     box-shadow 200ms ease;
 }
-
+.media {
+  position: relative;
+  height: 220px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.orb {
+  position: absolute;
+  inset: -40% -20% 20% 20%;
+  border-radius: 50%;
+}
+.accent {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+}
+.badges {
+  position: absolute;
+  inset: 12px 12px auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+.imageCategory,
+.tag {
+  max-width: 100%;
+  border: 1px solid #ffffff26;
+  border-radius: 30px;
+  padding: 7px 10px;
+  background: #00000055;
+  font-size: 10px;
+  font-weight: 700;
+}
+.imageCategory {
+  color: var(--card-accent, #d8b4fe);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+.tag {
+  color: #e8c97a;
+}
+.emoji {
+  font-size: 82px;
+  opacity: 0.1;
+  transform: rotate(-8deg);
+  user-select: none;
+}
+.imagePrice {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 16px 16px;
+  background: linear-gradient(0deg, #000000b3, transparent);
+  color: var(--card-accent, #e8c97a);
+  font-size: 28px;
+  font-weight: 700;
+}
+.imagePrice > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.imagePrice del {
+  color: #b8a9c6;
+  font-size: 12px;
+  font-weight: 400;
+}
+.discount {
+  padding: 8px;
+  border: 1px solid #c9963f66;
+  background: #c9963f22;
+  border-radius: 30px;
+  font-size: 11px;
+}
 .details {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 12px;
-  padding: 20px;
-  background:
-    radial-gradient(ellipse at 20% 0%, rgba(202, 146, 207, 0.2), transparent 65%),
-    linear-gradient(
-      150deg,
-      rgba(94, 43, 129, 0.92),
-      rgba(49, 21, 83, 0.97) 65%,
-      rgba(31, 12, 61, 0.98)
-    );
-  color: #faf5ff;
+  gap: 8px;
+  padding: 15px;
+  color: #111827;
 }
-
-.media {
-  position: relative;
-  flex-shrink: 0;
-  height: 220px;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.image {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .category {
-  color: #ecd1f5;
+  color: #9333ea;
   font-size: 11px;
-  font-weight: 600;
-  line-height: 1.5;
+  font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
 }
-
-.fileBadge {
-  padding: 2px 6px;
-  border: 1px solid rgba(232, 201, 122, 0.4);
-  border-radius: 10px;
-  background: rgba(232, 201, 122, 0.12);
-  color: #f6dfa3;
-  font-size: 9px;
-  font-weight: 700;
-}
-
 .title {
   margin: 0;
-  color: #fff;
-  font-family: var(--mantine-font-family);
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.4;
+  font-family: var(--mantine-font-family-headings);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
 }
-
 .productLink {
   display: block;
   width: 100%;
@@ -82,94 +124,89 @@
   font: inherit;
   text-align: start;
 }
-
-/* Extend the title's native button across the card, below the cart/admin controls. */
 .productLink::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 3;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
 }
-
 .productLink:focus-visible {
   outline: none;
 }
-
 .productLink:focus-visible::after {
-  outline: 3px solid #e8c97a;
+  outline: 3px solid #9333ea;
   outline-offset: -3px;
 }
-
-.summary {
-  color: #eadff2;
-  font-size: 13px;
-  line-height: 1.65;
-}
-
-.reviewCount {
-  color: #dac9e5;
+.reviews {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
   font-size: 12px;
+  color: #6b7280;
 }
-
+.stars {
+  color: #e99000;
+  font-size: 16px;
+  letter-spacing: -1px;
+}
+.previewLabel {
+  font-size: 10px;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 1px 4px;
+}
 .price {
-  color: #f1d68f;
+  color: #111827;
   font-family: var(--mantine-font-family-headings);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.25;
 }
-
 .oldPrice {
-  color: #cfbbdd;
-  font-size: 14px;
+  color: #9ca3af;
+  font-size: 15px;
   text-decoration: line-through;
 }
-
 .availability {
-  color: #f6dfa3;
+  color: #6b7280;
   font-size: 12px;
 }
-
 .actions,
 .adminActions {
   position: relative;
   z-index: 4;
 }
-
 .actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
   margin-top: auto;
   padding-top: 4px;
 }
-
-.addButton:focus-visible {
-  outline-color: #fff;
+.addButton,
+.buyButton {
+  min-width: 0;
+  padding-inline: 8px;
+  font-size: 13px;
 }
-
 .addButton {
-  padding-inline: 16px;
+  background: #111827;
 }
-
 .adminActions {
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid #e5e7eb;
 }
-
-/* The mobile collection supplies a compact card for its two-column pages. */
 .card[data-compact] .media {
   height: auto;
   aspect-ratio: 8 / 5;
 }
-
 .card[data-compact] .details {
-  gap: 6px;
+  gap: 8px;
   padding: 10px;
 }
-
-.card[data-compact] .categoryRow {
-  flex-wrap: nowrap;
-}
-
 .card[data-compact] .category {
   overflow: hidden;
   font-size: 9px;
@@ -177,48 +214,79 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-
 .card[data-compact] .title {
   min-height: 2.8em;
   font-size: 13px;
 }
-
 .card[data-compact] .productName {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
-
-.card[data-compact] .summary,
-.card[data-compact] .reviews,
 .card[data-compact] .imagePrice,
-.card[data-compact] .imageCategory,
-.card[data-compact] .fileBadge {
+.card[data-compact] .badges {
   display: none;
 }
-
-.card[data-compact] .tag {
-  max-width: calc(100% - 20px);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+.card[data-compact] .emoji {
+  font-size: 48px;
+  opacity: 0.3;
 }
-
 .card[data-compact] .price {
-  font-size: 20px;
+  font-size: 19px;
 }
-
 .card[data-compact] .oldPrice,
 .card[data-compact] .availability {
   font-size: 11px;
 }
-
-.card[data-compact] .actions {
-  padding-top: 0;
+.card[data-compact] .reviews {
+  font-size: 10px;
+  gap: 4px;
 }
-
-.card[data-compact] .addButton {
-  padding-inline: 4px;
+.card[data-compact] .stars {
   font-size: 12px;
+}
+.card[data-compact] .actions {
+  grid-template-columns: minmax(0, 1fr);
+  padding-top: 0;
+  gap: 6px;
+}
+.card[data-compact] .addButton,
+.card[data-compact] .buyButton {
+  font-size: 12px;
+}
+.card[data-peek] .media {
+  height: 180px;
+}
+.card[data-peek] .details {
+  padding: 12px;
+  gap: 12px;
+}
+.card[data-peek] .title {
+  font-size: 15px;
+}
+.card[data-peek] .badges {
+  inset: 8px 8px auto;
+  gap: 4px;
+}
+.card[data-peek] .imageCategory,
+.card[data-peek] .tag {
+  font-size: 8px;
+  padding: 5px 6px;
+  margin-top: 5px;
+  letter-spacing: 0.5px;
+}
+.card[data-peek] .imagePrice {
+  padding: 18px 10px 10px;
+  font-size: 23px;
+  gap: 4px;
+}
+.card[data-peek] .imagePrice > div {
+  gap: 4px;
+}
+.card[data-peek] .addButton,
+.card[data-peek] .buyButton {
+  font-size: 14px;
+  padding-inline: 4px;
+  margin-bottom: 8px;
 }

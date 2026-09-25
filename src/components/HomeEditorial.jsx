@@ -94,7 +94,7 @@ export default function HomeEditorial({ content, status, products, catalogStatus
               website={brand.website}
               loading={status === 'loading'}
             />
-            <BlogCards {...posts} />
+            <BlogCards {...posts} mobilePeek />
           </Container>
         </section>
       )}

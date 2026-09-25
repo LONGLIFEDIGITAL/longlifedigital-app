@@ -9,6 +9,21 @@
 .header[data-scrolled] {
   box-shadow: 0 2px 20px #0000001a;
 }
+.cartButton,
+.cartButton:hover {
+  color: #500597;
+  background: transparent;
+  border-color: transparent;
+}
+
+.cartButton:hover {
+  color: #8434cf;
+}
+
+.cartButton:focus-visible {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
+}
 .announcement {
   background: #1a0533;
   overflow-wrap: anywhere;
@@ -36,4 +51,148 @@
   font-weight: 700;
   text-transform: uppercase;
   margin-top: 4px;
+}
+
+.inlineNav {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  min-width: 0;
+}
+.navItem {
+  display: none;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.navButton {
+  position: relative;
+  padding-inline: 8px;
+  font-size: 13px;
+  max-width: 150px;
+}
+.navButton::after {
+  content: '';
+  position: absolute;
+  inset: auto 8px 0;
+  height: 3px;
+  background: #c9963f;
+  transform: scaleX(0);
+  transition: transform 150ms ease;
+}
+.navButton[data-active],
+.navButton:hover,
+.navButton:focus-visible,
+.navButton[aria-expanded='true'] {
+  color: #9333ea;
+  background: transparent;
+}
+.navButton[data-active]::after,
+.navButton:hover::after,
+.navButton:focus-visible::after,
+.navButton[aria-expanded='true']::after {
+  transform: scaleX(1);
+}
+.drawerLink[data-active],
+.drawerLink:hover,
+.menuItem[data-active],
+.menuItem:hover {
+  color: #7e22ce;
+  background: #f3eeff;
+  box-shadow: inset 3px 0 #c9963f;
+}
+.navButton :global(.mantine-Button-label) {
+  display: block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.desktopSearch {
+  display: none;
+}
+.dropdown {
+  max-height: min(70vh, 650px);
+  overflow-y: auto;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px #1a053326;
+}
+.menuHeading {
+  color: #b5802f;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 8px 10px 16px;
+}
+.menuGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding-block: 8px;
+}
+.menuItem {
+  padding: 14px 10px;
+}
+.menuEntry {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.menuEntry > div {
+  min-width: 0;
+}
+.menuIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f3eeff;
+  font-size: 22px;
+}
+.viewAll {
+  text-align: center;
+  color: #9333ea;
+  font-weight: 600;
+  padding: 14px;
+}
+@media (min-width: 48em) {
+  .inlineNav {
+    display: flex;
+  }
+  .navItem:nth-child(-n + 4) {
+    display: block;
+  }
+  .brand {
+    max-width: 200px;
+    flex-shrink: 0;
+  }
+  .brandSubtitle {
+    display: none;
+  }
+}
+@media (min-width: 64em) {
+  .navItem:nth-child(-n + 6) {
+    display: block;
+  }
+}
+@media (min-width: 68.75em) {
+  .navItem:nth-child(-n + 7) {
+    display: block;
+  }
+}
+@media (min-width: 80em) {
+  .navItem {
+    display: block;
+  }
+  .desktopSearch {
+    display: block;
+  }
+  .brandSubtitle {
+    display: block;
+  }
+}
+@media (max-width: 35.99em) {
+  .menuGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

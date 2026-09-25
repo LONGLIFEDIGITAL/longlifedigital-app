@@ -442,6 +442,7 @@ export default function App() {
           {page === 'order-confirmation' && <OrderConfirmationPage reloadCart={cartState.reload} />}
           {page === 'home' && (
             <HomePage
+              openCheckout={openCheckout}
               settings={settings}
               settingsManaged={settingsManaged}
               products={products}
@@ -472,6 +473,7 @@ export default function App() {
           )}
           {page === 'shop' && (
             <ShopPage
+              openCheckout={openCheckout}
               products={products}
               categories={categories}
               catalogStatus={catalogStatus}
@@ -529,6 +531,7 @@ export default function App() {
           {page === 'services' && <ServicesPage setPage={setPage} />}
           {page === 'courses' && (
             <CoursesPage
+              openCheckout={openCheckout}
               products={products}
               catalogStatus={catalogStatus}
               retryCatalog={retryCatalog}

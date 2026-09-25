@@ -14,8 +14,8 @@ export default function SiteFooter({ setPage, setFilterCat }) {
   return (
     <footer className={classes.footer}>
       <Container>
-        <div className={classes.grid}>
-          <div>
+        <div className={classes.grid} style={{ marginTop: '2rem' }}>
+          <div style={{ marginTop: '-2.4rem' }}>
             <LDLogo src={brand.logo.src} alt={brand.logo.alt} />
             <h2>{brand.name}</h2>
             <p>{footer.description}</p>

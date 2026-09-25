@@ -53,6 +53,12 @@ Home and About are now published with their storefront page keys. The remaining 
 
 Navigation destinations use storefront paths such as `/about`, `/products`, `/contact` or `/blog`, or public HTTPS URLs. Navigation also accepts `mailto:` and `tel:` links. For a dropdown, select **Manual children**, **Services**, or **Asset categories**. Manual children must have a parent in the same area. Essential route links remain available until you publish navigation records, so missing menus never make the site unusable.
 
+The hamburger menu includes all header links at every screen size. Inline links follow their CMS order: none below 768px, four from 768px, six from 1024px, seven from 1100px, and all from 1280px. Parents with children open a menu panel on hover, click, or keyboard activation.
+
+Product and blog listing cards select emoji artwork from their categories and tags. Use specific terms such as AI, SEO, Social Media, Courses, or Spreadsheets; unrecognized terms use a package (products) or book (posts). Featured images still appear on product and article detail pages. The shared mapping is in `src/utils/cardPresentation.js`.
+
+For private design previews, `VITE_DEMO_REVIEWS=true` displays five-star sample ratings with stable, varied counts and a Preview label for products without reviews, including the hero product. It also adds stable sample Happy Customers and Avg Rating statistics to the hero; matching published Home statistics replace those samples. Digital Products uses the actual catalog count. The preview setting is enabled in local development. Set the same build variable on Vercel only if sample ratings are wanted there; remove it or set it to `false` before consumer launch. Existing WooCommerce ratings take precedence over samples. The temporary values are isolated in `src/utils/cardPresentation.js` for replacement with verified metrics later.
+
 For service/asset **Linked WooCommerce product** pricing, the CMS and WooCommerce feed must point to the same WordPress installation. The content and product feeds now both use the main installation; recheck linked product IDs after migration. This prevents an identical numeric ID on another site from displaying the wrong product or price. An indicative amount is display copy only.
 
 ## Product-specific ACF extras: one installation step

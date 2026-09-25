@@ -578,3 +578,106 @@ test('confirmation matches product downloads and expiry, with general and produc
   await table.scrollIntoViewIfNeeded();
   await page.screenshot({ path: 'test-results/confirmation-mobile.png' });
 });
+
+test('navigation progressively reveals CMS items and keeps all links in the hamburger', async ({
+  page,
+}) => {
+  const state = mockCms();
+  state.collections['lld-navigation'] = [
+    'Home',
+    'Services',
+    'Courses',
+    'Domains',
+    'Digital Products',
+    'About',
+    'Blog',
+    'Contact',
+  ].map((title, index) =>
+    item(index + 1, 'lld_nav_item', title, {
+      lld_area: 'header',
+      lld_destination: [
+        '/',
+        '/services',
+        '/courses',
+        '/domains',
+        '/products',
+        '/about',
+        '/blog',
+        '/contact',
+      ][index],
+      lld_children_source: index === 1 ? 'manual' : '',
+    }),
+  );
+  state.collections['lld-navigation'].push(
+    item(20, 'lld_nav_item', 'Website Design', {
+      lld_area: 'header',
+      lld_parent: 2,
+      lld_destination: '/services#design',
+      lld_icon: '💻',
+      lld_summary: 'Professional sites for your business',
+    }),
+  );
+  await routeCms(page, state);
+  await page.goto('/about');
+  for (const [width, count] of [
+    [393, 0],
+    [768, 4],
+    [1024, 6],
+    [1100, 7],
+    [1280, 8],
+    [1440, 8],
+  ]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(page.locator('[aria-label="Quick navigation"] > div:visible')).toHaveCount(count);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      width,
+    );
+    await page.getByRole('button', { name: 'Open navigation menu' }).click();
+    const drawer = page.getByRole('dialog');
+    for (const title of [
+      'Home',
+      'Services',
+      'Courses',
+      'Domains',
+      'Digital Products',
+      'About',
+      'Contact',
+    ])
+      await expect(drawer.getByRole('link', { name: title, exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(drawer).toHaveCount(0);
+  }
+  const quickNav = page.locator('[aria-label="Quick navigation"]');
+  await expect(quickNav.getByRole('link', { name: 'Contact', exact: true })).toBeVisible();
+  await expect(quickNav.getByRole('link', { name: 'About', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await quickNav.getByRole('link', { name: 'Contact', exact: true }).click();
+  await expect(quickNav.getByRole('link', { name: 'Contact', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await expect(quickNav.getByRole('link', { name: 'About', exact: true })).not.toHaveAttribute(
+    'aria-current',
+  );
+  await page.getByRole('button', { name: 'Services', exact: true }).hover();
+  await expect
+    .poll(() =>
+      page
+        .getByRole('button', { name: 'Services', exact: true })
+        .evaluate((element) => getComputedStyle(element, '::after').transform),
+    )
+    .toBe('matrix(1, 0, 0, 1, 0, 0)');
+  await expect(page.getByRole('menuitem', { name: /Website Design/ })).toBeVisible();
+  await page.screenshot({ path: 'test-results/navigation-expanded.png' });
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Services', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('menuitem', { name: /Website Design/ })).toBeVisible();
+  await page.getByRole('menuitem', { name: /Website Design/ }).click();
+  await expect(page.getByRole('button', { name: 'Services', exact: true })).toHaveAttribute(
+    'data-active',
+    'true',
+  );
+});

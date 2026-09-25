@@ -14,6 +14,7 @@ const normalize = (post) => ({
   title: plainText(post.title),
   excerpt: plainText(post.excerpt),
   categories: (post.categories || []).map(plainText),
+  tags: (post.tags || []).map(plainText),
   image: { ...post.image, alt: plainText(post.image?.alt) },
 });
 
