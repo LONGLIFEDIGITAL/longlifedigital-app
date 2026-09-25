@@ -14,7 +14,8 @@ export default function usePublishedContent(params, normalize, enabled = true) {
     queryFn: async ({ signal }) => {
       const response = await fetch(`/api/content?${params}`, {
         cache: 'no-store',
-        credentials: 'omit',
+        // Protected previews need the browser's deployment cookie on this same-origin API.
+        credentials: 'same-origin',
         headers: { Accept: 'application/json' },
         signal: AbortSignal.any([signal, AbortSignal.timeout(CONTENT_SYNC.requestTimeoutMs)]),
       });

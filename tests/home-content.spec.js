@@ -156,6 +156,36 @@ async function refocus(page) {
   });
 }
 
+test('CMS and catalog requests retain the protected preview session cookie', async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  await setup(page);
+  await context.addCookies([
+    { name: 'preview_session', value: 'test-session', url: baseURL, httpOnly: true },
+  ]);
+  const authorized = new Set();
+  await page.route(/\/api\/(content|catalog)\?/, async (route) => {
+    const cookie = await route.request().headerValue('cookie');
+    if (!cookie?.includes('preview_session=test-session')) {
+      await route.fulfill({ status: 401, body: 'Authentication required' });
+      return;
+    }
+    const url = new URL(route.request().url());
+    authorized.add(
+      url.pathname === '/api/content' ? url.searchParams.get('resource') : 'catalog',
+    );
+    await route.fallback();
+  });
+  await page.goto('/');
+  await expect
+    .poll(() => [...authorized])
+    .toEqual(expect.arrayContaining(['home', 'settings', 'catalog']));
+  await expect(page.getByRole('heading', { name: /Created in WordPress/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: product.name }).first()).toBeVisible();
+});
+
 test('homepage API reads only its published record and allowlists public content', async () => {
   const server = cms();
   const result = await invoke(server.handler);

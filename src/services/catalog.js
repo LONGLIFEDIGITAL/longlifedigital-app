@@ -123,7 +123,8 @@ async function fetchPages(query, signal) {
     const response = await fetch(url, {
       cache: 'no-store',
       signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]),
-      credentials: 'omit',
+      // Protected previews need the browser's deployment cookie on this same-origin API.
+      credentials: 'same-origin',
       headers: { Accept: 'application/json' },
     });
     if (!response.ok) throw new Error(`The store could not be reached (${response.status}).`);
