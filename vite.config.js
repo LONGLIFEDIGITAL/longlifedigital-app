@@ -7,7 +7,7 @@ import { createCommerceHandler } from './api/commerce.js';
 import retiredPaymentHandler from './api/create-payment-intent.js';
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   // Server handlers need private settings too; Vite still exposes only VITE_ values to React.
   const env = { ...process.env, ...loadEnv(mode, process.cwd(), '') };
   const storeApiUrl = env.VITE_WOOCOMMERCE_STORE_API_URL?.trim();
@@ -16,6 +16,9 @@ export default defineConfig(({ mode }) => {
   const contentListeners = new Set();
   const contentHandler = createContentHandler({
     baseUrl: env.VITE_WORDPRESS_API_URL,
+    // Pre-rendering can wait longer than a visitor-facing API request.
+    requestTimeoutMs: command === 'build' ? 15000 : 6000,
+    buildDiagnostics: command === 'build',
     onRead: (entry) => contentListeners.forEach((listener) => listener(entry)),
   });
   return {

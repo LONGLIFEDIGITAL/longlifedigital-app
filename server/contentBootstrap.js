@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { join } from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
 import { CONTENT_PAGES } from '../src/contentPages.js';
 import { initialMarkup, metadataMarkup } from './initialMarkup.js';
 
@@ -57,36 +58,51 @@ export function bootstrapTag(snapshot) {
 
 // Materialize real published CMS content before serving/building the app. A
 // visitor's initial render then has no dependency on the CMS or its rate limits.
-export async function createBootstrap({ handler, cmsUrl, previous, now = Date.now }) {
+export async function createBootstrap({
+  handler,
+  cmsUrl,
+  previous,
+  now = Date.now,
+  retryDelayMs = 750,
+}) {
   const entries =
     previous?.cmsUrl === cmsUrl && previous.version === 1 ? { ...previous.entries } : {};
-  const read = async (key, query) => {
+  const read = async (key, query, required = false) => {
     let status;
     let body;
-    await handler(
-      { method: 'GET', url: `/api/content?${query}` },
-      {
-        set statusCode(value) {
-          status = value;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await handler(
+        { method: 'GET', url: `/api/content?${query}` },
+        {
+          set statusCode(value) {
+            status = value;
+          },
+          setHeader() {},
+          end(value) {
+            body = JSON.parse(value);
+          },
         },
-        setHeader() {},
-        end(value) {
-          body = JSON.parse(value);
-        },
-      },
-    );
+      );
+      const temporary = [429, 502, 503, 504].includes(status) && body?.retryable !== false;
+      if (!required || entries[key] || !temporary || attempt === 1) break;
+      await delay(retryDelayMs);
+    }
     if (status === 200 || status === 404)
       entries[key] = { data: status === 404 ? null : body, updatedAt: now() };
-    else if (!entries[key]) throw new Error(`Published content is unavailable (${key}).`);
+    else if (!entries[key])
+      throw new Error(
+        `Published content is unavailable (${key}; HTTP ${status ?? 'unknown'}). ${body?.diagnostic || body?.error || 'No content response.'}`,
+      );
     return entries[key].data;
   };
-  const home = await read('home', 'resource=home');
-  const latest = await read('posts:1:9:', 'resource=posts&page=1&limit=9');
+  const home = await read('home', 'resource=home', true);
+  const latest = await read('posts:1:9:', 'resource=posts&page=1&limit=9', true);
   const selected = home?.blog?.postIds || [];
   if (selected.length) {
     await read(
       `posts:1:3:${selected.join(',')}`,
       `resource=posts&limit=3&include=${selected.join(',')}`,
+      true,
     );
   } else if (latest) {
     entries['posts:1:3:'] = {

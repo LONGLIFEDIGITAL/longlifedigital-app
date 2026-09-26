@@ -55,6 +55,8 @@ export function createContentHandler({
   cacheTtl = preview ? 0 : CONTENT_SYNC.serverCacheMs,
   now = Date.now,
   onRead,
+  requestTimeoutMs = 6000,
+  buildDiagnostics = false,
 }) {
   let pagesPending;
   const readPages = async (read) => {
@@ -91,6 +93,10 @@ export function createContentHandler({
       return send(res, 400, { error: 'Unknown content request.' });
     }
     if (!baseUrl?.trim()) return send(res, 503, { error: 'Site content is not configured.' });
+    let failureReason =
+      'Invalid CMS URL. Use the HTTPS WordPress REST base ending in /wp-json/wp/v2.';
+    let retryable = false;
+    let signal;
     try {
       const base = new URL(`${baseUrl.trim().replace(/\/+$/, '')}/`);
       if (
@@ -102,8 +108,27 @@ export function createContentHandler({
       ) {
         throw new Error('Invalid CMS configuration.');
       }
-      const signal = AbortSignal.timeout(6000);
-      const request = (path) => requestWordPress(new URL(path, base), { fetcher, signal });
+      failureReason =
+        'CMS returned unexpected content. Check the published page and its ACF fields.';
+      signal = AbortSignal.timeout(requestTimeoutMs);
+      const request = async (path) => {
+        let response;
+        try {
+          response = await requestWordPress(new URL(path, base), { fetcher, signal });
+        } catch {
+          retryable = true;
+          failureReason =
+            'CMS network request failed. Check DNS, TLS, redirects, and CMS availability.';
+          throw new Error('Content request failed.');
+        }
+        if (!response.ok) {
+          retryable = response.status === 429 || response.status >= 500;
+          failureReason = `CMS returned HTTP ${response.status} for ${path.split('?')[0]}.`;
+          if ([401, 403].includes(response.status))
+            failureReason += ' Check WordPress privacy settings and firewall access from Vercel.';
+        }
+        return response;
+      };
       const read = async (path) => {
         const response = await request(path);
         if (!response.ok) throw new Error('Content unavailable.');
@@ -329,6 +354,11 @@ export function createContentHandler({
       };
       return sendContent(res, settings, preview);
     } catch {
+      // The shared deadline also covers response bodies and related content reads.
+      if (signal?.aborted) {
+        retryable = true;
+        failureReason = `CMS request timed out after ${requestTimeoutMs / 1000}s.`;
+      }
       return send(res, 502, {
         error:
           resource === 'home'
@@ -336,6 +366,8 @@ export function createContentHandler({
             : resource === 'settings'
               ? 'Site settings are temporarily unavailable.'
               : 'Content is temporarily unavailable.',
+        // Only the local build handler enables this; public API responses stay generic.
+        ...(buildDiagnostics ? { diagnostic: failureReason, retryable } : {}),
       });
     }
   };
