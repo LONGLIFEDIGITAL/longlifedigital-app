@@ -141,7 +141,7 @@ export default function AdminDashboard({
         >
           {dashTab === 'overview' && (
             <div>
-              <SimpleGrid minColWidth="min(100%, 140px)" spacing={12} mb={24}>
+              <SimpleGrid minColWidth="min(100%, 8.75rem)" spacing={12} mb={24}>
                 {[
                   [
                     '💰',

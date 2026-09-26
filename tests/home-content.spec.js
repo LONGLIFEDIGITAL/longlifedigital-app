@@ -156,6 +156,62 @@ async function refocus(page) {
   });
 }
 
+test('hero scales across phones, tablets, laptops and large screens without overflow', async ({
+  page,
+}, testInfo) => {
+  const server = cms();
+  server.pages[0].acf.lld_intro =
+    'Instant download ebooks, courses, marketing tools and premium domains — everything you need to grow online.';
+  Object.assign(server.products[0], { average_rating: '5', review_count: 81 });
+  server.products[0].prices.regular_price = '1900';
+  Object.assign(server.pages[0].acf.lld_home, {
+    hero_prefix: 'Beautifully Crafted',
+    hero_highlight: 'Digital Products',
+    hero_suffix: 'for Life & Business',
+  });
+  await setup(page, server);
+  await page.goto('/');
+  const hero = page.getByRole('region', { name: 'Store introduction' });
+  const card = page.getByLabel('Featured product', { exact: true });
+  await expect(card).toBeVisible();
+  let previous;
+  for (const width of [320, 393, 768, 1024, 1366, 1512, 1920, 2560]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const metrics = await hero.evaluate((node) => {
+      const card = node.querySelector('[aria-label="Featured product"]');
+      const heading = node.querySelector('h1');
+      const bounds = card.getBoundingClientRect();
+      const headingBounds = heading.getBoundingClientRect();
+      return {
+        width: bounds.width,
+        height: bounds.height,
+        fontSize: parseFloat(getComputedStyle(heading).fontSize),
+        headingBottom: headingBounds.bottom,
+        headingRight: headingBounds.right,
+        cardTop: bounds.top,
+        cardLeft: bounds.left,
+        overflow: document.documentElement.scrollWidth > innerWidth,
+        clipped: card.scrollHeight > card.clientHeight + 1,
+      };
+    });
+    expect(metrics.overflow, `page overflow at ${width}`).toBe(false);
+    expect(metrics.clipped, `card clipping at ${width}`).toBe(false);
+    if (width < 992) expect(metrics.cardTop).toBeGreaterThan(metrics.headingBottom);
+    else {
+      expect(metrics.cardLeft).toBeGreaterThan(metrics.headingRight);
+      expect(Math.abs(metrics.height - metrics.width)).toBeLessThan(2);
+      if (previous) {
+        expect(metrics.width).toBeGreaterThan(previous.width);
+        expect(metrics.fontSize).toBeGreaterThan(previous.fontSize);
+      }
+      previous = metrics;
+    }
+    if (width === 1512) {
+      await hero.screenshot({ path: testInfo.outputPath('laptop-hero.png') });
+    }
+  }
+});
+
 test('CMS and catalog requests retain the protected preview session cookie', async ({
   page,
   context,
@@ -173,9 +229,7 @@ test('CMS and catalog requests retain the protected preview session cookie', asy
       return;
     }
     const url = new URL(route.request().url());
-    authorized.add(
-      url.pathname === '/api/content' ? url.searchParams.get('resource') : 'catalog',
-    );
+    authorized.add(url.pathname === '/api/content' ? url.searchParams.get('resource') : 'catalog');
     await route.fallback();
   });
   await page.goto('/');

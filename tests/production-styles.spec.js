@@ -34,13 +34,21 @@ for (const width of [393, 1440]) {
       .filter({ has: page.getByRole('heading', { name: 'Business Toolkit' }) })
       .first();
     const category = card.locator('p').filter({ hasText: /^Business Tools$/ });
-    await expect(category).toHaveCSS('font-size', '11px');
+    const rootSize = await page.evaluate(() =>
+      parseFloat(getComputedStyle(document.documentElement).fontSize),
+    );
+    expect(
+      await category.evaluate((node) => parseFloat(getComputedStyle(node).fontSize)),
+    ).toBeCloseTo((rootSize * 11) / 16, 1);
     await expect(category).toHaveCSS('font-weight', '700');
     const price = card
       .locator('span')
       .filter({ hasText: /^\$29$/ })
       .last();
-    await expect(price).toHaveCSS('font-size', '20px');
+    expect(await price.evaluate((node) => parseFloat(getComputedStyle(node).fontSize))).toBeCloseTo(
+      (rootSize * 20) / 16,
+      1,
+    );
     await expect(price).toHaveCSS('font-weight', '700');
     const add = card.getByRole('button', { name: 'Add to Cart', exact: true });
     await expect(add).toHaveCSS('background-color', 'rgb(17, 24, 39)');

@@ -6,7 +6,7 @@ export default function ProductDetailsSkeleton() {
   return (
     <SkeletonRegion label="Loading product details">
       <Box maw={1280} mx="auto" p="16px 24px">
-        <SkeletonBlock height={20} width="min(70%, 320px)" />
+        <SkeletonBlock height={20} width="min(70%, 20rem)" />
       </Box>
       <Container>
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing={{ base: 24, md: 48 }} p="24px 0 60px">

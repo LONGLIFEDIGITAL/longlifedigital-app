@@ -73,19 +73,11 @@ export default function HomePage({
     <div>
       <PageMetadata content={content} title={brand.name} path="/" />
       <Flex
+        className={classes.hero}
+        aria-label="Store introduction"
         align="center"
         wrap="wrap"
-        py={{
-          base: 40,
-          sm: 64,
-          lg: 80,
-        }}
-        px={{
-          base: 16,
-          sm: 24,
-        }}
         bg="linear-gradient(135deg,#0a001e 0%,#1a0533 35%,#2d0f6b 65%,#1a0533 100%)"
-        mih="70vh"
         pos="relative"
         component="section"
         style={{
@@ -163,10 +155,15 @@ export default function HomePage({
               )}
               light
             />
-            <Flex gap={24} wrap="wrap" mt={32}>
+            <Flex className={classes.heroStats} wrap="wrap">
               {heroStats.map(({ value, label, demo }) => (
                 <Box key={label} ta="center">
-                  <Box c="#E8C97A" fz={20} fw={800} ff="'Plus Jakarta Sans',sans-serif">
+                  <Box
+                    className={classes.statValue}
+                    c="#E8C97A"
+                    fw={800}
+                    ff="'Plus Jakarta Sans',sans-serif"
+                  >
                     {loading && !demo ? (
                       <SkeletonRegion label="Loading product count">
                         <SkeletonBlock tone="light" height={25} width={48} mx="auto" />
@@ -175,7 +172,7 @@ export default function HomePage({
                       value
                     )}
                   </Box>
-                  <Box c="rgba(255,255,255,0.45)" fz={11} mt={2}>
+                  <Box className={classes.statLabel} c="rgba(255,255,255,0.45)" mt={2}>
                     {label}
                     {demo && <span className={classes.previewLabel}>Preview</span>}
                   </Box>
@@ -190,11 +187,11 @@ export default function HomePage({
                   <Box
                     c="#E8C97A"
                     bg="rgba(201,150,63,0.2)"
-                    fz={11}
+                    fz="var(--hero-small)"
                     fw="700"
                     p="4px 12px"
                     style={{
-                      borderRadius: 20,
+                      borderRadius: '1.25rem',
                       display: 'inline-block',
                       alignSelf: 'flex-start',
                       border: '1px solid rgba(201,150,63,0.4)',
@@ -206,7 +203,13 @@ export default function HomePage({
                   <Box aria-hidden="true" className={classes.featuredEmoji}>
                     {cardEmoji(highlighted)}
                   </Box>
-                  <Box c="#fff" fz={18} fw="700" ff="'Plus Jakarta Sans',sans-serif" lh={1.3}>
+                  <Box
+                    className={classes.featuredTitle}
+                    c="#fff"
+                    fw="700"
+                    ff="'Plus Jakarta Sans',sans-serif"
+                    lh={1.3}
+                  >
                     {highlighted.name}
                   </Box>
                   <Flex align="center" gap={10} wrap="wrap">
@@ -214,7 +217,7 @@ export default function HomePage({
                       component="span"
                       inherit
                       c="#E8C97A"
-                      fz={28}
+                      className={classes.featuredPrice}
                       fw="700"
                       ff="'Plus Jakarta Sans',sans-serif"
                     >
@@ -226,7 +229,7 @@ export default function HomePage({
                           component="span"
                           inherit
                           c="rgba(255,255,255,0.7)"
-                          fz={16}
+                          fz="var(--hero-body)"
                           td="line-through"
                         >
                           {money(highlighted, highlighted.oldPrice)}
@@ -236,11 +239,11 @@ export default function HomePage({
                           inherit
                           c="#92400E"
                           bg="#FEF3C7"
-                          fz={11}
+                          fz="var(--hero-small)"
                           fw="700"
                           p="3px 10px"
                           style={{
-                            borderRadius: 20,
+                            borderRadius: '1.25rem',
                           }}
                         >
                           Save {Math.round((1 - highlighted.price / highlighted.oldPrice) * 100)}%
@@ -249,7 +252,7 @@ export default function HomePage({
                     )}
                   </Flex>
                   {highlightedReview && (
-                    <Box fz={13} className={classes.featuredReviews}>
+                    <Box fz="var(--hero-body)" className={classes.featuredReviews}>
                       <Text
                         component="span"
                         inherit
@@ -258,7 +261,12 @@ export default function HomePage({
                       >
                         {stars(highlightedReview.rating)}
                       </Text>{' '}
-                      <Text component="span" inherit c="rgba(255,255,255,0.5)" fz={12}>
+                      <Text
+                        component="span"
+                        inherit
+                        c="rgba(255,255,255,0.5)"
+                        fz="var(--hero-small)"
+                      >
                         {highlightedReview.rating.toFixed(1)} ({highlightedReview.count} reviews)
                       </Text>
                       {highlightedReview.demo && (
@@ -267,7 +275,8 @@ export default function HomePage({
                     </Box>
                   )}
                   <Button
-                    className="btn-h"
+                    className={`btn-h ${classes.featuredButton}`}
+                    styles={{ root: { paddingBlock: 'var(--hero-button-py)' } }}
                     onClick={() => goProduct(highlighted)}
                     variant="gradient"
                     color="brand"
@@ -328,7 +337,7 @@ export default function HomePage({
                   p="16px 20px"
                   style={{
                     border: '1px solid #F3F4F6',
-                    borderRadius: 12,
+                    borderRadius: '0.75rem',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                   }}
@@ -432,7 +441,7 @@ export default function HomePage({
                 p="13px 20px"
                 style={{
                   border: 'solid 1px #dbb8fe',
-                  borderRadius: 8,
+                  borderRadius: '0.5rem',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                 }}
@@ -498,7 +507,7 @@ export default function HomePage({
             <Title
               order={2}
               c="#fff"
-              fz="clamp(22px,4vw,36px)"
+              fz="clamp(1.375rem,4vw,2.25rem)"
               ff="'Plus Jakarta Sans',sans-serif"
               mb={10}
             >
@@ -517,7 +526,7 @@ export default function HomePage({
                 p="24px"
                 style={{
                   border: '1px solid rgba(201,150,63,0.25)',
-                  borderRadius: 14,
+                  borderRadius: '0.875rem',
                 }}
               >
                 <SimpleGrid
@@ -549,7 +558,7 @@ export default function HomePage({
                         input: {
                           background: 'rgba(255,255,255,0.08)',
                           border: '1px solid rgba(255,255,255,0.15)',
-                          padding: '10px 12px',
+                          padding: '0.625rem 0.75rem',
                           color: '#fff',
                         },
                       }}
@@ -576,7 +585,7 @@ export default function HomePage({
                         input: {
                           background: 'rgba(255,255,255,0.08)',
                           border: '1px solid rgba(255,255,255,0.15)',
-                          padding: '10px 12px',
+                          padding: '0.625rem 0.75rem',
                           color: '#fff',
                         },
                       }}
@@ -600,8 +609,8 @@ export default function HomePage({
                     onChange={(e) => setSubConsent(e.target.checked)}
                     style={{
                       marginTop: 2,
-                      width: 15,
-                      height: 15,
+                      width: '0.9375rem',
+                      height: '0.9375rem',
                       accentColor: '#C9963F',
                       flexShrink: 0,
                     }}
@@ -664,7 +673,7 @@ export default function HomePage({
                   p="12px"
                   style={{
                     border: 'none',
-                    borderRadius: 8,
+                    borderRadius: '0.5rem',
                     cursor: 'pointer',
                   }}
                 >

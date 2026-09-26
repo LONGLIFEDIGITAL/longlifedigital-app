@@ -7,9 +7,9 @@ export default function HomeHeroSkeleton() {
     <SkeletonRegion label="Loading homepage introduction">
       <SkeletonBlock tone="light" height={30} width="70%" radius="xl" mb={20} />
       <Stack gap={12} mb={20}>
-        <SkeletonBlock tone="light" height="clamp(32px, 5vw, 64px)" width="95%" />
-        <SkeletonBlock tone="light" height="clamp(32px, 5vw, 64px)" width="80%" />
-        <SkeletonBlock tone="light" height="clamp(32px, 5vw, 64px)" width="90%" />
+        <SkeletonBlock tone="light" height="clamp(2rem, 5vw, 4rem)" width="95%" />
+        <SkeletonBlock tone="light" height="clamp(2rem, 5vw, 4rem)" width="80%" />
+        <SkeletonBlock tone="light" height="clamp(2rem, 5vw, 4rem)" width="90%" />
       </Stack>
       <Stack gap={12} mb={32}>
         <SkeletonBlock tone="light" height={18} width="90%" />

@@ -33,7 +33,7 @@ export default function NewsletterPopup({
         pos="relative"
         style={{
           border: '1px solid rgba(201,150,63,0.35)',
-          borderRadius: 24,
+          borderRadius: '1.5rem',
           boxShadow: '0 32px 80px rgba(0,0,0,0.5)',
         }}
       >
@@ -95,8 +95,8 @@ export default function NewsletterPopup({
               input: {
                 background: 'rgba(255,255,255,0.08)',
                 border: '1px solid rgba(255,255,255,0.15)',
-                borderRadius: 10,
-                padding: '12px 16px',
+                borderRadius: '0.625rem',
+                padding: '0.75rem 1rem',
                 color: '#fff',
                 fontFamily: "'Inter',sans-serif",
               },
@@ -110,8 +110,8 @@ export default function NewsletterPopup({
               input: {
                 background: 'rgba(255,255,255,0.08)',
                 border: '1px solid rgba(255,255,255,0.15)',
-                borderRadius: 10,
-                padding: '12px 16px',
+                borderRadius: '0.625rem',
+                padding: '0.75rem 1rem',
                 color: '#fff',
                 fontFamily: "'Inter',sans-serif",
               },
@@ -134,8 +134,8 @@ export default function NewsletterPopup({
             onChange={(e) => setPopupConsent(e.target.checked)}
             style={{
               marginTop: 3,
-              width: 15,
-              height: 15,
+              width: '0.9375rem',
+              height: '0.9375rem',
               accentColor: '#C9963F',
               flexShrink: 0,
             }}
@@ -186,7 +186,7 @@ export default function NewsletterPopup({
           p="14px"
           style={{
             border: 'none',
-            borderRadius: 10,
+            borderRadius: '0.625rem',
             cursor: 'pointer',
           }}
         >

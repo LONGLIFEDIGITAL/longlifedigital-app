@@ -1,15 +1,22 @@
 .footer {
   overflow-wrap: anywhere;
 }
+.hero {
+  --hero-small: clamp(0.6875rem, 0.85vw, 1.125rem);
+  --hero-body: clamp(1rem, 1.25vw, 1.625rem);
+  --hero-button: clamp(0.9375rem, 1.1vw, 1.5rem);
+  --hero-button-py: clamp(0.625rem, 0.8vw, 1.125rem);
+  padding: clamp(2rem, 4vw, 4rem) clamp(1rem, 4vw, 2rem);
+}
 .heroGrid {
   position: relative;
   z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: center;
-  gap: 32px;
+  gap: clamp(1.5rem, 4vw, 6rem);
   width: 100%;
-  max-width: 1440px;
+  max-width: 120rem;
   margin-inline: auto;
 }
 .featuredEmoji {
@@ -17,9 +24,9 @@
   align-items: center;
   justify-content: center;
   flex: 1;
-  min-height: 48px;
+  min-height: 3rem;
   margin: 0;
-  font-size: clamp(100px, 7vw, 108px);
+  font-size: clamp(5rem, 9vw, 13.5rem);
   line-height: 1;
   opacity: 0.3;
   transform: rotate(-18deg);
@@ -27,31 +34,29 @@
 }
 @media (min-width: 62em) {
   .heroGrid {
-    grid-template-columns: minmax(0, 1.10fr) minmax(0, 0.85fr);
-    /* column-gap: clamp(72px, 8vw, 160px); */
-    padding: 0.25rem 0.5rem;
-    padding-top: 0;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
   }
 }
 
 .featuredCard {
   aspect-ratio: 1;
   width: 100%;
-  max-width: 440px;
-  min-height: 330px;
-  margin-left: auto;
+  max-width: 40rem;
+  margin-inline: auto;
+  min-width: 0;
+  min-height: min-content;
   display: grid;
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: 20px;
+  padding: clamp(1rem, 2vw, 3rem);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
+  border-radius: 1rem;
   background: rgba(255, 255, 255, 0.06);
   box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.4),
+    0 1.5rem 5rem rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(24px);
+  backdrop-filter: blur(1.5rem);
 }
 
 .featuredImage {
@@ -84,7 +89,7 @@
   min-height: min-content;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: clamp(0.5rem, 0.8vw, 1.25rem);
 }
 .featuredContent > :not(.featuredEmoji) {
   flex-shrink: 0;
@@ -93,19 +98,52 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: clamp(0.375rem, 0.6vw, 0.875rem);
 }
 .previewLabel {
   display: inline-block;
-  margin-left: 5px;
-  font-size: 9px;
+  margin-left: 0.3125rem;
+  font-size: clamp(0.5625rem, 0.65vw, 0.875rem);
   font-weight: 400;
   color: #d8c8ea;
   border: 1px solid #ffffff33;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   padding: 0 3px;
 }
 
 .featuredImageSpace {
-  height: 160px;
+  height: clamp(6.25rem, 12vw, 17.5rem);
+}
+.heroStats {
+  gap: clamp(1rem, 2vw, 3rem);
+  margin-top: clamp(1.5rem, 2.5vw, 3.75rem);
+}
+.statValue {
+  font-size: clamp(1.25rem, 1.8vw, 2.625rem);
+}
+.statLabel {
+  font-size: var(--hero-small);
+}
+.featuredTitle {
+  font-size: clamp(1.125rem, 1.4vw, 2rem);
+}
+.featuredPrice {
+  font-size: clamp(1.75rem, 2.5vw, 3.75rem);
+}
+.featuredButton {
+  font-size: var(--hero-button);
+}
+@media (min-width: 62em) {
+  .featuredCard {
+    max-width: none;
+  }
+}
+@media (max-width: 35.99em) {
+  .featuredCard {
+    aspect-ratio: auto;
+  }
+  .featuredEmoji {
+    flex: none;
+    min-height: clamp(6.25rem, 35vw, 11.25rem);
+  }
 }

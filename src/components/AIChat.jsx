@@ -78,11 +78,11 @@ export default function AIChat({ settings }) {
         h={60}
         pos="fixed"
         right={16}
-        bottom="max(16px, env(safe-area-inset-bottom))"
+        bottom="max(1rem, env(safe-area-inset-bottom))"
         style={{
           zIndex: 180,
           border: 'none',
-          borderRadius: 50,
+          borderRadius: '3.125rem',
           cursor: 'pointer',
           boxShadow: '0 4px 24px rgba(147,51,234,0.5)',
           display: 'flex',
@@ -100,15 +100,15 @@ export default function AIChat({ settings }) {
           direction="column"
           wrap="nowrap"
           bg="linear-gradient(160deg, #0a001e, #1a0533)"
-          w="min(360px, calc(100vw - 32px))"
-          h="min(500px, calc(100dvh - 116px - env(safe-area-inset-bottom)))"
+          w="min(22.5rem, calc(100vw - 2rem))"
+          h="min(31.25rem, calc(100dvh - 7.25rem - env(safe-area-inset-bottom)))"
           pos="fixed"
           right={16}
-          bottom="calc(84px + env(safe-area-inset-bottom))"
+          bottom="calc(5.25rem + env(safe-area-inset-bottom))"
           style={{
             zIndex: 179,
             border: '1px solid rgba(147,51,234,0.4)',
-            borderRadius: 20,
+            borderRadius: '1.25rem',
             boxShadow: '0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(147,51,234,0.2)',
             overflow: 'hidden',
             animation: 'chatSlideIn 0.25s ease',
@@ -270,9 +270,9 @@ export default function AIChat({ settings }) {
                   flex: 1,
                   background: 'rgba(255,255,255,0.07)',
                   border: '1px solid rgba(147,51,234,0.3)',
-                  borderRadius: 10,
+                  borderRadius: '0.625rem',
                   color: '#fff',
-                  padding: '9px 12px',
+                  padding: '0.5625rem 0.75rem',
                 },
               }}
             />
@@ -294,7 +294,7 @@ export default function AIChat({ settings }) {
               h={38}
               style={{
                 border: 'none',
-                borderRadius: 10,
+                borderRadius: '0.625rem',
                 cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',

@@ -137,7 +137,7 @@ export default function Nav({
             </Text>
           )}
         </Box>
-        <Container size={1680} py={10}>
+        <Container className={classes.navContainer} size={1680} py={10}>
           <Flex
             component="nav"
             aria-label="Main navigation"
@@ -196,7 +196,7 @@ export default function Nav({
                       onChange={(opened) => setActiveDropdown(opened ? item.id : null)}
                       withinPortal
                       zIndex={150}
-                      width="min(620px, calc(100vw - 32px))"
+                      width="min(38.75rem, calc(100vw - 2rem))"
                       position="bottom-start"
                     >
                       <Menu.Target>
@@ -294,7 +294,7 @@ export default function Nav({
                 }}
                 aria-label="Search products"
                 placeholder="Search products..."
-                leftSection={<span style={{ fontSize: 28 }}>⌕</span>}
+                leftSection={<span style={{ fontSize: '1.75rem' }}>⌕</span>}
                 value={search}
                 onChange={updateSearch}
               />
@@ -339,8 +339,8 @@ export default function Nav({
                   aria-label={`Open cart (${cartCount})`}
                 >
                   <svg
-                    width="30"
-                    height="30"
+                    width="1.875rem"
+                    height="1.875rem"
                     viewBox="0 0 32 32"
                     fill="none"
                     stroke="currentColor"
@@ -370,7 +370,8 @@ export default function Nav({
           </Flex>
         </Container>
       </Box>
-      <Box h={headerRect.height} aria-hidden="true" />
+      {/* ResizeObserver reports physical CSS pixels, already including the fluid scale. */}
+      <Box style={{ height: headerRect.height }} aria-hidden="true" />
       <Drawer
         opened={menuOpen}
         onClose={() => setMenuOpen(false)}

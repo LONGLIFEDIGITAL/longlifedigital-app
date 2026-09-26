@@ -1,4 +1,7 @@
 :root {
+  /* One shared scale for Mantine's rem props and our component styles.
+     Keep the user's default font size on small screens; grow up to 150% on wide ones. */
+  font-size: clamp(100%, calc(75% + 0.4vw), 150%);
   color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -88,8 +91,8 @@ img {
   outline: none;
 }
 .responsive-modal {
-  max-width: calc(100vw - 24px);
-  border-radius: 16px;
+  max-width: calc(100vw - 1.5rem);
+  border-radius: 1rem;
 }
 .responsive-modal-body {
   overflow-wrap: anywhere;

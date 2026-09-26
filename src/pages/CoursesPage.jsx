@@ -39,7 +39,7 @@ export default function CoursesPage({
             </Text>
           </Box>
         ) : (
-          <SimpleGrid minColWidth="min(100%, 250px)" spacing={20}>
+          <SimpleGrid minColWidth="min(100%, 15.625rem)" spacing={20}>
             {courses.map((p) => (
               <ProductCard
                 key={p.id}
@@ -62,7 +62,7 @@ export default function CoursesPage({
           <Title
             order={2}
             c="#111827"
-            fz="clamp(24px,4vw,36px)"
+            fz="clamp(1.5rem,4vw,2.25rem)"
             fw="700"
             ff="'Plus Jakarta Sans',sans-serif"
             mb={28}
@@ -72,7 +72,7 @@ export default function CoursesPage({
           {catalogStatus === 'loading' ? (
             <ProductGridSkeleton label="Loading other products" compactMobile={false} />
           ) : (
-            <SimpleGrid minColWidth="min(100%, 250px)" spacing={20}>
+            <SimpleGrid minColWidth="min(100%, 15.625rem)" spacing={20}>
               {products
                 .filter((p) => !matchesCategory(p, 'course'))
                 .slice(0, 4)

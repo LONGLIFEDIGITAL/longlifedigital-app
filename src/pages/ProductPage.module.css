@@ -1,7 +1,7 @@
 .description {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
   color: #374151;
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.7;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -73,7 +73,7 @@
 .description pre {
   overflow-x: auto;
   padding: 1em;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   background: #f9fafb;
 }
 

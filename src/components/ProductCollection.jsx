@@ -11,8 +11,8 @@ const PAGE_SIZE = 4;
 function PageArrow({ previous = false }) {
   return (
     <svg
-      width="20"
-      height="20"
+      width="1.25rem"
+      height="1.25rem"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -42,7 +42,7 @@ function MobileProductPages({ products, label, mobilePeek = false, ...cardProps 
         id={id}
         aria-label={label}
         tabIndex={pages.length > 1 ? 0 : undefined}
-        slideSize={mobilePeek ? 'calc((100% - 12px) / 1.25)' : '100%'}
+        slideSize={mobilePeek ? 'calc((100% - 0.75rem) / 1.25)' : '100%'}
         includeGapInSize={!mobilePeek}
         slideGap={12}
         withControls={false}
@@ -139,17 +139,18 @@ export default function ProductCollection({
     );
   if (products.length === 0) return null;
 
-  if (desktop && horizontal) return (
-    <div className={classes.horizontalRow} role="region" aria-label={label} tabIndex={0}>
-      {products.map((product) => (
-        <ProductCard key={product.id} p={product} {...cardProps} />
-      ))}
-    </div>
-  );
+  if (desktop && horizontal)
+    return (
+      <div className={classes.horizontalRow} role="region" aria-label={label} tabIndex={0}>
+        {products.map((product) => (
+          <ProductCard key={product.id} p={product} {...cardProps} />
+        ))}
+      </div>
+    );
 
   return desktop ? (
     <SimpleGrid
-      minColWidth={`min(100%, ${minColWidth}px)`}
+      minColWidth={`min(100%, ${minColWidth / 16}rem)`}
       spacing={20}
       aria-label={label}
       role="region"

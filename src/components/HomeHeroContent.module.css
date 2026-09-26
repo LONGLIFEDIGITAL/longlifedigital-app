@@ -6,25 +6,23 @@
 .badge {
   display: inline-block;
   max-width: 100%;
-  margin: 0 0 20px;
-  padding: 5px 16px;
-  margin-top: 0;
-  margin-bottom: 2.5rem;
+  margin: 0 0 clamp(1.5rem, 2.5vw, 3.75rem);
+  padding: clamp(0.3125rem, 0.45vw, 0.625rem) clamp(0.75rem, 1.2vw, 1.75rem);
   border: 1px solid rgba(201, 150, 63, 0.3);
-  border-radius: 30px;
+  border-radius: 1.875rem;
   background: rgba(201, 150, 63, 0.12);
   color: #e8c97a;
-  font-size: 13px;
+  font-size: clamp(0.625rem, 0.95vw, 1.25rem);
   font-weight: 600;
-  letter-spacing: 2px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .heading {
-  margin: 0 0 20px;
+  margin: 0 0 clamp(1.25rem, 2vw, 3rem);
   color: #fff;
   font-family: 'Playfair Display', serif;
-  font-size: clamp(32px, 5vw, 64px);
+  font-size: clamp(2rem, 5vw, 7rem);
   font-weight: 700;
   line-height: 1.1;
 }
@@ -44,11 +42,11 @@
 }
 
 .intro {
-  max-width: 480px;
-  margin: 0 0 32px;
+  max-width: 36em;
+  margin: 0 0 clamp(1.5rem, 2.5vw, 3.75rem);
   color: rgba(255, 255, 255, 0.72);
-  font-size: 16px;
-  line-height: 1.85;
+  font-size: var(--hero-body, 1rem);
+  line-height: 1.7;
   white-space: pre-line;
 }
 
@@ -56,16 +54,16 @@
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  gap: 12px;
+  gap: clamp(0.75rem, 1.2vw, 1.75rem);
 }
 
 .button {
   max-width: 100%;
   height: auto;
-  min-height: 48px;
-  padding: 14px 32px;
+  min-height: 3rem;
+  padding: var(--hero-button-py, 0.625rem) clamp(1.25rem, 2vw, 3rem);
   color: #1a0533;
-  font-size: 15px;
+  font-size: var(--hero-button, 0.9375rem);
 }
 
 .button :global(.mantine-Button-label) {
@@ -74,21 +72,21 @@
 }
 
 .secondary {
-  padding-inline: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
   font-weight: 600;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(0.5rem);
 }
 
 @media (max-width: 35.99em) {
   .actions {
     flex-direction: column;
   }
-  .badge {
-    font-size: 10px;
-    margin-bottom: 2.3rem;
+}
+@media (min-width: 36em) and (max-width: 61.99em) {
+  .heading {
+    font-size: clamp(2rem, 6.5vw, 4rem);
   }
 }

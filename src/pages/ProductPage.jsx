@@ -223,7 +223,7 @@ export default function ProductPage({
             <Title
               order={1}
               c="#111827"
-              fz="clamp(24px,4vw,40px)"
+              fz="clamp(1.5rem,4vw,2.5rem)"
               fw="700"
               ff="'Plus Jakarta Sans',sans-serif"
               lh={1.2}
@@ -476,14 +476,14 @@ export default function ProductPage({
             <Title
               order={2}
               c="#111827"
-              fz="clamp(24px,4vw,36px)"
+              fz="clamp(1.5rem,4vw,2.25rem)"
               fw="700"
               ff="'Plus Jakarta Sans',sans-serif"
               mb={24}
             >
               You May Also Like
             </Title>
-            <SimpleGrid minColWidth="min(100%, 250px)" spacing={20}>
+            <SimpleGrid minColWidth="min(100%, 15.625rem)" spacing={20}>
               {related.map((r) => (
                 <ProductCard
                   key={r.id}

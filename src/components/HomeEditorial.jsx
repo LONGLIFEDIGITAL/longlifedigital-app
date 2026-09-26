@@ -29,8 +29,8 @@ export function SectionHeading({ title, intro, cta, website, loading }) {
   if (loading)
     return (
       <SkeletonRegion label="Loading section heading" className={classes.heading}>
-        <SkeletonBlock height={32} width="min(100%, 320px)" />
-        <SkeletonBlock height={18} width="min(100%, 240px)" mt={12} />
+        <SkeletonBlock height={32} width="min(100%, 20rem)" />
+        <SkeletonBlock height={18} width="min(100%, 15rem)" mt={12} />
       </SkeletonRegion>
     );
   return (

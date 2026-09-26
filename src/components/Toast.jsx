@@ -5,7 +5,7 @@ export default function Toast({ toast }) {
     <Box
       role="status"
       aria-live="polite"
-      maw="calc(100vw - 32px)"
+      maw="calc(100vw - 2rem)"
       c="#fff"
       bg={toast.type === 'err' ? '#EF4444' : toast.type === 'info' ? '#F59E0B' : '#9333EA'}
       fz={13}

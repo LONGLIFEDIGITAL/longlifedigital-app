@@ -21,33 +21,33 @@
 .cardTitle {
   min-height: 2.8em;
   justify-content: center;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 [data-compact] .cardTitle {
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .categoryTiles {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 144px));
+  grid-template-columns: repeat(4, minmax(0, 9rem));
   justify-content: center;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .categoryTile {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 16px;
+  gap: 0.5rem;
+  padding: 1rem;
   border: 1px solid #f3f4f6;
-  border-radius: 12px;
+  border-radius: 0.75rem;
 }
 
 @media (max-width: 47.99em) {
   .categoryTiles {
-    grid-template-columns: repeat(2, minmax(0, 144px));
+    grid-template-columns: repeat(2, minmax(0, 9rem));
   }
 
   .categoryTile:nth-child(n + 3) {

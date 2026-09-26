@@ -19,7 +19,7 @@ export default function ProductEditor({ editId, form, saveProduct, setForm, setS
         bg="#fff"
         pos="relative"
         style={{
-          borderRadius: 16,
+          borderRadius: '1rem',
           boxShadow: '0 24px 80px rgba(0,0,0,0.15)',
         }}
       >
@@ -59,7 +59,7 @@ export default function ProductEditor({ editId, form, saveProduct, setForm, setS
           p="16px"
           style={{
             border: '1px solid #F3F4F6',
-            borderRadius: 10,
+            borderRadius: '0.625rem',
           }}
         >
           <Box c="#111827" fz={13} fw="700" mb={12}>
@@ -210,7 +210,7 @@ export default function ProductEditor({ editId, form, saveProduct, setForm, setS
             component="textarea"
             styles={{
               input: {
-                height: 80,
+                height: '5rem',
                 resize: 'vertical',
               },
             }}
@@ -252,8 +252,8 @@ export default function ProductEditor({ editId, form, saveProduct, setForm, setS
                 })
               }
               style={{
-                width: 18,
-                height: 18,
+                width: '1.125rem',
+                height: '1.125rem',
                 accentColor: '#9333EA',
               }}
             />
@@ -276,7 +276,7 @@ export default function ProductEditor({ editId, form, saveProduct, setForm, setS
           p="16px"
           style={{
             border: '1px solid #F3F4F6',
-            borderRadius: 10,
+            borderRadius: '0.625rem',
           }}
         >
           <Box c="#111827" fz={13} fw="700" mb={12}>
@@ -376,7 +376,7 @@ export default function ProductEditor({ editId, form, saveProduct, setForm, setS
           p="16px"
           style={{
             border: '1px solid #F3F4F6',
-            borderRadius: 10,
+            borderRadius: '0.625rem',
           }}
         >
           <Box c="#111827" fz={13} fw="700" mb={12}>

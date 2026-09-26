@@ -16,6 +16,7 @@ function HeroButton({ button, secondary, website }) {
   return (
     <Button
       className={`btn-h ${classes.button} ${secondary ? classes.secondary : ''}`}
+      styles={{ root: { paddingBlock: 'var(--hero-button-py, 10px)' } }}
       {...(internal
         ? {
             type: 'button',

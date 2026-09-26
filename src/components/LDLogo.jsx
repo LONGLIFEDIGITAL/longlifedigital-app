@@ -29,6 +29,8 @@ export default function LDLogo({ size = 36, src, alt = 'Longlife Digital' }) {
         style={{
           display: 'block',
           objectFit: 'contain',
+          width: '100%',
+          height: '100%',
         }}
       />
     </Flex>

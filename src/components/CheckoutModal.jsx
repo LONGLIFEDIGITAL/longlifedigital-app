@@ -40,7 +40,7 @@ export default function CheckoutModal({
         maw={420}
         pos="relative"
         style={{
-          borderRadius: 20,
+          borderRadius: '1.25rem',
           overflow: 'hidden',
           boxShadow: '0 24px 60px rgba(0,0,0,0.4)',
         }}
@@ -81,7 +81,7 @@ export default function CheckoutModal({
               h={52}
               m="0 auto 12px"
               style={{
-                borderRadius: 12,
+                borderRadius: '0.75rem',
               }}
             >
               {CATS.find((c) => c.id === checkoutItem.cat)?.icon || '📦'}
@@ -129,14 +129,14 @@ export default function CheckoutModal({
                   style={{
                     display: 'block',
                     background: 'linear-gradient(135deg,#059669,#10B981)',
-                    borderRadius: 10,
-                    padding: '12px',
+                    borderRadius: '0.625rem',
+                    padding: '0.75rem',
                     textAlign: 'center',
                     color: '#fff',
                     fontWeight: 700,
-                    fontSize: 13,
+                    fontSize: '0.8125rem',
                     textDecoration: 'none',
-                    marginBottom: 12,
+                    marginBottom: '0.75rem',
                   }}
                 >
                   ⬇ Download Now
@@ -173,7 +173,7 @@ export default function CheckoutModal({
                   p="10px 14px"
                   style={{
                     border: '1px solid rgba(239,68,68,0.3)',
-                    borderRadius: 8,
+                    borderRadius: '0.5rem',
                   }}
                 >
                   {stripeError}
@@ -243,7 +243,7 @@ export default function CheckoutModal({
                 }
                 styles={{
                   input: {
-                    marginBottom: 10,
+                    marginBottom: '0.625rem',
                   },
                 }}
               />

@@ -1,23 +1,23 @@
 .header {
   background: #f9fafb;
   border-bottom: 1px solid #f0eef5;
-  padding: clamp(28px, 4vw, 56px) 0;
+  padding: clamp(1.75rem, 4vw, 3.5rem) 0;
 }
 .heading {
   font:
-    700 clamp(28px, 5vw, 48px)/1.22 'Plus Jakarta Sans',
+    700 clamp(1.75rem, 5vw, 3rem)/1.22 'Plus Jakarta Sans',
     sans-serif;
   color: #111827;
-  margin: 0 0 12px;
+  margin: 0 0 0.75rem;
   overflow-wrap: anywhere;
 }
 .eyebrow {
   color: #9333ea;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  margin: 0 0 12px;
+  margin: 0 0 0.75rem;
 }
 .intro {
   color: #6b7280;
@@ -27,27 +27,27 @@
   white-space: pre-line;
 }
 .body {
-  padding-block: clamp(28px, 5vw, 60px);
+  padding-block: clamp(1.75rem, 5vw, 3.75rem);
 }
 .section {
   border: 1px solid #ebe7f2;
   background: #faf9fc;
-  border-radius: 18px;
-  padding: clamp(20px, 4vw, 32px);
-  margin-block: 24px;
-  scroll-margin-top: 160px;
+  border-radius: 1.125rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  margin-block: 1.5rem;
+  scroll-margin-top: 10rem;
   overflow-wrap: anywhere;
 }
 .section h2,
 .section h3 {
-  margin: 0 0 14px;
+  margin: 0 0 0.875rem;
   color: #1a0533;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.75rem), 1fr));
+  gap: 1.5rem;
   align-items: start;
 }
 .grid .section {
@@ -55,37 +55,37 @@
 }
 .actions {
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  margin-top: 20px;
+  margin-top: 1.25rem;
 }
 .empty {
-  padding: 24px;
+  padding: 1.5rem;
   border: 1px dashed #d8cbea;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   color: #6b7280;
   line-height: 1.7;
 }
 .price {
   color: #6724aa;
   font-weight: 700;
-  font-size: 20px;
-  margin-block: 18px;
+  font-size: 1.25rem;
+  margin-block: 1.125rem;
 }
 .tag {
   display: inline-block;
   background: #f3eeff;
   color: #7428b5;
-  padding: 4px 10px;
-  border-radius: 20px;
-  margin: 0 8px 12px 0;
-  font-size: 13px;
+  padding: 0.25rem 0.625rem;
+  border-radius: 1.25rem;
+  margin: 0 0.5rem 0.75rem 0;
+  font-size: 0.8125rem;
 }
 
 .image {
   width: 100%;
-  height: 180px;
+  height: 11.25rem;
   object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 20px;
+  border-radius: 0.75rem;
+  margin-bottom: 1.25rem;
 }

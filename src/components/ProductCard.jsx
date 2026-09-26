@@ -5,7 +5,7 @@ import { cardEmoji, cardReviews, cardTheme } from '../utils/cardPresentation';
 import { headlessEnabled } from '../services/checkout';
 import classes from './ProductCard.module.css';
 
-const cardButtonStyles = { root: { minHeight: 36, paddingBlock: 6 } };
+const cardButtonStyles = { root: { minHeight: 'max(44px, 2.25rem)', paddingBlock: '0.375rem' } };
 
 export default function ProductCard({
   p,

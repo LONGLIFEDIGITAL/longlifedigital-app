@@ -36,7 +36,7 @@ export const theme = createTheme({
   components: {
     Input: Input.extend({
       defaultProps: { size: 'md' },
-      styles: { input: { fontSize: 16, borderRadius: 8 } },
+      styles: { input: { fontSize: 'max(16px, 1rem)', borderRadius: '0.5rem' } },
     }),
     Container: Container.extend({
       defaultProps: { size: 1280, px: { base: 16, sm: 24 } },
@@ -44,7 +44,7 @@ export const theme = createTheme({
     Button: Button.extend({
       defaultProps: { size: 'md' },
       styles: {
-        root: { height: 'auto', minHeight: 44, paddingBlock: 10 },
+        root: { height: 'auto', minHeight: 'max(44px, 2.75rem)', paddingBlock: '0.625rem' },
         label: { whiteSpace: 'normal', overflow: 'visible', lineHeight: 1.4 },
       },
     }),

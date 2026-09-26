@@ -38,7 +38,7 @@ export default function ContactPage({ fire, contact, settings }) {
               bg="linear-gradient(135deg,#1a0533,#2d1066)"
               p="36px"
               style={{
-                borderRadius: 20,
+                borderRadius: '1.25rem',
                 border: '1px solid rgba(201,150,63,0.2)',
               }}
             >
@@ -76,8 +76,8 @@ export default function ContactPage({ fire, contact, settings }) {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 14,
-                      marginBottom: 20,
+                      gap: '0.875rem',
+                      marginBottom: '1.25rem',
                       textDecoration: 'none',
                     }}
                   >
@@ -130,7 +130,7 @@ export default function ContactPage({ fire, contact, settings }) {
             p="36px"
             pos="relative"
             style={{
-              borderRadius: 20,
+              borderRadius: '1.25rem',
               border: '1px solid rgba(201,150,63,0.15)',
               boxShadow: '0 8px 40px rgba(147,51,234,0.08)',
             }}
@@ -140,7 +140,7 @@ export default function ContactPage({ fire, contact, settings }) {
               pos="absolute"
               style={{
                 inset: 0,
-                borderRadius: 20,
+                borderRadius: '1.25rem',
                 border: '1.5px solid transparent',
                 pointerEvents: 'none',
               }}
@@ -307,7 +307,7 @@ export default function ContactPage({ fire, contact, settings }) {
                   component="textarea"
                   styles={{
                     input: {
-                      height: 120,
+                      height: '7.5rem',
                       resize: 'vertical',
                     },
                   }}
