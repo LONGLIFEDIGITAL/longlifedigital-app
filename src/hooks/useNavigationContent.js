@@ -3,7 +3,7 @@ import { CONTENT_PAGES } from '../contentPages';
 
 // Essential route links keep the storefront usable before its menu is published.
 const defaults = {
-  header: ['home', 'services', 'courses', 'domains', 'shop', 'about', 'blog', 'contact'],
+  header: ['home', 'services', 'courses', 'domains', 'shop', 'blog', 'about', 'contact'],
   footer_company: ['about', 'blog', 'shop'],
   footer_support: ['faq', 'contact'],
   footer_legal: ['refund', 'privacy', 'terms'],
@@ -17,6 +17,20 @@ const labels = {
   contact: 'Contact',
   faq: 'FAQ',
 };
+
+// Match routes so editors can rename the labels without changing their position.
+function headerPriority(item) {
+  try {
+    const path =
+      new URL(item.destination, 'https://navigation.invalid').pathname.replace(/\/+$/, '') || '/';
+    if (path === CONTENT_PAGES.home.path) return -1;
+    if (path === CONTENT_PAGES.about.path) return 1;
+    if (path === CONTENT_PAGES.contact.path) return 2;
+  } catch {
+    // Preserve the existing order for destinations that are not page URLs.
+  }
+  return 0;
+}
 export default function useNavigationContent() {
   const navigation = useContent('navigation');
   const services = useContent('services');
@@ -60,5 +74,7 @@ export default function useNavigationContent() {
           children: [],
         }));
   }
+  // Stable sorting preserves CMS order for the links between Home and About/Contact.
+  areas.header.sort((a, b) => headerPriority(a) - headerPriority(b));
   return { ...areas, status: navigation.status };
 }
