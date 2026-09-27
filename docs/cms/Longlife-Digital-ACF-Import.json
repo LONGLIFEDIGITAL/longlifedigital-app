@@ -324,7 +324,8 @@
           "faq": "Faq",
           "refund": "Refund",
           "privacy": "Privacy",
-          "terms": "Terms"
+          "terms": "Terms",
+          "ebook": "Ebook"
         },
         "default_value": "",
         "key": "field_lld_page_lld_page_key"

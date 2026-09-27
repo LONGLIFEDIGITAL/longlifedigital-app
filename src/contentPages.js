@@ -12,4 +12,5 @@ export const CONTENT_PAGES = {
   refund: { slug: 'refund-policy', path: '/refund-policy', title: 'Refund Policy' },
   privacy: { slug: 'privacy-policy', path: '/privacy-policy', title: 'Privacy Policy' },
   terms: { slug: 'terms-of-service', path: '/terms-of-service', title: 'Terms of Service' },
+  ebook: { slug: 'ebook', path: '/ebook', title: 'E-book' },
 };

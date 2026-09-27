@@ -92,6 +92,7 @@ PAGE_ROUTES = [
     ('domains', '/domains', 'DomainsPage.jsx'), ('contact', '/contact', 'ContactPage.jsx'),
     ('faq', '/faq', 'FAQPage.jsx'), ('refund', '/refund-policy', 'RefundPage.jsx'),
     ('privacy', '/privacy-policy', 'PrivacyPage.jsx'), ('terms', '/terms-of-service', 'TermsPage.jsx'),
+    ('ebook', '/ebook', 'EbookPage.jsx'),
 ]
 PAGE_KEY = 'field_lld_page_lld_page_key'
 home_fields = [

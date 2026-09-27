@@ -35,6 +35,7 @@ const BlogPage = lazy(() => import('./pages/BlogPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
 const CoursesPage = lazy(() => import('./pages/CoursesPage'));
+const EbookPage = lazy(() => import('./pages/EbookPage'));
 const DomainsPage = lazy(() => import('./pages/DomainsPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
@@ -538,6 +539,19 @@ export default function App() {
               addCart={addCart}
               goProduct={goProduct}
               fire={fire}
+              isAdmin={isAdmin}
+              openEdit={openEdit}
+              openDel={openDel}
+            />
+          )}
+          {page === 'ebook' && (
+            <EbookPage
+              products={products}
+              catalogStatus={catalogStatus}
+              retryCatalog={retryCatalog}
+              addCart={addCart}
+              openCheckout={openCheckout}
+              goProduct={goProduct}
               isAdmin={isAdmin}
               openEdit={openEdit}
               openDel={openDel}

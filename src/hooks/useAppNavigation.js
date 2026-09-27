@@ -15,6 +15,7 @@ export const PAGE_PATHS = {
   refund: '/refund-policy',
   privacy: '/privacy-policy',
   terms: '/terms-of-service',
+  ebook: '/ebook',
 };
 
 export default function useAppNavigation() {
