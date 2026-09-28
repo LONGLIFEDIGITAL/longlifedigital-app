@@ -9,20 +9,14 @@ import ProductCollection from '../components/ProductCollection';
 import CatalogStatus from '../components/CatalogStatus';
 import ProductGridSkeleton from '../components/skeletons/ProductGridSkeleton';
 import classes from './EbookPage.module.css';
-
-// Membership comes from merchandising metadata, never a guess based on the title.
-function isEbook(product) {
-  const terms = [
-    product.cat,
-    ...(product.categoryIds || []),
-    ...(product.categories || []).flatMap((term) => [term.id, term.label]),
-    ...(product.tags || []).flatMap((term) => [term.id, term.label]),
-  ];
-  return terms.some((term) => /(^|[^a-z0-9])e[\s-]?books?($|[^a-z0-9])/i.test(term || ''));
-}
+import ContentButton from '../components/ContentButton';
+import { collectionButton } from '../utils/collectionCopy';
+import { isEbook } from '../utils/ebook';
+import ArrowIcon from '../components/ArrowIcon';
 
 export default function EbookPage({ products, catalogStatus, retryCatalog, ...cardProps }) {
   const content = useContent('page', 'ebook');
+  const copy = content.data?.collection || {};
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('featured');
   const ebooks = products.filter(isEbook);
@@ -64,15 +58,28 @@ export default function EbookPage({ products, catalogStatus, retryCatalog, ...ca
                 'Discover ebooks for curious minds and ambitious next steps. Find a fresh perspective, explore an idea, and make it your own.'}
             </p>
             <div className={classes.actions}>
-              <Button component="a" href="#ebook-library" color="brand" radius="xl">
-                Explore the library <span aria-hidden="true">&nbsp;↗</span>
-              </Button>
-              <Link className={classes.textLink} to="/products">
-                All digital products <span aria-hidden="true">→</span>
-              </Link>
+              {copy.primary?.label && copy.primary?.destination ? (
+                <ContentButton button={copy.primary} radius="xl" arrow="up-right" />
+              ) : (
+                <Button
+                  component="a"
+                  href="#ebook-library"
+                  color="brand"
+                  radius="xl"
+                  rightSection={<ArrowIcon />}
+                >
+                  Explore the library
+                </Button>
+              )}
+              <ContentButton
+                variant="subtle"
+                radius="xl"
+                arrow="right"
+                button={collectionButton(copy.secondary, 'All digital products', '/products')}
+              />
             </div>
             <p className={classes.heroNote}>
-              <span aria-hidden="true">✦</span> A new chapter, on your terms.
+              <span aria-hidden="true">✦</span> {copy.hero_note || 'A new chapter, on your terms.'}
             </p>
           </div>
           <div className={classes.bookshelf} aria-hidden="true">
@@ -111,8 +118,10 @@ export default function EbookPage({ products, catalogStatus, retryCatalog, ...ca
         >
           <div className={classes.sectionHeading}>
             <div>
-              <p className={classes.eyebrow}>Browse the collection</p>
-              <h2 id="library-heading">Find your next read.</h2>
+              <p className={classes.eyebrow}>
+                {copy.collection_eyebrow || 'Browse the collection'}
+              </p>
+              <h2 id="library-heading">{copy.collection_heading || 'Find your next read.'}</h2>
             </div>
             <p className={classes.count} role="status">
               {catalogStatus === 'ready'
@@ -184,13 +193,18 @@ export default function EbookPage({ products, catalogStatus, retryCatalog, ...ca
         </section>
         <aside className={classes.closing}>
           <div>
-            <p className={classes.eyebrow}>Keep your curiosity going</p>
-            <h2>There’s always more to discover.</h2>
-            <p>Explore fresh perspectives and practical ideas in our journal.</p>
+            <p className={classes.eyebrow}>{copy.closing_eyebrow || 'Keep your curiosity going'}</p>
+            <h2>{copy.closing_heading || 'There’s always more to discover.'}</h2>
+            <p>
+              {copy.closing_body ||
+                'Explore fresh perspectives and practical ideas in our journal.'}
+            </p>
           </div>
-          <Link className={classes.textLink} to="/blog">
-            Visit the journal <span aria-hidden="true">↗</span>
-          </Link>
+          <ContentButton
+            variant="subtle"
+            arrow="up-right"
+            button={collectionButton(copy.closing, 'Visit the journal', '/blog')}
+          />
         </aside>
         <PageCta cta={content.data?.cta} />
       </Container>

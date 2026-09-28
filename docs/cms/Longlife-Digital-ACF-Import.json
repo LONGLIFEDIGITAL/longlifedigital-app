@@ -416,6 +416,212 @@
         "key": "field_lld_page_lld_cta"
       },
       {
+        "name": "lld_collection",
+        "label": "Collection page editorial content",
+        "type": "group",
+        "instructions": "Ebook and Domains editorial copy. Blank fields use the designed page defaults. Buttons need both a label and destination to override the default. For a collection anchor use /ebook#ebook-library or /domains#domain-collection.",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "primary",
+            "label": "Primary hero button",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "label",
+                "label": "Button label",
+                "type": "text",
+                "instructions": "Leave both label and destination empty to hide this button.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 60,
+                "key": "field_lld_page_lld_collection_primary_label"
+              },
+              {
+                "name": "destination",
+                "label": "Destination",
+                "type": "text",
+                "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 500,
+                "key": "field_lld_page_lld_collection_primary_destination"
+              }
+            ],
+            "key": "field_lld_page_lld_collection_primary"
+          },
+          {
+            "name": "secondary",
+            "label": "Secondary hero button",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "label",
+                "label": "Button label",
+                "type": "text",
+                "instructions": "Leave both label and destination empty to hide this button.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 60,
+                "key": "field_lld_page_lld_collection_secondary_label"
+              },
+              {
+                "name": "destination",
+                "label": "Destination",
+                "type": "text",
+                "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 500,
+                "key": "field_lld_page_lld_collection_secondary_destination"
+              }
+            ],
+            "key": "field_lld_page_lld_collection_secondary"
+          },
+          {
+            "name": "hero_note",
+            "label": "Note below hero buttons",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_collection_hero_note"
+          },
+          {
+            "name": "collection_eyebrow",
+            "label": "Collection small heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_collection_collection_eyebrow"
+          },
+          {
+            "name": "collection_heading",
+            "label": "Collection heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_collection_collection_heading"
+          },
+          {
+            "name": "closing_eyebrow",
+            "label": "Editorial closing small heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_collection_closing_eyebrow"
+          },
+          {
+            "name": "closing_heading",
+            "label": "Editorial closing heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_collection_closing_heading"
+          },
+          {
+            "name": "closing_body",
+            "label": "Editorial closing description",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_page_lld_collection_closing_body"
+          },
+          {
+            "name": "closing",
+            "label": "Editorial closing button",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "label",
+                "label": "Button label",
+                "type": "text",
+                "instructions": "Leave both label and destination empty to hide this button.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 60,
+                "key": "field_lld_page_lld_collection_closing_label"
+              },
+              {
+                "name": "destination",
+                "label": "Destination",
+                "type": "text",
+                "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 500,
+                "key": "field_lld_page_lld_collection_closing_destination"
+              }
+            ],
+            "key": "field_lld_page_lld_collection_closing"
+          }
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_page_lld_page_key",
+              "operator": "==",
+              "value": "ebook"
+            }
+          ],
+          [
+            {
+              "field": "field_lld_page_lld_page_key",
+              "operator": "==",
+              "value": "domains"
+            }
+          ]
+        ],
+        "key": "field_lld_page_lld_collection"
+      },
+      {
+        "name": "lld_featured_asset",
+        "label": "Featured domain / website",
+        "type": "post_object",
+        "instructions": "Select a published, available Asset for the Domains hero. If empty or unavailable, the first available listing is shown. With no available listings, an editorial illustration is shown.",
+        "required": 0,
+        "return_format": "id",
+        "allow_null": 1,
+        "multiple": 0,
+        "ui": 1,
+        "post_type": [
+          "lld_asset"
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_page_lld_page_key",
+              "operator": "==",
+              "value": "domains"
+            }
+          ]
+        ],
+        "key": "field_lld_page_lld_featured_asset"
+      },
+      {
         "name": "lld_home",
         "label": "Homepage sections",
         "type": "group",
@@ -2075,7 +2281,7 @@
     "instruction_placement": "label",
     "hide_on_screen": [],
     "active": true,
-    "description": "Native title is the domain or website name; excerpt is the listing summary. Assign Asset Categories for filtering. Initial domain names and asking prices in the React source are samples, not a verified inventory.",
+    "description": "Native title is the domain or website name; excerpt is the listing summary, content is extended detail. Assign Asset Categories for filtering. Only published Assets populate the storefront; no sample inventory is substituted.",
     "show_in_rest": 1
   },
   {

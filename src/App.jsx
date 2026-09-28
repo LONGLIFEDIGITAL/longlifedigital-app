@@ -506,10 +506,14 @@ export default function App() {
           {page === 'product' && selProduct && (
             <ProductPage
               selProduct={selProduct}
+              onBrowseCategory={(category) => {
+                setFilterCat(category);
+                setSearch('');
+                setPage('shop');
+              }}
               openCheckout={openCheckout}
               checkoutLoading={leaving}
               products={products}
-              setPage={setPage}
               addCart={addCart}
               fire={fire}
               isAdmin={isAdmin}

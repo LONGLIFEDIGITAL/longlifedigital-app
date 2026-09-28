@@ -1,16 +1,19 @@
+import { Link } from 'react-router';
 import { headlessEnabled } from '../services/checkout';
 import RichText from '../components/RichText';
 import PageMetadata from '../components/PageMetadata';
 import CmsFaqs from '../components/CmsFaqs';
 import { Box, Button, Container, Flex, SimpleGrid, Text, Title } from '@mantine/core';
 import LoadingImage from '../components/LoadingImage';
+import EbookCover from '../components/EbookCover';
+import { isEbook } from '../utils/ebook';
 import { stars, fmtPrice, catLabel, getProdTheme } from '../utils/helpers';
 import ProductCard from '../components/ProductCard';
 import classes from './ProductPage.module.css';
 export default function ProductPage({
   selProduct,
   products,
-  setPage,
+  onBrowseCategory,
   addCart,
   fire,
   openCheckout,
@@ -27,41 +30,28 @@ export default function ProductPage({
   return (
     <div>
       <PageMetadata content={p} title={p.name} path={`/products/${p.id}`} />
-      <Flex align="center" gap={8} wrap="wrap" maw={1280} m="0 auto" p="16px 24px">
-        <Text
-          onClick={() => setPage('home')}
-          component="span"
-          inherit
-          c="#9333EA"
-          fz={13}
-          style={{
-            cursor: 'pointer',
-          }}
-        >
-          Home
-        </Text>
-        <Text component="span" inherit c="#D1D5DB" fz={13}>
-          /
-        </Text>
-        <Text
-          onClick={() => setPage('shop')}
-          component="span"
-          inherit
-          c="#9333EA"
-          fz={13}
-          style={{
-            cursor: 'pointer',
-          }}
-        >
-          Shop
-        </Text>
-        <Text component="span" inherit c="#D1D5DB" fz={13}>
-          /
-        </Text>
-        <Text component="span" inherit c="#9CA3AF" fz={13}>
-          {p.name}
-        </Text>
-      </Flex>
+      <nav className={classes.breadcrumb} aria-label="Breadcrumb">
+        <ol>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <button type="button" onClick={() => onBrowseCategory('all')}>
+              Shop
+            </button>
+          </li>
+          <li>
+            {isEbook(p) ? (
+              <Link to="/ebook">E-books</Link>
+            ) : (
+              <button type="button" onClick={() => onBrowseCategory(p.cat || 'uncategorized')}>
+                {p.categoryLabel || catLabel(p.cat) || 'Uncategorized'}
+              </button>
+            )}
+          </li>
+          <li aria-current="page">{p.name}</li>
+        </ol>
+      </nav>
       <Container>
         <SimpleGrid
           cols={{
@@ -80,133 +70,137 @@ export default function ProductPage({
           }}
         >
           <div>
-            <Flex
-              align="center"
-              justify="center"
-              wrap="wrap"
-              h={{
-                base: 280,
-                sm: 360,
-                md: 420,
-              }}
-              bg={getProdTheme(p.id).bg}
-              pos="relative"
-              style={{
-                borderRadius: 16,
-                border: '1px solid #F3F4F6',
-                overflow: 'hidden',
-              }}
-            >
-              {p.image && (
-                <LoadingImage
-                  src={p.image}
-                  alt={p.imageAlt || p.name}
-                  pos="absolute"
-                  inset={0}
-                  w="100%"
-                  h="100%"
-                  fit="contain"
-                />
-              )}
-              <Box
-                bg={`radial-gradient(circle,${getProdTheme(p.id).orb1} 0%,transparent 70%)`}
-                w="70%"
-                h="70%"
-                pos="absolute"
-                top="-20%"
-                right="-10%"
-                style={{
-                  borderRadius: '50%',
-                  pointerEvents: 'none',
-                }}
-              />
-              <Box
-                bg={`radial-gradient(circle,${getProdTheme(p.id).orb2} 0%,transparent 70%)`}
-                w="50%"
-                h="50%"
-                pos="absolute"
-                left="-10%"
-                bottom="-15%"
-                style={{
-                  borderRadius: '50%',
-                  pointerEvents: 'none',
-                }}
-              />
-              <Box bg={getProdTheme(p.id).bar} h={4} pos="absolute" top={0} left={0} right={0} />
-              {p.tag && (
-                <Box
-                  c="#E8C97A"
-                  bg="rgba(0,0,0,0.4)"
-                  fz={11}
-                  fw={700}
-                  lts={1}
-                  p="5px 14px"
-                  pos="absolute"
-                  top={16}
-                  left={16}
-                  style={{
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    borderRadius: 20,
-                  }}
-                >
-                  {p.tag}
-                </Box>
-              )}
-              {!p.image && (
-                <Box
-                  fz={120}
-                  opacity={0.1}
-                  style={{
-                    pointerEvents: 'none',
-                    userSelect: 'none',
-                  }}
-                >
-                  {getProdTheme(p.id).icon}
-                </Box>
-              )}
+            {isEbook(p) ? (
+              <EbookCover product={p} />
+            ) : (
               <Flex
                 align="center"
-                gap={12}
+                justify="center"
                 wrap="wrap"
-                bg="linear-gradient(0deg,rgba(0,0,0,0.88) 0%,transparent 100%)"
-                p="16px 20px"
-                pos="absolute"
-                left={0}
-                right={0}
-                bottom={0}
+                h={{
+                  base: 280,
+                  sm: 360,
+                  md: 420,
+                }}
+                bg={getProdTheme(p.id).bg}
+                pos="relative"
+                style={{
+                  borderRadius: 16,
+                  border: '1px solid #F3F4F6',
+                  overflow: 'hidden',
+                }}
               >
-                <Box
-                  c={getProdTheme(p.id).priceColor}
-                  fz={40}
-                  fw={700}
-                  ff="'Plus Jakarta Sans',sans-serif"
-                  lh={1}
-                >
-                  {fmtPrice(p.price, p.currency, p.minorUnit)}
-                </Box>
-                {p.oldPrice && (
-                  <>
-                    <Box c="rgba(255,255,255,0.4)" fz={16} td="line-through">
-                      {fmtPrice(p.oldPrice, p.currency, p.minorUnit)}
-                    </Box>
-                    <Box
-                      c="#E8C97A"
-                      bg="rgba(201,150,63,0.2)"
-                      fz={11}
-                      fw={700}
-                      p="4px 12px"
-                      style={{
-                        border: '1px solid rgba(201,150,63,0.35)',
-                        borderRadius: 20,
-                      }}
-                    >
-                      SAVE {Math.round((1 - p.price / p.oldPrice) * 100)}%
-                    </Box>
-                  </>
+                {p.image && (
+                  <LoadingImage
+                    src={p.image}
+                    alt={p.imageAlt || p.name}
+                    pos="absolute"
+                    inset={0}
+                    w="100%"
+                    h="100%"
+                    fit="contain"
+                  />
                 )}
+                <Box
+                  bg={`radial-gradient(circle,${getProdTheme(p.id).orb1} 0%,transparent 70%)`}
+                  w="70%"
+                  h="70%"
+                  pos="absolute"
+                  top="-20%"
+                  right="-10%"
+                  style={{
+                    borderRadius: '50%',
+                    pointerEvents: 'none',
+                  }}
+                />
+                <Box
+                  bg={`radial-gradient(circle,${getProdTheme(p.id).orb2} 0%,transparent 70%)`}
+                  w="50%"
+                  h="50%"
+                  pos="absolute"
+                  left="-10%"
+                  bottom="-15%"
+                  style={{
+                    borderRadius: '50%',
+                    pointerEvents: 'none',
+                  }}
+                />
+                <Box bg={getProdTheme(p.id).bar} h={4} pos="absolute" top={0} left={0} right={0} />
+                {p.tag && (
+                  <Box
+                    c="#E8C97A"
+                    bg="rgba(0,0,0,0.4)"
+                    fz={11}
+                    fw={700}
+                    lts={1}
+                    p="5px 14px"
+                    pos="absolute"
+                    top={16}
+                    left={16}
+                    style={{
+                      backdropFilter: 'blur(8px)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: 20,
+                    }}
+                  >
+                    {p.tag}
+                  </Box>
+                )}
+                {!p.image && (
+                  <Box
+                    fz={120}
+                    opacity={0.1}
+                    style={{
+                      pointerEvents: 'none',
+                      userSelect: 'none',
+                    }}
+                  >
+                    {getProdTheme(p.id).icon}
+                  </Box>
+                )}
+                <Flex
+                  align="center"
+                  gap={12}
+                  wrap="wrap"
+                  bg="linear-gradient(0deg,rgba(0,0,0,0.88) 0%,transparent 100%)"
+                  p="16px 20px"
+                  pos="absolute"
+                  left={0}
+                  right={0}
+                  bottom={0}
+                >
+                  <Box
+                    c={getProdTheme(p.id).priceColor}
+                    fz={40}
+                    fw={700}
+                    ff="'Plus Jakarta Sans',sans-serif"
+                    lh={1}
+                  >
+                    {fmtPrice(p.price, p.currency, p.minorUnit)}
+                  </Box>
+                  {p.oldPrice && (
+                    <>
+                      <Box c="rgba(255,255,255,0.4)" fz={16} td="line-through">
+                        {fmtPrice(p.oldPrice, p.currency, p.minorUnit)}
+                      </Box>
+                      <Box
+                        c="#E8C97A"
+                        bg="rgba(201,150,63,0.2)"
+                        fz={11}
+                        fw={700}
+                        p="4px 12px"
+                        style={{
+                          border: '1px solid rgba(201,150,63,0.35)',
+                          borderRadius: 20,
+                        }}
+                      >
+                        SAVE {Math.round((1 - p.price / p.oldPrice) * 100)}%
+                      </Box>
+                    </>
+                  )}
+                </Flex>
               </Flex>
-            </Flex>
+            )}
           </div>
           <div>
             <Box c="#9333EA" fz={10} fw="600" lts={1.5} tt="uppercase" mb={10}>

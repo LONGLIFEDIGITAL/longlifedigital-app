@@ -1,0 +1,97 @@
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  width: 100%;
+  max-width: 38rem;
+  aspect-ratio: 1;
+  margin-inline: auto;
+  border-radius: 1.25rem;
+  background: radial-gradient(ellipse at center, #e9def5 0%, #faf7f2 72%);
+}
+.orbit {
+  position: absolute;
+  inset: 8%;
+  border: 1px solid #d7c6e7;
+  border-radius: 50%;
+  z-index: -1;
+}
+.spark {
+  position: absolute;
+  right: 6%;
+  top: 20%;
+  color: #c9963f;
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  line-height: 1;
+}
+.backBook {
+  position: absolute;
+  width: 49%;
+  aspect-ratio: 0.7;
+  transform: translate(18%, 2%) rotate(15deg);
+  background: linear-gradient(100deg, #b58a4c, #e2bf83 12%, #edcf9e);
+  border-right: 0.4rem solid #f8eddc;
+  border-radius: 0.2rem 0.6rem 0.6rem 0.2rem;
+  box-shadow: 0.5rem 1rem 1.5rem #39204a15;
+}
+.frontBook {
+  position: relative;
+  width: 59%;
+  aspect-ratio: 0.68;
+  transform: rotate(-9deg);
+  background: #32164c;
+  border-radius: 0.2rem 0.6rem 0.6rem 0.2rem;
+  border-right: 0.3rem solid #e3d9c6;
+  box-shadow: 0.8rem 1.25rem 2rem #39204a30;
+}
+/* The actual artwork stays intact. These narrow highlights give the cover a spine. */
+.frontBook::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #00000026, #ffffff18 2%, #00000018 4%, transparent 7%);
+  box-shadow: inset 1px 0 #ffffff30;
+  pointer-events: none;
+}
+.cover {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10%;
+  color: #f9eedc;
+  background: linear-gradient(110deg, #31134f, #653494);
+  border-radius: inherit;
+}
+.placeholder strong {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1rem, 2.5vw, 2rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.placeholder > span {
+  font-size: 0.6875rem;
+  letter-spacing: 0.15em;
+}
+.placeholder > span:last-child {
+  font-size: 2rem;
+  color: #e8c97a;
+}
+.caption {
+  position: absolute;
+  inset: auto 1rem 0.65rem;
+  color: #77542b;
+  text-align: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}

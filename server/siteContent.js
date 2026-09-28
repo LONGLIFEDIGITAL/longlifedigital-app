@@ -123,6 +123,24 @@ export async function readSiteContent({
       seo: await resolveSeo(acf, read, httpsUrl),
       heading: text(acf.lld_heading) || text(page.title?.rendered),
       intro: text(acf.lld_intro),
+      collection: ['ebook', 'domains'].includes(key)
+        ? {
+            ...Object.fromEntries(
+              [
+                'hero_note',
+                'collection_eyebrow',
+                'collection_heading',
+                'closing_eyebrow',
+                'closing_heading',
+                'closing_body',
+              ].map((field) => [field, text(acf.lld_collection?.[field])]),
+            ),
+            primary: button(acf.lld_collection?.primary),
+            secondary: button(acf.lld_collection?.secondary),
+            closing: button(acf.lld_collection?.closing),
+            featuredAsset: key === 'domains' ? id(acf.lld_featured_asset) : null,
+          }
+        : undefined,
       cta: {
         heading: text(acf.lld_cta?.heading),
         body: text(acf.lld_cta?.body),

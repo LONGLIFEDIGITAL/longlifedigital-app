@@ -90,3 +90,51 @@ test('an empty ebook collection never substitutes unrelated products', async ({ 
     page.getByRole('link', { name: 'Explore all products', exact: true }),
   ).toHaveAttribute('href', '/products');
 });
+
+for (const width of [393, 1440]) {
+  test(`ebook detail presents the CMS cover as a book at ${width}px`, async ({
+    page,
+  }, testInfo) => {
+    const coverUrl = 'https://images.example.test/ebook-cover.svg';
+    await setup(page, [
+      { ...books[0], images: [{ src: coverUrl, alt: 'Creative Business cover artwork' }] },
+      product,
+    ]);
+    await page.route(coverUrl, (route) =>
+      route.fulfill({
+        contentType: 'image/svg+xml',
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="680" height="1000" viewBox="0 0 680 1000"><rect width="680" height="1000" fill="#244b49"/><circle cx="510" cy="610" r="220" fill="#e2bf83"/><text x="65" y="180" fill="#fff5dc" font-family="serif" font-size="70">The Creative</text><text x="65" y="265" fill="#fff5dc" font-family="serif" font-size="70">Business</text><text x="65" y="350" fill="#fff5dc" font-family="serif" font-size="70">Handbook</text><text x="65" y="920" fill="#fff5dc" font-family="sans-serif" font-size="22">A PRACTICAL GUIDE TO YOUR NEXT CHAPTER</text></svg>',
+      }),
+    );
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto('/products/701');
+    await expect(
+      page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'E-books' }),
+    ).toHaveAttribute('href', '/ebook');
+    const cover = page.getByRole('img', { name: 'Creative Business cover artwork', exact: true });
+    await expect(cover).toBeVisible();
+    await expect(cover).toHaveAttribute('src', coverUrl);
+    await expect(cover).toHaveCSS('object-fit', 'contain');
+    const book = cover.locator('..').locator('..');
+    await expect(book).not.toHaveCSS('transform', 'none');
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+    ).toBeLessThanOrEqual(1);
+    await page.screenshot({ path: testInfo.outputPath('ebook-detail.png'), fullPage: true });
+    // Other digital products retain their existing image presentation.
+    await page.goto('/products/318');
+    await expect(page.locator('[class*="frontBook"]')).toHaveCount(0);
+    const breadcrumb = page.getByRole('navigation', { name: 'Breadcrumb' });
+    await expect(breadcrumb).toContainText('AI Tools');
+    await breadcrumb.getByRole('button', { name: 'AI Tools', exact: true }).click();
+    await expect(page).toHaveURL(/\/products$/);
+    await expect(page.getByRole('heading', { name: books[0].name })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: product.name }).first()).toBeVisible();
+    await page.goto('/products/318');
+    await page
+      .getByRole('navigation', { name: 'Breadcrumb' })
+      .getByRole('button', { name: 'Shop', exact: true })
+      .click();
+    await expect(page.getByRole('heading', { name: books[0].name }).first()).toBeVisible();
+  });
+}

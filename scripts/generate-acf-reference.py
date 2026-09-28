@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'docs' / 'cms'
 OUT.mkdir(parents=True, exist_ok=True)
 VERSION = '1.0'
-DATE = 'September 17, 2026'
+DATE = 'September 28, 2026'
 
 
 def field(name, label, kind='text', help='', required=False, **settings):
@@ -127,6 +127,19 @@ add_group('page', 'Page content', [('post_type', 'page')], [
     field('lld_heading', 'Display heading', help='Optional override of the WordPress page title. Home uses its three hero segments when supplied.'),
     field('lld_intro', 'Page introduction', 'textarea', 'Home uses this as the hero paragraph; other pages use it below the heading.'),
     cta('lld_cta', 'Page closing call to action', heading=True),
+    group('lld_collection', 'Collection page editorial content', [
+        cta('primary', 'Primary hero button'), cta('secondary', 'Secondary hero button'),
+        field('hero_note', 'Note below hero buttons'),
+        field('collection_eyebrow', 'Collection small heading'),
+        field('collection_heading', 'Collection heading'),
+        field('closing_eyebrow', 'Editorial closing small heading'),
+        field('closing_heading', 'Editorial closing heading'),
+        field('closing_body', 'Editorial closing description', 'textarea'),
+        cta('closing', 'Editorial closing button'),
+    ], 'Ebook and Domains editorial copy. Blank fields use the designed page defaults. Buttons need both a label and destination to override the default. For a collection anchor use /ebook#ebook-library or /domains#domain-collection.', conditional_logic=when(PAGE_KEY, 'ebook', 'domains')),
+    field('lld_featured_asset', 'Featured domain / website', 'post_object',
+          'Select a published, available Asset for the Domains hero. If empty or unavailable, the first available listing is shown. With no available listings, an editorial illustration is shown.',
+          post_type=['lld_asset'], conditional_logic=when(PAGE_KEY, 'domains')),
     group('lld_home', 'Homepage sections', home_fields, conditional_logic=when(PAGE_KEY, 'home')),
     group('lld_about', 'About page', [field('tagline', 'Brand introduction', 'textarea'),
         related('sections', 'Mission, offering and promise cards', ['lld_block'], 6, 'Select Value/story blocks. Native page content can hold additional introductory prose.')], conditional_logic=when(PAGE_KEY, 'about')),
@@ -192,7 +205,7 @@ add_group('asset', 'Domain and website listing', [('post_type', 'lld_asset')], [
     field('lld_badge', 'Badge text', maxlength=40),
     field('lld_demo_url', 'Public website preview', 'url', 'HTTPS public demo only; never registrar credentials or transfer codes.', conditional_logic=when('field_lld_asset_lld_asset_type', 'website')),
     *pricing('asset'), cta('lld_cta', 'Inquiry button'),
-], 'Native title is the domain or website name; excerpt is the listing summary. Assign Asset Categories for filtering. Initial domain names and asking prices in the React source are samples, not a verified inventory.')
+], 'Native title is the domain or website name; excerpt is the listing summary, content is extended detail. Assign Asset Categories for filtering. Only published Assets populate the storefront; no sample inventory is substituted.')
 
 add_group('faq', 'FAQ placement', [('post_type', 'lld_faq')], [
     field('lld_topics', 'Relevant sections', 'checkbox', 'General items appear on the FAQ page. Additional placements can be connected later.', choices={'general': 'General', 'products': 'Products', 'services': 'Services', 'domains': 'Domains'}, default_value=['general']),
@@ -289,6 +302,8 @@ for item in CPTS:
     assert len(item['post_type']) <= 20
 assert all(item['show_in_rest'] == 1 for item in GROUPS)
 (OUT / 'Longlife-Digital-ACF-Import.json').write_text(json.dumps(IMPORT, indent=2, ensure_ascii=False) + '\n')
+(OUT / 'Longlife-Digital-ACF-Collection-Pages-Update.json').write_text(
+    json.dumps([entry for entry in GROUPS if entry['key'] == 'group_lld_page'], indent=2, ensure_ascii=False) + '\n')
 
 # The rest of this generator builds the human reference from these same definitions.
 SECTIONS = []

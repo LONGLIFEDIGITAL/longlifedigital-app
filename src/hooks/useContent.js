@@ -18,6 +18,14 @@ function normalizeRecord(record) {
   }
   if (record.about)
     normalized.about = { ...record.about, sections: record.about.sections.map(normalizeRecord) };
+  if (record.collection) {
+    normalized.collection = Object.fromEntries(
+      Object.entries(record.collection).map(([key, value]) => [
+        key,
+        typeof value === 'string' ? plainText(value) : value,
+      ]),
+    );
+  }
   return normalized;
 }
 const normalize = (data) =>

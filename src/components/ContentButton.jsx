@@ -1,7 +1,8 @@
 import { Button } from '@mantine/core';
 import { useNavigate } from 'react-router';
+import ArrowIcon from './ArrowIcon';
 
-export default function ContentButton({ button, website, ...props }) {
+export default function ContentButton({ button, website, arrow, ...props }) {
   const navigate = useNavigate();
   if (!button?.label || !button?.destination) return null;
   let destination = button.destination;
@@ -14,6 +15,7 @@ export default function ContentButton({ button, website, ...props }) {
       className="btn-h"
       color="brand"
       px="lg"
+      rightSection={arrow ? <ArrowIcon direction={arrow} /> : undefined}
       {...props}
       {...(destination.startsWith('/')
         ? {
@@ -25,7 +27,8 @@ export default function ContentButton({ button, website, ...props }) {
           }
         : { component: 'a', href: destination })}
     >
-      {button.label}
+      {/* Replace legacy CMS arrow suffixes when an SVG arrow is requested. */}
+      {arrow ? button.label.replace(/\s*[↗→][\uFE0E\uFE0F]?\s*$/u, '') : button.label}
     </Button>
   );
 }
