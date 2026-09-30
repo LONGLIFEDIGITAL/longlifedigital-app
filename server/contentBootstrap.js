@@ -157,6 +157,7 @@ export async function createBootstrap({
 
 export function contentBootstrapPlugin({ handler, cmsUrl, mode, root, subscribe }) {
   let snapshot;
+  let development = false;
   const enabled = Boolean(cmsUrl) && mode !== 'test';
   const directory = join(root, '.cache');
   const filename = join(
@@ -181,6 +182,9 @@ export function contentBootstrapPlugin({ handler, cmsUrl, mode, root, subscribe 
   };
   return {
     name: 'published-content-bootstrap',
+    configResolved(config) {
+      development = config.command === 'serve';
+    },
     configureServer(server) {
       if (!enabled || !subscribe) return;
       let timer;
@@ -207,6 +211,19 @@ export function contentBootstrapPlugin({ handler, cmsUrl, mode, root, subscribe 
         previous = JSON.parse(await readFile(filename, 'utf8'));
       } catch {
         /* First run. */
+      }
+      // The browser refreshes published content automatically. Local restarts
+      // can reuse the last good snapshot instead of waiting for every CMS read.
+      // Builds still validate/fetch current published content below.
+      if (
+        development &&
+        previous?.version === 1 &&
+        previous.cmsUrl === cmsUrl &&
+        previous.entries?.home &&
+        previous.entries?.['posts:1:9:']
+      ) {
+        snapshot = previous;
+        return;
       }
       try {
         snapshot = await createBootstrap({ handler, cmsUrl, previous });

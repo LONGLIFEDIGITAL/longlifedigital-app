@@ -361,3 +361,23 @@ test('malformed bodies and upstream debug errors do not expose private details',
   assert.equal(failed.status, 502);
   assert.ok(!JSON.stringify(failed.body).includes('Private database'));
 });
+
+test('authenticated checkout binds the server-held account token and ignores client ownership', async () => {
+  const account = `lld_account=${seal({ kind: 'account', store: env.VITE_WOOCOMMERCE_STORE_API_URL, token: 'verified-wp-session', expires: Date.now() + 60000 }, env)}`;
+  let dispatched = false;
+  const result = await call(
+    'checkout',
+    { ...payload, _lld_account: 'attacker-token' },
+    async (url, init) => {
+      if (url.endsWith('/config')) return reply(config);
+      const body = JSON.parse(init.body);
+      assert.equal(body._lld_account, 'verified-wp-session');
+      assert.equal(body.customer_id, undefined);
+      dispatched = true;
+      return reply({ order_id: 12, payment_result: { payment_status: 'success' } });
+    },
+    { cookie: `${cookie}; ${account}` },
+  );
+  assert.equal(result.status, 200);
+  assert.equal(dispatched, true);
+});

@@ -1,6 +1,5 @@
 import usePublishedContent from './usePublishedContent';
 import {
-  DEMO_SITE_SETTINGS,
   EMPTY_SITE_SETTINGS,
   normalizeSiteSettings,
   wordpressApiUrl,
@@ -13,12 +12,12 @@ export default function useSiteSettings() {
     normalizeSiteSettings,
   );
   return {
-    settings: managed ? (data ?? EMPTY_SITE_SETTINGS) : DEMO_SITE_SETTINGS,
+    settings: data || EMPTY_SITE_SETTINGS,
     managed,
     status:
-      data === null
+      !managed || data === null
         ? 'error'
-        : !managed || data !== undefined
+        : data !== undefined
           ? 'ready'
           : isPending || isFetching
             ? 'loading'

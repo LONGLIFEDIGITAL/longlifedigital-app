@@ -1,4 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { mockLayoutStorefront } from './fixtures/layoutStorefront';
+
+test.beforeEach(async ({ context }) => {
+  await mockLayoutStorefront(context);
+});
 
 async function navigate(page, label) {
   const burger = page.getByRole('button', { name: 'Open navigation menu', exact: true });
@@ -78,22 +83,24 @@ test('mobile navigation, search, cart and checkout retain their behavior', async
   await page.setViewportSize({ width: 393, height: 640 });
   await page.goto('/');
   await page.getByRole('button', { name: 'Open navigation menu', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Search products in menu' }).fill('Migraine');
+  await page.getByRole('textbox', { name: 'Search products in menu' }).fill('Small Business');
   await page.getByRole('button', { name: 'View search results' }).click();
   await expect(page.locator('main')).toContainText('1 product');
   await page.getByRole('button', { name: 'Add to Cart', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'added to cart' })).toBeVisible();
   await page.getByRole('button', { name: 'Open cart (1)', exact: true }).click();
   const cart = page.getByRole('dialog', { name: 'Shopping cart' });
-  await expect(cart).toContainText('Migraine & Headache Tracker');
+  await expect(cart).toContainText('Small Business AI Prompt Pack');
   await cart
-    .getByRole('button', { name: 'Increase quantity of Migraine & Headache Tracker' })
+    .getByRole('button', { name: 'Increase quantity of Small Business AI Prompt Pack' })
     .click();
-  await expect(cart.getByLabel('Cart subtotal', { exact: true })).toHaveText('$24');
+  await expect(cart.getByLabel('Cart subtotal', { exact: true })).toHaveText('$27.98');
   await expectFits(page);
-  // Demo catalog items have no WooCommerce identity and cannot take payments.
+  // Checkout is disabled in this layout-only fixture.
   await expect(cart.getByRole('button', { name: 'Proceed to Checkout' })).toBeDisabled();
-  await cart.getByRole('button', { name: 'Remove Migraine & Headache Tracker from cart' }).click();
+  await cart
+    .getByRole('button', { name: 'Remove Small Business AI Prompt Pack from cart' })
+    .click();
   await expect(cart).toContainText('Your cart is empty');
 });
 
@@ -110,70 +117,6 @@ test('chat fits a short phone screen and keeps its request behavior', async ({ p
   await expectFits(page);
   await page.screenshot({ path: 'test-results/chat-mobile.png' });
   await page.getByRole('button', { name: 'Close AI chat' }).click();
-});
-
-async function loginAsOwner(page) {
-  await page.keyboard.type('aaa');
-  const login = page.getByRole('dialog', { name: 'Admin login' });
-  await expect(login).toBeVisible();
-  await login.getByPlaceholder('Password').fill('longlife2024');
-  await login.getByRole('button', { name: 'Login', exact: true }).click();
-  await expect(login).toHaveCount(0);
-}
-
-test('admin dashboard and every tab fit on a narrow phone', async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto('/');
-  await loginAsOwner(page);
-  await page.getByRole('button', { name: 'Open dashboard' }).click();
-  const dashboard = page.getByRole('dialog', { name: 'Longlife Digital Dashboard' });
-  for (const name of ['Overview', 'Orders', 'Products', 'Team', 'Subscribers', 'Settings']) {
-    await dashboard.getByRole('button', { name: new RegExp(name) }).click();
-    await expectFits(page);
-  }
-  await dashboard.getByRole('button', { name: /Team/ }).click();
-  await dashboard.getByRole('button', { name: '+ Add Member', exact: true }).click();
-  await expectFits(page);
-  await page.screenshot({ path: 'test-results/admin-mobile.png' });
-  await page.keyboard.press('Escape');
-  await expect(dashboard).toHaveCount(0);
-});
-
-test('product create, edit and delete keep working in a scrollable phone dialog', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 393, height: 568 });
-  await page.goto('/');
-  await loginAsOwner(page);
-  await page.getByRole('button', { name: '+ Add Product', exact: true }).first().click();
-  const editor = page.getByRole('dialog', { name: 'Product editor' });
-  await expectFits(page);
-  await editor.getByPlaceholder('e.g. The AI Prompt Bible').fill('Responsive test product');
-  await editor.getByPlaceholder('e.g. 29', { exact: true }).fill('19');
-  await editor
-    .getByPlaceholder('Describe your product...')
-    .fill('A temporary product for this browser test.');
-  await editor.getByRole('button', { name: 'Publish Product' }).click();
-  await expect(editor).toHaveCount(0);
-  await expect(page.getByRole('status').filter({ hasText: 'Product published' })).toBeVisible();
-  await navigate(page, 'Digital Products');
-  // The new item is at the end of the paged mobile catalog.
-  await page.getByRole('region', { name: 'All Products', exact: true }).focus();
-  await page.keyboard.press('End');
-  const card = page.locator('.pcard').filter({ hasText: 'Responsive test product' });
-  await expect(card).toHaveCount(1);
-  await card.getByRole('button', { name: 'Edit', exact: true }).click();
-  await expect(editor.getByPlaceholder('e.g. The AI Prompt Bible')).toHaveValue(
-    'Responsive test product',
-  );
-  await editor.getByPlaceholder('e.g. 29', { exact: true }).fill('29');
-  await editor.getByRole('button', { name: 'Save Changes', exact: true }).click();
-  await expect(card).toContainText('$29');
-  await card.getByRole('button', { name: 'Delete', exact: true }).click();
-  const confirmation = page.getByRole('dialog', { name: 'Delete product' });
-  await expectFits(page);
-  await confirmation.getByRole('button', { name: 'Delete', exact: true }).click();
-  await expect(card).toHaveCount(0);
 });
 
 test('contact form and newsletter retain their validation and success behavior', async ({

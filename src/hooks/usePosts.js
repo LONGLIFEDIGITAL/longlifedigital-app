@@ -1,4 +1,4 @@
-import { DEMO_POSTS, normalizePosts } from '../services/posts';
+import { normalizePosts } from '../services/posts';
 import usePublishedContent from './usePublishedContent';
 import { wordpressApiUrl } from '../services/siteSettings';
 
@@ -12,11 +12,7 @@ export default function usePosts({ slug, page = 1, limit = 9, include = [], enab
     else params.set('page', String(page));
   }
   const query = usePublishedContent(params, (data) => normalizePosts(data, slug), enabled);
-  const data = managed
-    ? query.data
-    : slug
-      ? DEMO_POSTS.find((post) => post.slug === slug) || null
-      : { posts: DEMO_POSTS.slice(0, limit), totalPages: 1, page: 1 };
+  const data = managed ? query.data : slug ? null : { posts: [], totalPages: 0, page: 1 };
   return {
     data,
     status:

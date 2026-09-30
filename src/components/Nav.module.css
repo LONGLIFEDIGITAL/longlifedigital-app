@@ -107,6 +107,12 @@
   background: #f3eeff;
   box-shadow: inset 3px 0 #c9963f;
 }
+.accountLink {
+  margin-top: 0.75rem;
+  border-top: 1px solid #e6dcef;
+  padding-block: 1rem;
+  color: #500597;
+}
 .navButton :global(.mantine-Button-label) {
   position: relative;
   display: block;

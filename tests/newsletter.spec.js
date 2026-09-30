@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { mockLayoutStorefront } from './fixtures/layoutStorefront';
 
 const popup = (page) => page.getByRole('dialog', { name: 'Join the community' });
 
@@ -9,7 +10,8 @@ async function visibility(page, state) {
   }, state);
 }
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, context }) => {
+  await mockLayoutStorefront(context);
   await page.clock.install({ time: new Date('2030-01-01T12:00:00Z') });
   await page.clock.pauseAt(new Date('2030-01-01T12:00:01Z'));
   await page.setViewportSize({ width: 393, height: 852 });

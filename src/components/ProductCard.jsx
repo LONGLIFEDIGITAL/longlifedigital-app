@@ -12,9 +12,6 @@ export default function ProductCard({
   addCart,
   openCheckout,
   goProduct,
-  isAdmin,
-  openEdit,
-  openDel,
   compact = false,
   peek = false,
 }) {
@@ -143,28 +140,6 @@ export default function ProductCard({
             Buy Now
           </Button>
         </div>
-        {isAdmin && (
-          <Flex className={classes.adminActions} gap={8} wrap="wrap" mt={10} pt={10}>
-            <Button
-              onClick={() => openEdit(p)}
-              variant="light"
-              color="gray"
-              size="xs"
-              type="button"
-            >
-              Edit
-            </Button>
-            <Button
-              onClick={() => openDel(p.id)}
-              variant="light"
-              color="red"
-              size="xs"
-              type="button"
-            >
-              Delete
-            </Button>
-          </Flex>
-        )}
       </Box>
     </Box>
   );

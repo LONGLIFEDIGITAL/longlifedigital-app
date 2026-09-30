@@ -4,10 +4,13 @@ import { Alert, Box, Button } from '@mantine/core';
 import { useState, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
 import { ScrollRestoration } from 'react-router';
 import useCart from './hooks/useCart';
+import useCustomer from './hooks/useCustomer';
+// Login and registration must open immediately, even while CMS/session requests run.
+import AuthPage from './pages/AuthPage';
+const AccountPage = lazy(() => import('./pages/AccountPage'));
 import { headlessEnabled } from './services/checkout';
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
-import { EMPTY_FORM, DEFAULT_CONTACT } from './constants/data';
 import useCatalog from './hooks/useCatalog';
 import useSiteSettings from './hooks/useSiteSettings';
 import useNewsletterPopup from './hooks/useNewsletterPopup';
@@ -21,13 +24,8 @@ import Toast from './components/Toast';
 import AIChat from './components/AIChat';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
-const DeleteProductModal = lazy(() => import('./components/DeleteProductModal'));
-const ProductEditor = lazy(() => import('./components/ProductEditor'));
-const ContactEditor = lazy(() => import('./components/ContactEditor'));
-const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 import NewsletterPopup from './components/NewsletterPopup';
 import CartDrawer from './components/CartDrawer';
-const LoginModal = lazy(() => import('./components/LoginModal'));
 const ShopPage = lazy(() => import('./pages/ShopPage'));
 const ProductPage = lazy(() => import('./pages/ProductPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -47,20 +45,9 @@ export default function App() {
     document.getElementById('initial-content')?.remove();
   }, []);
   const { page, setPage, productId, postSlug, goProduct } = useAppNavigation();
-  const {
-    products,
-    setProducts,
-    status: catalogStatus,
-    retry: retryCatalog,
-    managed: cmsManaged,
-    categories,
-  } = useCatalog();
-  const {
-    settings,
-    managed: settingsManaged,
-    status: settingsStatus,
-    retry: retrySettings,
-  } = useSiteSettings();
+  const auth = useCustomer();
+  const { products, status: catalogStatus, retry: retryCatalog, categories } = useCatalog();
+  const { settings, status: settingsStatus, retry: retrySettings } = useSiteSettings();
   const selProduct = products.find((product) => String(product.id) === productId);
   const cartState = useCart(products);
   const { cart, busy: leaving } = cartState;
@@ -68,106 +55,20 @@ export default function App() {
   const [filterCat, setFilterCat] = useState('all');
   const [sortBy, setSortBy] = useState('default');
   const [search, setSearch] = useState('');
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [editId, setEditId] = useState(null);
-  const [delId, setDelId] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [loginPass, setLoginPass] = useState('');
-  const [loginErr, setLoginErr] = useState(false);
   const [toast, setToast] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [annBarHidden, setAnnBarHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
-  const [subscribers, setSubscribers] = useState([]);
+  const [, setSubscribers] = useState([]);
   const [subName, setSubName] = useState('');
   const [subEmail, setSubEmail] = useState('');
   const [subConsent, setSubConsent] = useState(false);
   const [popupName, setPopupName] = useState('');
   const [popupEmail, setPopupEmail] = useState('');
   const [popupConsent, setPopupConsent] = useState(false);
-  const [localContact, setContact] = useState(DEFAULT_CONTACT);
-  const contact = settingsManaged ? settings.contact : { ...settings.contact, ...localContact };
-  const [showContactEdit, setShowContactEdit] = useState(false);
-  const [contactForm, setContactForm] = useState(DEFAULT_CONTACT);
+  const contact = settings.contact;
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [userRole, setUserRole] = useState(null);
-  const [showDashboard, setShowDashboard] = useState(false);
-  const [dashTab, setDashTab] = useState('overview');
-  const [teamMembers, setTeamMembers] = useState([
-    {
-      id: 1,
-      name: 'Owner',
-      email: 'support@lldhome.com',
-      role: 'owner',
-      status: 'active',
-      added: 'Jan 2024',
-      lastLogin: 'Today',
-      permissions: ['all'],
-    },
-  ]);
-  const [showMemberForm, setShowMemberForm] = useState(false);
-  const [memberForm, setMemberForm] = useState({
-    name: '',
-    email: '',
-    role: 'va',
-    password: '',
-  });
-  const [editMemberId, setEditMemberId] = useState(null);
-  const [orders] = useState([
-    {
-      id: 'LD-001',
-      customer: 'Sarah Johnson',
-      email: 'sarah@email.com',
-      product: 'AI Wealth Accelerator Bundle',
-      amount: 497,
-      status: 'completed',
-      date: 'Jan 20, 2024',
-      method: 'card',
-    },
-    {
-      id: 'LD-002',
-      customer: 'Marcus Williams',
-      email: 'marcus@email.com',
-      product: 'AI Prompts for Real Estate Agents',
-      amount: 37,
-      status: 'completed',
-      date: 'Jan 19, 2024',
-      method: 'google',
-    },
-    {
-      id: 'LD-003',
-      customer: 'Emma Davis',
-      email: 'emma@email.com',
-      product: 'Migraine & Headache Tracker',
-      amount: 12,
-      status: 'completed',
-      date: 'Jan 18, 2024',
-      method: 'card',
-    },
-    {
-      id: 'LD-004',
-      customer: 'James Brown',
-      email: 'james@email.com',
-      product: 'AI Money Machine Toolkit',
-      amount: 47,
-      status: 'completed',
-      date: 'Jan 17, 2024',
-      method: 'apple',
-    },
-    {
-      id: 'LD-005',
-      customer: 'Lisa Chen',
-      email: 'lisa@email.com',
-      product: 'PLR Online Business Bundle',
-      amount: 67,
-      status: 'refunded',
-      date: 'Jan 16, 2024',
-      method: 'card',
-    },
-  ]);
   const { showPopup, setShowPopup, popupDone, setPopupDone } = useNewsletterPopup({
     subscribed,
     delaySeconds: settings.newsletter?.popupDelay,
@@ -177,26 +78,8 @@ export default function App() {
       showCart ||
       leaving ||
       page === 'checkout' ||
-      page === 'order-confirmation' ||
-      showLogin ||
-      showForm ||
-      showDashboard ||
-      showContactEdit,
+      page === 'order-confirmation',
   });
-  const ROLE_PASSWORDS = {
-    owner: 'longlife2024',
-    manager: 'manager2024',
-    va: 'va2024',
-  };
-  const ROLE_PERMISSIONS = {
-    owner: ['dashboard', 'products', 'orders', 'members', 'store', 'subscribers', 'contact'],
-    manager: ['dashboard', 'products', 'orders', 'subscribers'],
-    va: ['dashboard', 'products', 'subscribers'],
-  };
-  const canDo = (perm) => {
-    if (!userRole) return false;
-    return ROLE_PERMISSIONS[userRole]?.includes(perm) || false;
-  };
   useEffect(() => {
     let lastY = 0;
     const fn = () => {
@@ -217,27 +100,6 @@ export default function App() {
     window.addEventListener('popstate', closeNavigationOverlays);
     return () => window.removeEventListener('popstate', closeNavigationOverlays);
   }, []);
-  useEffect(() => {
-    if (cmsManaged) return;
-    let count = 0;
-    let timer = null;
-    const handler = (e) => {
-      if (e.key === 'a' || e.key === 'A') {
-        count++;
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          count = 0;
-        }, 800);
-        if (count >= 3) {
-          count = 0;
-          if (!isAdmin) setShowLogin(true);
-          else setShowDashboard(true);
-        }
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isAdmin, cmsManaged]);
   const fire = (msg, type = 'ok') => {
     setToast({
       msg,
@@ -269,109 +131,6 @@ export default function App() {
   const rmCart = (id) => cartState.remove(id).catch((error) => fire(error.message, 'err'));
   const changeCartQuantity = (id, direction) =>
     cartState.change(id, direction).catch((error) => fire(error.message, 'err'));
-  const login = () => {
-    const role = Object.keys(ROLE_PASSWORDS).find((r) => ROLE_PASSWORDS[r] === loginPass);
-    if (role) {
-      setIsAdmin(true);
-      setUserRole(role);
-      setShowLogin(false);
-      setLoginPass('');
-      setLoginErr(false);
-      fire(
-        `Welcome back${role === 'owner' ? ' Owner' : role === 'manager' ? ' Manager' : ' VA'}! ✦`,
-      );
-    } else {
-      setLoginErr(true);
-      setLoginPass('');
-    }
-  };
-  const logout = () => {
-    setIsAdmin(false);
-    setUserRole(null);
-    setShowDashboard(false);
-    fire('Logged out.', 'info');
-  };
-  const guard = (fn) => {
-    if (cmsManaged) return;
-    if (!isAdmin) {
-      setShowLogin(true);
-      return;
-    }
-    fn();
-  };
-  const openAdd = () =>
-    guard(() => {
-      setForm(EMPTY_FORM);
-      setEditId(null);
-      setShowForm(true);
-    });
-  const openEdit = (p) =>
-    guard(() => {
-      setForm({
-        name: p.name,
-        cat: p.cat,
-        price: String(p.price),
-        oldPrice: String(p.oldPrice || ''),
-        tag: p.tag || '',
-        desc: p.desc,
-        includes: p.includes || '',
-        level: p.level || '',
-        duration: p.duration || '',
-        featured: p.featured || false,
-        payhipUrl: p.payhipUrl || '',
-        stripeUrl: p.stripeUrl || '',
-        image: p.image || '',
-        thumbnail: p.thumbnail || '',
-        pdfFile: p.pdfFile || '',
-        pdfName: p.pdfName || '',
-        pdfSize: p.pdfSize || '',
-      });
-      setEditId(p.id);
-      setShowForm(true);
-    });
-  const openDel = (id) => guard(() => setDelId(id));
-  const saveProduct = () => {
-    if (!form.name || !form.price || !form.desc) {
-      fire('Fill all required fields.', 'err');
-      return;
-    }
-    const data = {
-      ...form,
-      price: Number(form.price),
-      oldPrice: form.oldPrice ? Number(form.oldPrice) : null,
-      rating: 4.8,
-      reviews: 0,
-    };
-    if (editId) {
-      setProducts((p) =>
-        p.map((x) =>
-          x.id === editId
-            ? {
-                ...x,
-                ...data,
-              }
-            : x,
-        ),
-      );
-      fire('Product updated!');
-    } else {
-      setProducts((p) => [
-        ...p,
-        {
-          ...data,
-          id: Date.now(),
-        },
-      ]);
-      fire('Product published!');
-    }
-    setShowForm(false);
-    setEditId(null);
-  };
-  const delProduct = (id) => {
-    setProducts((p) => p.filter((x) => x.id !== id));
-    setDelId(null);
-    fire('Product removed.', 'info');
-  };
   const openCheckout = async (product) => {
     if (!headlessEnabled) {
       fire('Checkout is being configured.', 'info');
@@ -402,9 +161,9 @@ export default function App() {
     <Box c="#111827" bg="#fff" ff="'Inter',sans-serif" mih="100vh">
       <Toast toast={toast} />
       <Nav
+        customer={auth.user}
         settings={settings}
         settingsStatus={settingsStatus}
-        cmsManaged={cmsManaged}
         page={page}
         setPage={setPage}
         annBarHidden={annBarHidden}
@@ -412,10 +171,6 @@ export default function App() {
         search={search}
         setSearch={setSearch}
         setFilterCat={setFilterCat}
-        isAdmin={isAdmin}
-        logout={logout}
-        setShowLogin={setShowLogin}
-        setShowDashboard={setShowDashboard}
         cart={cart}
         setShowCart={setShowCart}
         menuOpen={menuOpen}
@@ -439,27 +194,25 @@ export default function App() {
               </Button>
             </Alert>
           )}
-          {page === 'checkout' && <CheckoutPage cartState={cartState} />}
+          {['login', 'register', 'forgot-password', 'reset-password'].includes(page) && (
+            <AuthPage key={page} mode={page} auth={auth} />
+          )}
+          {page === 'account' && <AccountPage auth={auth} />}
+          {page === 'checkout' && <CheckoutPage cartState={cartState} customer={auth.user} />}
           {page === 'order-confirmation' && <OrderConfirmationPage reloadCart={cartState.reload} />}
           {page === 'home' && (
             <HomePage
               openCheckout={openCheckout}
               settings={settings}
-              settingsManaged={settingsManaged}
               products={products}
               categories={categories}
               catalogStatus={catalogStatus}
               retryCatalog={retryCatalog}
-              cmsManaged={cmsManaged}
               setPage={setPage}
               setFilterCat={setFilterCat}
               goProduct={goProduct}
               addCart={addCart}
               fire={fire}
-              isAdmin={isAdmin}
-              openAdd={openAdd}
-              openEdit={openEdit}
-              openDel={openDel}
               subName={subName}
               setSubName={setSubName}
               subEmail={subEmail}
@@ -484,13 +237,9 @@ export default function App() {
               setFilterCat={setFilterCat}
               sortBy={sortBy}
               setSortBy={setSortBy}
-              isAdmin={isAdmin}
-              openAdd={openAdd}
               addCart={addCart}
               goProduct={goProduct}
               fire={fire}
-              openEdit={openEdit}
-              openDel={openDel}
             />
           )}
           {page === 'product' && catalogStatus !== 'ready' && (
@@ -516,21 +265,10 @@ export default function App() {
               products={products}
               addCart={addCart}
               fire={fire}
-              isAdmin={isAdmin}
-              openEdit={openEdit}
-              openDel={openDel}
               goProduct={goProduct}
             />
           )}
-          {page === 'about' && (
-            <AboutPage
-              brand={settings.brand}
-              contact={contact}
-              isAdmin={isAdmin && !settingsManaged}
-              setContactForm={setContactForm}
-              setShowContactEdit={setShowContactEdit}
-            />
-          )}
+          {page === 'about' && <AboutPage brand={settings.brand} contact={contact} />}
           {page === 'blog' && <BlogPage />}
           {page === 'post' && <BlogPostPage key={postSlug} slug={postSlug} />}
           {page === 'services' && <ServicesPage setPage={setPage} />}
@@ -543,9 +281,6 @@ export default function App() {
               addCart={addCart}
               goProduct={goProduct}
               fire={fire}
-              isAdmin={isAdmin}
-              openEdit={openEdit}
-              openDel={openDel}
             />
           )}
           {page === 'ebook' && (
@@ -556,9 +291,6 @@ export default function App() {
               addCart={addCart}
               openCheckout={openCheckout}
               goProduct={goProduct}
-              isAdmin={isAdmin}
-              openEdit={openEdit}
-              openDel={openDel}
             />
           )}
           {page === 'domains' && <DomainsPage setPage={setPage} />}
@@ -585,60 +317,6 @@ export default function App() {
             clearCart={() => cartState.clear().catch((error) => fire(error.message, 'err'))}
             serverTotals={cartState.data?.totals}
             cartError={cartState.error}
-          />
-        )}
-        {showLogin && (
-          <LoginModal
-            showLogin={showLogin}
-            setShowLogin={setShowLogin}
-            loginPass={loginPass}
-            setLoginPass={setLoginPass}
-            loginErr={loginErr}
-            setLoginErr={setLoginErr}
-            login={login}
-          />
-        )}
-        {delId && <DeleteProductModal delId={delId} delProduct={delProduct} setDelId={setDelId} />}
-        {showForm && (
-          <ProductEditor
-            editId={editId}
-            form={form}
-            saveProduct={saveProduct}
-            setForm={setForm}
-            setShowForm={setShowForm}
-          />
-        )}
-        {showContactEdit && (
-          <ContactEditor
-            contactForm={contactForm}
-            fire={fire}
-            setContact={setContact}
-            setContactForm={setContactForm}
-            setShowContactEdit={setShowContactEdit}
-          />
-        )}
-        {showDashboard && isAdmin && (
-          <AdminDashboard
-            canDo={canDo}
-            dashTab={dashTab}
-            editMemberId={editMemberId}
-            fire={fire}
-            memberForm={memberForm}
-            openAdd={openAdd}
-            openDel={openDel}
-            openEdit={openEdit}
-            orders={orders}
-            products={products}
-            setDashTab={setDashTab}
-            setEditMemberId={setEditMemberId}
-            setMemberForm={setMemberForm}
-            setShowDashboard={setShowDashboard}
-            setShowMemberForm={setShowMemberForm}
-            setTeamMembers={setTeamMembers}
-            showMemberForm={showMemberForm}
-            subscribers={subscribers}
-            teamMembers={teamMembers}
-            userRole={userRole}
           />
         )}
         {showPopup && !popupDone && (

@@ -8,6 +8,7 @@ import {
 } from '../server/commerce/http.js';
 import { readSession, writeSession } from '../server/commerce/session.js';
 import { createWoo } from '../server/commerce/woo.js';
+import { readAccount } from '../server/account.js';
 
 function attemptId(value) {
   if (
@@ -92,6 +93,7 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
           )
             throw new CommerceError('Checkout is being configured. Please try again later.', 503);
           const billing = address(body.billing_address, config.billingFields);
+          const account = readAccount(req, env);
           const paymentData = {
             payment_method: 'stripe',
             wc_payment_intent_id: '',
@@ -108,6 +110,7 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
               billing_address: billing,
               payment_method: 'stripe',
               create_account: false,
+              ...(account ? { _lld_account: account.token } : {}),
               expected_total: body.expectedTotal,
               payment_data: Object.entries(paymentData).map(([key, value]) => ({ key, value })),
             },

@@ -1,4 +1,4 @@
-import { DEMO_HOME_CONTENT, normalizeHomeContent } from '../services/homePage';
+import { normalizeHomeContent } from '../services/homePage';
 import usePublishedContent from './usePublishedContent';
 import { wordpressApiUrl } from '../services/siteSettings';
 
@@ -10,10 +10,10 @@ export default function useHomeHero() {
   );
   return {
     managed,
-    content: managed ? data : DEMO_HOME_CONTENT,
-    hero: managed ? data?.hero : DEMO_HOME_CONTENT.hero,
+    content: data,
+    hero: data?.hero,
     status: !managed
-      ? 'ready'
+      ? 'empty'
       : data === null
         ? 'empty'
         : data !== undefined

@@ -56,6 +56,7 @@ function WC() { return (object) array('countries' => new Countries, 'cart' => tr
 $orders = array();
 function wc_get_order($id) { global $orders; return $orders[$id] ?? null; }
 class Order {
+    public $customer_id = 0;
     public $meta = array(); public $status = 'pending'; public $paidDate = false; public $downloads = array(); public $verified = false;
     function save() {}
     function get_id() { return 12; } function get_meta($k) { return $this->meta[$k] ?? ''; }
@@ -65,6 +66,7 @@ class Order {
     function has_status($values) { return in_array($this->status, (array) $values, true); }
     function get_payment_method() { return 'stripe'; }
     function get_order_number() { return '12'; } function get_status() { return $this->status; }
+    function set_customer_id($id) { $this->customer_id = $id; }
     function get_transaction_id() { return ''; }
     function get_total() { return '13.99'; } function get_currency() { return 'USD'; }
     function get_items() { return array(); } function is_download_permitted() { return true; }

@@ -62,11 +62,13 @@ in the Preview environment and redeploy. No API key is required for this public
 catalog. This change does not modify Vercel settings or deploy the app.
 Production must use its own production CMS URL when ready; the local staging
 configuration is not loaded by a production build. With the variable unset,
-the existing demo catalog and workflows remain available during migration.
+the catalog shows its unavailable state; it does not substitute sample products.
 
-Guest checkout is now implemented locally inside React, with WooCommerce owning the cart, orders, payments and downloads. It remains **test-only and pending installation acceptance**. Follow [HEADLESS-CHECKOUT-SETUP.md](docs/HEADLESS-CHECKOUT-SETUP.md) to install the bridge and configure server-only secrets. Customer accounts/dashboard/verified guest linking remain the next phase.
+Guest checkout is implemented inside React, with WooCommerce owning the cart, orders, payments and downloads. Payments remain **test-only**. Follow [HEADLESS-CHECKOUT-SETUP.md](docs/HEADLESS-CHECKOUT-SETUP.md) to install the bridge and configure server-only secrets. Customer registration, login and order history are described in [CUSTOMER-ACCOUNTS-SETUP.md](docs/CUSTOMER-ACCOUNTS-SETUP.md).
 
-The Store API cart persists in an encrypted HttpOnly cookie, and quantity controls, discounts and totals use WooCommerce responses. `VITE_HEADLESS_COMMERCE=false` retains an in-memory demo cart with payment disabled. Neither mode invokes the old standalone Stripe flow. React admin entry points stay hidden in CMS mode; manage the store in WordPress.
+The Store API cart persists in an encrypted HttpOnly cookie, and quantity controls, discounts and totals use WooCommerce responses. `VITE_HEADLESS_COMMERCE=false` retains an in-memory browsing cart with payment disabled. Cart product names and thumbnails link to their storefront detail pages. The obsolete standalone Stripe flow and demo admin dashboard have been removed; manage the store in WordPress.
+
+Products, posts, promotions and contact details come from the CMS. Missing configuration or content shows an empty/unavailable state instead of old sample content. `VITE_DEMO_REVIEWS=true` retains the agreed preview ratings and statistics only where published values are missing; these stay labeled Preview. Basic navigation, interface labels and category artwork remain part of the application.
 
 ```sh
 npm run test:catalog
@@ -161,7 +163,7 @@ Configure `VITE_WORDPRESS_API_URL` in the **build environment**, including Verce
 Preview/Production. Snapshots are scoped to that exact CMS URL. `.cache/` stores a
 local, git-ignored copy for build reuse; no new CMS plugin, field or service is
 required for editorial content. Product-specific ACF extras require the small plugin
-linked in the content checklist. Builds without a CMS URL retain demo mode. Test mode disables bootstrap
+linked in the content checklist. Builds without a CMS URL have no editorial content. Test mode disables bootstrap
 network calls. A configured build with neither available published content nor a
 previous snapshot fails explicitly rather than deploying an empty homepage.
 
@@ -311,13 +313,12 @@ PLAYWRIGHT_CHANNEL=chrome npm run test:e2e
 ```
 
 Browser tests cover pages from 320px to 1440px wide, navigation, search, cart,
-checkout, chat, product editing, admin tabs, contact forms, and newsletter
-dialogs. Payment and chat requests are mocked during tests.
+checkout, chat, contact forms, and newsletter dialogs. Layout fixtures mock CMS
+responses inside tests; they do not depend on a demo catalog in the app. Payment
+and chat requests are mocked during tests.
 
-`npm run lint` also checks the source. Existing unused checkout/admin variables in
-`src/App.jsx` still produce lint errors. The new CMS settings and newsletter hook
-pass their targeted lint checks; the old newsletter timer dependency warning has
-been removed with the new hook.
+`npm run lint` checks the source. The obsolete demo checkout/admin components,
+their sample records and their hard-coded login credentials have been removed.
 
 Currently, two official plugins are available:
 

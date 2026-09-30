@@ -1,13 +1,4 @@
-import { BLOG_POSTS } from '../constants/data';
 import { plainText } from './catalog';
-
-export const DEMO_POSTS = BLOG_POSTS.map((post) => ({
-  ...post,
-  slug: `demo-${post.id}`,
-  categories: [post.tag],
-  image: { src: '', alt: '' },
-  body: `<p>${post.excerpt}</p>`,
-}));
 
 const normalize = (post) => ({
   ...post,

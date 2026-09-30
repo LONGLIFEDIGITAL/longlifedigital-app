@@ -3,7 +3,7 @@ import { sanitizeRichText } from '../utils/richText';
 
 export const storeApiUrl = import.meta.env.VITE_WOOCOMMERCE_STORE_API_URL?.trim() || '';
 
-// Plain-text fields remain useful for labels, summaries and the legacy editor.
+// Plain-text fields remain useful for labels and summaries.
 export function plainText(html = '') {
   const document = new DOMParser().parseFromString(String(html), 'text/html');
   document.querySelectorAll('script, style, iframe, object').forEach((node) => node.remove());

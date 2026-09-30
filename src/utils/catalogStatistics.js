@@ -7,10 +7,7 @@ export function catalogStatistics(products) {
       ? product.categories.map((category) => category.id)
       : [product.cat];
     categoryIds.filter((id) => id && id !== 'all').forEach((id) => categories.add(id));
-    if (
-      categoryIds.some((id) => ['ai-tools', 'ai-tools'].includes(id)) ||
-      product.tags?.some((tag) => tag.id === 'ai-tools')
-    ) {
+    if (categoryIds.includes('ai-tools') || product.tags?.some((tag) => tag.id === 'ai-tools')) {
       aiToolsProductCount++;
     }
   }

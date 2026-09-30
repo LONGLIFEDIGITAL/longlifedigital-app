@@ -18,13 +18,11 @@ export default function ProductPage({
   fire,
   openCheckout,
   checkoutLoading,
-  isAdmin,
-  openEdit,
-  openDel,
   goProduct,
 }) {
   const p = selProduct;
   if (!p) return null;
+  const theme = getProdTheme(p);
   const discount = p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
   const related = products.filter((r) => r.cat === p.cat && r.id !== p.id).slice(0, 4);
   return (
@@ -82,7 +80,7 @@ export default function ProductPage({
                   sm: 360,
                   md: 420,
                 }}
-                bg={getProdTheme(p.id).bg}
+                bg={theme.bg}
                 pos="relative"
                 style={{
                   borderRadius: 16,
@@ -102,7 +100,7 @@ export default function ProductPage({
                   />
                 )}
                 <Box
-                  bg={`radial-gradient(circle,${getProdTheme(p.id).orb1} 0%,transparent 70%)`}
+                  bg={`radial-gradient(circle,${theme.orb1} 0%,transparent 70%)`}
                   w="70%"
                   h="70%"
                   pos="absolute"
@@ -114,7 +112,7 @@ export default function ProductPage({
                   }}
                 />
                 <Box
-                  bg={`radial-gradient(circle,${getProdTheme(p.id).orb2} 0%,transparent 70%)`}
+                  bg={`radial-gradient(circle,${theme.orb2} 0%,transparent 70%)`}
                   w="50%"
                   h="50%"
                   pos="absolute"
@@ -125,7 +123,7 @@ export default function ProductPage({
                     pointerEvents: 'none',
                   }}
                 />
-                <Box bg={getProdTheme(p.id).bar} h={4} pos="absolute" top={0} left={0} right={0} />
+                <Box bg={theme.bar} h={4} pos="absolute" top={0} left={0} right={0} />
                 {p.tag && (
                   <Box
                     c="#E8C97A"
@@ -155,7 +153,7 @@ export default function ProductPage({
                       userSelect: 'none',
                     }}
                   >
-                    {getProdTheme(p.id).icon}
+                    {theme.icon}
                   </Box>
                 )}
                 <Flex
@@ -170,7 +168,7 @@ export default function ProductPage({
                   bottom={0}
                 >
                   <Box
-                    c={getProdTheme(p.id).priceColor}
+                    c={theme.priceColor}
                     fz={40}
                     fw={700}
                     ff="'Plus Jakarta Sans',sans-serif"
@@ -425,38 +423,6 @@ export default function ProductPage({
                 </Text>
               ))}
             </Flex>
-            {isAdmin && (
-              <Flex
-                gap={10}
-                wrap="wrap"
-                mt={20}
-                pt={16}
-                style={{
-                  borderTop: '1px solid #F3F4F6',
-                }}
-              >
-                <Button
-                  onClick={() => openEdit(p)}
-                  variant="light"
-                  color="gray"
-                  px="lg"
-                  size="xs"
-                  type="button"
-                >
-                  Edit
-                </Button>
-                <Button
-                  onClick={() => openDel(p.id)}
-                  variant="light"
-                  color="red"
-                  px="lg"
-                  size="xs"
-                  type="button"
-                >
-                  Delete
-                </Button>
-              </Flex>
-            )}
           </div>
         </SimpleGrid>
         {related.length > 0 && (
@@ -486,9 +452,6 @@ export default function ProductPage({
                   openCheckout={openCheckout}
                   goProduct={goProduct}
                   fire={fire}
-                  isAdmin={isAdmin}
-                  openEdit={openEdit}
-                  openDel={openDel}
                 />
               ))}
             </SimpleGrid>

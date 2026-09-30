@@ -40,7 +40,15 @@ add_filter('rest_pre_dispatch', function ($result, $server, $request) {
     if (is_wp_error($auth)) return $auth;
     if (!lld_configuration()['enabled']) return lld_error('React test checkout is not enabled for this gateway configuration.', 503);
     if (!$request->get_header('cart-token')) return lld_error('Cart session required.', 403);
+    $customer_id = 0;
+    $account_token = $request->get_param('_lld_account');
+    if ($account_token !== null) {
+        $customer = lld_account_user($account_token);
+        if (is_wp_error($customer)) return $customer;
+        $customer_id = $customer->ID;
+    }
     $identity = lld_request_identity($request);
+    $identity['customer_id'] = $customer_id;
     $hash = hash('sha256', $request->get_body());
     $existing = lld_record($identity['key']);
     if ($existing) {
@@ -59,6 +67,8 @@ add_action('woocommerce_store_api_checkout_update_order_meta', function ($order)
     $record = lld_record($identity['key']);
     $record['order'] = $order->get_id();
     lld_save($identity['key'], $record);
+    // Ownership is resolved from a validated WP session, never billing email or input ID.
+    $order->set_customer_id($identity['customer_id'] ?? 0);
     $order->update_meta_data('_lld_checkout_session', $identity['session']);
     $order->update_meta_data('_lld_checkout_attempt', $identity['attempt']);
 });

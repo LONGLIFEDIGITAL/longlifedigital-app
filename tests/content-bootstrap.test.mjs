@@ -142,3 +142,29 @@ test('the production plugin recovers from a cold-start failure and renders initi
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('local restarts reuse the saved snapshot, while production builds refresh it', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'lld-bootstrap-restart-'));
+  const context = { error(message) { throw new Error(message); } };
+  try {
+    const initial = cms(() => Response.json([homeRecord]));
+    const build = contentBootstrapPlugin({ handler: initial.handler, cmsUrl, root, mode: 'production' });
+    await build.buildStart.call(context);
+
+    let reads = 0;
+    const dev = contentBootstrapPlugin({ handler: () => { reads++; throw new Error('CMS offline'); }, cmsUrl, root, mode: 'development' });
+    dev.configResolved({ command: 'serve' });
+    await dev.buildStart.call(context);
+    assert.equal(reads, 0, 'a warm local restart must not wait for CMS requests');
+    const output = dev.transformIndexHtml.handler('<html><!--initial-content--></html>', { path: '/' });
+    assert.match(output.html, /Created in WordPress/);
+
+    const latest = cms(() => Response.json([homeRecord]));
+    const prod = contentBootstrapPlugin({ handler: latest.handler, cmsUrl, root, mode: 'production' });
+    prod.configResolved({ command: 'build' });
+    await prod.buildStart.call(context);
+    assert.equal(latest.calls(), 1, 'production builds still fetch current CMS content');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

@@ -41,7 +41,7 @@ const settings = {
   newsletter: { enabled: false },
   chat: { displayName: 'AI Assistant', welcome: 'How can we help?' },
 };
-export async function mockFluidStorefront(page) {
+export async function mockFluidStorefront(page, { settings: settingsOverride = {} } = {}) {
   await page.route('**/api/catalog?**', (route) =>
     route.fulfill({
       headers: { 'X-WP-TotalPages': '1' },
@@ -55,7 +55,7 @@ export async function mockFluidStorefront(page) {
     const query = new URL(route.request().url()).searchParams;
     const resource = query.get('resource');
     let json = [];
-    if (resource === 'settings') json = settings;
+    if (resource === 'settings') json = { ...settings, ...settingsOverride };
     if (resource === 'page') {
       const key = query.get('key');
       json = {

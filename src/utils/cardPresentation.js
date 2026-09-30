@@ -46,7 +46,11 @@ const categoryPalettes = {
 export function cardTheme(product) {
   // Category-based so products in the same collection share their artwork palette.
   const category = [product.categoryLabel, product.cat, ...(product.categories || [])]
-    .filter(Boolean).map(label).join(' ').toLowerCase().replace(/[-_]/g, ' ');
+    .filter(Boolean)
+    .map(label)
+    .join(' ')
+    .toLowerCase()
+    .replace(/[-_]/g, ' ');
   const rules = [
     [/\b(course|courses|ai|prompt|prompts|automation)\b/, 'purple'],
     [/\b(ebook|ebooks|book|books|education|domain|domains|website|websites)\b/, 'blue'],
@@ -57,8 +61,9 @@ export function cardTheme(product) {
   ];
   const names = Object.keys(categoryPalettes);
   const seed = [...category].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 0);
-  const name = rules.find(([pattern]) => pattern.test(category))?.[1]
-    || (category ? names[seed % names.length] : 'purple');
+  const name =
+    rules.find(([pattern]) => pattern.test(category))?.[1] ||
+    (category ? names[seed % names.length] : 'purple');
   const [dark, bright, glow, accent] = categoryPalettes[name];
   return {
     bg: `linear-gradient(135deg, ${dark}, ${bright})`,
@@ -78,14 +83,22 @@ export function heroPreviewStatistics(storeName, enabled = previewEnabled) {
   const seed = previewSeed(storeName || 'Longlife Digital');
   return [
     { value: formatCompactCount(`${5000 + (seed % 400)}+`), label: 'Happy Customers', demo: true },
-    { value: `${(5 + (seed % 3) / 10).toFixed(1)}★`, label: 'Avg Rating', demo: true },
+    { value: `${(4.8 + (seed % 3) / 10).toFixed(1)}★`, label: 'Avg Rating', demo: true },
   ];
 }
 
 export function cardReviews(product, demoEnabled = previewEnabled) {
-  if (product.reviews > 0) return { rating: product.rating, count: product.reviews, demo: false };
+  const published =
+    product.reviews > 0 && product.rating > 0
+      ? { rating: product.rating, count: product.reviews, demo: false }
+      : null;
+  if (published) return published;
   if (!demoEnabled) return null;
   // Stable preview numbers: no changes on rerender, no mutation of real Woo review data.
   const seed = previewSeed(product.id);
-  return { rating: 5, count: 24 + (seed % 157), demo: true };
+  return {
+    rating: product.rating || 5,
+    count: product.reviews || 24 + (seed % 157),
+    demo: true,
+  };
 }

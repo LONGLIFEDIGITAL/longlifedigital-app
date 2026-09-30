@@ -2,12 +2,13 @@
 /**
  * Plugin Name: Longlife Headless Commerce
  * Description: Authenticated React checkout bridge for WooCommerce Store API and Stripe Gateway 11.0.0. Test payments only.
- * Version: 0.2.4
+ * Version: 0.3.2
  * Requires Plugins: woocommerce
  * Requires PHP: 8.0
  */
 if (!defined('ABSPATH')) { exit; }
 require_once __DIR__ . '/security.php';
+require_once __DIR__ . '/account.php';
 require_once __DIR__ . '/checkout.php';
 
 register_activation_hook(__FILE__, function () {
@@ -29,7 +30,7 @@ add_action('admin_init', function () {
     add_settings_field('lld_headless_checkout', 'Longlife headless checkout', function () {
         echo '<input type="hidden" name="lld_checkout_enabled" value="0">';
         echo '<label><input type="checkbox" name="lld_checkout_enabled" value="1" ' . checked(get_option('lld_checkout_enabled'), '1', false) . '> Enable React test checkout</label>';
-        echo '<p>Requires WooCommerce 11.1.2, official Stripe Gateway 11.0.0, test mode, card payments and automatic capture. Customer accounts will be integrated separately after guest checkout acceptance.</p>';
+        echo '<p>Requires WooCommerce 11.1.2, official Stripe Gateway 11.0.0, test mode, card payments and automatic capture. Customer accounts use WooCommerce registration settings and verified email password setup.</p>';
         echo '<p>Copy this integration secret into the server-only LLD_COMMERCE_BRIDGE_SECRET environment variable. Do not place it in a VITE_ setting or share it publicly.</p>';
         echo '<input id="lld-integration-secret" type="password" readonly class="large-text" autocomplete="off" spellcheck="false" aria-label="Longlife integration secret" aria-describedby="lld-secret-status" value="' . esc_attr(get_option('lld_bridge_secret')) . '">';
         echo '<p><button id="lld-secret-toggle" type="button" class="button" aria-controls="lld-integration-secret" aria-label="Show integration secret" aria-pressed="false">Show</button> ';
@@ -51,6 +52,9 @@ add_action('rest_api_init', function () {
     register_rest_route('lld-headless/v1', '/config', array(
         'methods' => 'GET', 'permission_callback' => '__return_true',
         'callback' => function () { return lld_response(lld_configuration()); },
+    ));
+    register_rest_route('lld-headless/v1', '/account', array(
+        'methods' => 'POST', 'permission_callback' => 'lld_authenticate_bridge', 'callback' => 'lld_account',
     ));
     register_rest_route('lld-headless/v1', '/order', array(
         'methods' => 'POST', 'permission_callback' => 'lld_authenticate_bridge', 'callback' => 'lld_order_status',

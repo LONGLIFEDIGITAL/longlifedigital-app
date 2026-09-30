@@ -297,7 +297,7 @@ function Summary({ data }) {
     </Paper>
   );
 }
-export default function CheckoutPage({ cartState }) {
+export default function CheckoutPage({ cartState, customer }) {
   const { data, busy, error: cartError, mutate, reload } = cartState;
   const navigate = useNavigate();
   const [config, setConfig] = useState(null);
@@ -394,7 +394,17 @@ export default function CheckoutPage({ cartState }) {
     <Container size="lg" py={50}>
       <Stack gap="xl">
         <Title>Checkout</Title>
-        <Text c="dimmed">Continue as a guest. No account is required.</Text>
+        {customer ? (
+          <Text c="dimmed">
+            Logged in as {customer.email}. This order will appear in your account.
+          </Text>
+        ) : (
+          <Text c="dimmed">
+            Continue as a guest, or <Link to="/login?next=%2Fcheckout">log in</Link> /{' '}
+            <Link to="/register?next=%2Fcheckout">create an account</Link> to keep your purchases
+            together.
+          </Text>
+        )}
         {previous?.pending ? (
           <Navigate
             replace

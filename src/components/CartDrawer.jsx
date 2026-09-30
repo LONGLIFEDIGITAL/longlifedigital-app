@@ -1,4 +1,5 @@
 import { ActionIcon, Button, Drawer } from '@mantine/core';
+import { Link } from 'react-router';
 import { moneyMinor } from '../services/checkout';
 import LoadingImage from './LoadingImage';
 import { fmtPrice, catLabel } from '../utils/helpers';
@@ -117,7 +118,12 @@ export default function CartDrawer({
                       const { minimum, maximum } = getQuantityLimits(item);
                       return (
                         <li key={item.id} className={classes.item} aria-label={item.name}>
-                          <div className={classes.itemInfo}>
+                          <Link
+                            className={classes.itemInfo}
+                            to={`/products/${encodeURIComponent(item.id)}`}
+                            onClick={() => setShowCart(false)}
+                            aria-label={`View ${item.name}`}
+                          >
                             {item.thumbnail || item.image ? (
                               <LoadingImage
                                 src={item.thumbnail || item.image}
@@ -142,7 +148,7 @@ export default function CartDrawer({
                                   : `${money(item, item.price)} each`}
                               </p>
                             </div>
-                          </div>
+                          </Link>
                           <div className={classes.itemControls}>
                             <div
                               className={classes.stepper}
@@ -219,7 +225,7 @@ export default function CartDrawer({
                       ? 'Remove unavailable items before checkout.'
                       : checkoutEnabled
                         ? 'Final prices, discounts and taxes are confirmed at checkout.'
-                        : 'Checkout is unavailable while the store is loading or using demo products.'}
+                        : 'Checkout is temporarily unavailable. Please try again shortly.'}
                   </p>
                   <div className={classes.checkoutActions}>
                     <Button

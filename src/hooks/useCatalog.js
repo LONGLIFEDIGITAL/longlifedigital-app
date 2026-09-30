@@ -1,14 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { INIT_PRODUCTS, CATS } from '../constants/data';
 import { catalogCategories, fetchCatalog, storeApiUrl } from '../services/catalog';
 
 const EMPTY_PRODUCTS = [];
 
 export default function useCatalog() {
   const managed = Boolean(storeApiUrl);
-  // The legacy editor still owns demo products; CMS data stays in the query cache.
-  const [localProducts, setProducts] = useState(managed ? EMPTY_PRODUCTS : INIT_PRODUCTS);
   const { data, isPending, isFetching, refetch } = useQuery({
     queryKey: ['woocommerce', 'catalog', storeApiUrl],
     queryFn: ({ signal }) => fetchCatalog(signal),
@@ -16,18 +13,22 @@ export default function useCatalog() {
   });
 
   const retry = useCallback(() => refetch(), [refetch]);
-  const products = managed ? (data ?? EMPTY_PRODUCTS) : localProducts;
+  const products = data || EMPTY_PRODUCTS;
   // Keep the last successful catalog during refetches, including failed ones.
   // Only the first load or a retry without cached data needs page skeletons.
-  const status =
-    !managed || data !== undefined ? 'ready' : isPending || isFetching ? 'loading' : 'error';
+  const status = !managed
+    ? 'error'
+    : data !== undefined
+      ? 'ready'
+      : isPending || isFetching
+        ? 'loading'
+        : 'error';
 
   return {
     products,
-    setProducts,
     status,
     retry,
     managed,
-    categories: managed ? catalogCategories(products) : CATS,
+    categories: catalogCategories(products),
   };
 }

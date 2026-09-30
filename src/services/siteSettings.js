@@ -1,57 +1,5 @@
 export const wordpressApiUrl = import.meta.env.VITE_WORDPRESS_API_URL?.trim() || '';
 
-export const DEMO_SITE_SETTINGS = {
-  newsletter: {
-    enabled: true,
-    popupEnabled: true,
-    popupDelay: 180,
-    heading: 'Newsletter',
-    body: '',
-    button_label: "✦ Subscribe — It's Free",
-    consent_text: 'I agree to receive news and offers. I can unsubscribe anytime.',
-    success_message: "✦ You're subscribed! Welcome aboard.",
-    popup_heading: 'Join the newsletter',
-    popup_body: '',
-  },
-  chat: {
-    displayName: 'AI Assistant',
-    welcome: 'How can we help?',
-    unavailableMessage: 'Chat is temporarily unavailable.',
-    suggestedQuestions: [],
-  },
-  brand: {
-    name: 'Longlife Digital',
-    legalName: 'Longlife Digital LLC',
-    tagline: 'Premium Digital Store',
-    website: 'https://longlifedigital.co',
-    websiteLabel: 'longlifedigital.co',
-    logo: { src: '/logo.png', alt: 'Longlife Digital' },
-  },
-  contact: {
-    email: 'support@lldhome.com',
-    social: '@longlifedigital',
-    website: 'longlifedigital.co',
-    responseNote: 'We respond within 24 hours — let us know how we can help',
-    hours: 'We reply to all messages within 24 hours, Monday through Saturday.',
-  },
-  social: { instagram: 'https://instagram.com/longlifedigital' },
-  announcement: {
-    enabled: true,
-    message: '🎉 Get 10% off your first order',
-    couponCode: 'WELCOME10',
-    deliveryNote: '⚡ Instant Digital Delivery',
-    cta: { label: '', destination: '' },
-  },
-  footer: {
-    description:
-      'Premium digital products for entrepreneurs, creators and learners. Excellence in every product.',
-    companyHeading: 'Company',
-    supportHeading: 'Support',
-    contactHeading: 'Contact',
-    copyrightName: 'Longlife Digital',
-  },
-};
-
 // Configured CMS failures must not resurrect stale promotions or contact details.
 export const EMPTY_SITE_SETTINGS = {
   brand: {

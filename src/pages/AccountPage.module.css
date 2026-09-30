@@ -1,0 +1,169 @@
+.authPage {
+  background: radial-gradient(ellipse at 10% 40%, #eee5f8, transparent 55%), #faf7f2;
+  color: #241631;
+  padding-block: clamp(3rem, 6vw, 6rem);
+  min-height: 65vh;
+}
+.authGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: center;
+}
+.eyebrow {
+  color: #77542b;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+.story h1,
+.accountHeader h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.3rem, 4vw, 4rem);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  margin-block: 1rem 1.5rem;
+  overflow-wrap: anywhere;
+}
+.story > p:not(.eyebrow) {
+  color: #756a7b;
+  font-size: 1rem;
+  line-height: 1.8;
+  max-width: 34rem;
+}
+.art {
+  margin-top: 2rem;
+  border-left: 1px solid #d9c6e5;
+  padding: 1.5rem 2rem;
+  display: flex;
+  gap: 1.5rem;
+  color: #56277b;
+  font-size: 1.5rem;
+  line-height: 1.5;
+}
+.art > span {
+  color: #c9963f;
+  font-size: 3rem;
+}
+.art em {
+  font-family: 'Playfair Display', serif;
+}
+.formCard {
+  background: #fff;
+  border: 1px solid #eee6f3;
+  padding: clamp(1.5rem, 3vw, 2.75rem);
+  border-radius: 1.25rem;
+  box-shadow: 0 0.75rem 2.5rem #32164008;
+  min-width: 0;
+}
+.formCard h2 {
+  font-size: 1.5rem;
+  margin: 0 0 1.5rem;
+}
+.formCard a:not(:global(.mantine-Button-root)),
+.link {
+  color: #7927b7;
+  text-underline-offset: 0.2em;
+}
+.formNote {
+  font-size: 0.8125rem;
+  color: #756a7b;
+  text-align: center;
+  margin-top: 1.5rem;
+}
+.backLink {
+  display: block;
+  text-align: center;
+  font-size: 0.8125rem;
+  margin-top: 1.5rem;
+}
+.link {
+  font-size: 0.8125rem;
+}
+.accountPage {
+  background: #faf8fc;
+  color: #241631;
+  min-height: 60vh;
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+.accountHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+.accountGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+.accountGrid h2 {
+  font-size: 1.5rem;
+  margin-top: 0;
+}
+.orders {
+  display: grid;
+  gap: 1rem;
+}
+.order {
+  background: #fff;
+  border: 1px solid #eee6f3;
+  padding: 1.5rem;
+  border-radius: 1rem;
+}
+.order h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+.order ul {
+  padding-left: 1.2rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.order li span,
+.muted {
+  color: #756a7b;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+.total {
+  font-weight: 700;
+  margin-bottom: 0;
+}
+.status {
+  font-size: 0.75rem;
+  border-radius: 2rem;
+  background: #f2eaf9;
+  color: #652b90;
+  padding: 0.3rem 0.75rem;
+}
+.empty {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  border: 1px dashed #d9c6e5;
+  border-radius: 1rem;
+  background: #fff;
+}
+.empty > span {
+  font-size: 2.5rem;
+  color: #c9963f;
+}
+.empty p,
+.formCard p {
+  color: #756a7b;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+@media (max-width: 47.99em) {
+  .authGrid,
+  .accountGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .art {
+    display: none;
+  }
+}

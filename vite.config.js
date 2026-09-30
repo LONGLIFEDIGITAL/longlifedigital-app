@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import { createContentHandler } from './api/content.js';
 import { contentBootstrapPlugin } from './server/contentBootstrap.js';
 import { freshWordPressUrl } from './server/wordpressRequest.js';
+import { devServerLifecyclePlugin } from './server/devServerLifecycle.js';
+import { createAccountHandler } from './api/account.js';
 import { createCommerceHandler } from './api/commerce.js';
 import retiredPaymentHandler from './api/create-payment-intent.js';
 
@@ -23,6 +25,7 @@ export default defineConfig(({ mode, command }) => {
   });
   return {
     plugins: [
+      devServerLifecyclePlugin(),
       react(),
       contentBootstrapPlugin({
         handler: contentHandler,
@@ -51,6 +54,7 @@ export default defineConfig(({ mode, command }) => {
             return handler(req, res);
           };
           server.middlewares.use('/api/commerce', commerceHandler);
+          server.middlewares.use('/api/account', createAccountHandler({ env }));
           server.middlewares.use('/api/create-payment-intent', adapt(retiredPaymentHandler));
           server.middlewares.use('/api/stripe-webhook', adapt(retiredPaymentHandler));
         },
@@ -60,6 +64,9 @@ export default defineConfig(({ mode, command }) => {
       entries: ['index.html'],
     },
     server: {
+      // Never leave a browser or checkout origin pointing at an abandoned port.
+      port: 5173,
+      strictPort: true,
       watch: { ignored: ['**/.cache/**'] },
       proxy: store
         ? {

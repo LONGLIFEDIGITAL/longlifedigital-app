@@ -101,6 +101,19 @@
   grid-template-columns: 3.5rem minmax(0, 1fr);
   align-items: start;
   gap: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 0.75rem;
+}
+
+.itemInfo:hover .itemName {
+  color: #794a96;
+  text-decoration: underline;
+}
+
+.itemInfo:focus-visible {
+  outline: 2px solid #794a96;
+  outline-offset: 4px;
 }
 
 .thumbnail,

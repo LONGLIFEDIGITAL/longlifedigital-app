@@ -1,7 +1,7 @@
 import useContent from '../hooks/useContent';
 import { PageHeader, ContentState, PageCta } from '../components/ContentPage';
 import RichText from '../components/RichText';
-import { Box, Button, Container, Flex, NativeSelect, Text, Title } from '@mantine/core';
+import { Box, Container, Flex, NativeSelect, Text, Title } from '@mantine/core';
 import CatalogStatus from '../components/CatalogStatus';
 import { matchesCategory } from '../services/catalog';
 import ProductCollection from '../components/ProductCollection';
@@ -19,13 +19,9 @@ export default function ShopPage({
   setFilterCat,
   sortBy,
   setSortBy,
-  isAdmin,
-  openAdd,
   addCart,
   openCheckout,
   goProduct,
-  openEdit,
-  openDel,
 }) {
   const loading = catalogStatus === 'loading';
   const content = useContent('page', 'shop');
@@ -77,11 +73,6 @@ export default function ShopPage({
                 label: `${cat.icon} ${cat.label}`,
               }))}
             />
-          )}
-          {isAdmin && (
-            <Button mt="sm" onClick={openAdd}>
-              + Add Product
-            </Button>
           )}
         </Box>
         <Flex
@@ -149,20 +140,6 @@ export default function ShopPage({
                   </Text>
                 </Flex>
               ))
-            )}
-            {isAdmin && (
-              <Button
-                className="btn-h"
-                onClick={openAdd}
-                variant="filled"
-                color="brand"
-                px="lg"
-                type="button"
-                w="100%"
-                mt={20}
-              >
-                + Add Product
-              </Button>
             )}
           </Box>
           <Box flex={1} miw={0}>
@@ -236,9 +213,6 @@ export default function ShopPage({
                     addCart={addCart}
                     openCheckout={openCheckout}
                     goProduct={goProduct}
-                    isAdmin={isAdmin}
-                    openEdit={openEdit}
-                    openDel={openDel}
                   />
                 </Box>
               ))

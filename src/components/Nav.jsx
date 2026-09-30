@@ -26,6 +26,7 @@ import SkeletonRegion from './skeletons/SkeletonRegion';
 import { getCartCount } from '../utils/cart';
 import classes from './Nav.module.css';
 export default function Nav({
+  customer,
   settings,
   settingsStatus,
   setPage,
@@ -34,11 +35,6 @@ export default function Nav({
   search,
   setSearch,
   setFilterCat,
-  isAdmin,
-  cmsManaged,
-  logout,
-  setShowLogin,
-  setShowDashboard,
   cart,
   setShowCart,
   menuOpen,
@@ -298,38 +294,6 @@ export default function Nav({
                 value={search}
                 onChange={updateSearch}
               />
-              {!cmsManaged &&
-                (isAdmin ? (
-                  <>
-                    <ActionIcon
-                      size="lg"
-                      variant="light"
-                      onClick={() => setShowDashboard(true)}
-                      aria-label="Open dashboard"
-                      title="Dashboard"
-                    >
-                      ⚡
-                    </ActionIcon>
-                    <ActionIcon
-                      size="lg"
-                      variant="light"
-                      color="red"
-                      onClick={logout}
-                      aria-label="Logout"
-                      title="Logout"
-                    >
-                      ↪
-                    </ActionIcon>
-                  </>
-                ) : (
-                  <UnstyledButton
-                    w={8}
-                    h={24}
-                    opacity={0}
-                    aria-label="Admin login"
-                    onClick={() => setShowLogin(true)}
-                  />
-                ))}
               <Indicator label={cartCount} disabled={!cartCount} size={16} offset={12}>
                 <ActionIcon
                   size={44}
@@ -436,6 +400,29 @@ export default function Nav({
               setShowCart(true);
               setMenuOpen(false);
             }}
+          />
+          <NavLink
+            component={Link}
+            to={customer ? '/account' : '/login'}
+            label={customer ? 'My account' : 'Login'}
+            className={`${classes.drawerLink} ${classes.accountLink}`}
+            onClick={closeNavigation}
+            leftSection={
+              <svg
+                width="1.5rem"
+                height="1.5rem"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+              </svg>
+            }
           />
         </Stack>
       </Drawer>

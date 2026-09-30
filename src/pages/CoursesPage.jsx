@@ -14,9 +14,6 @@ export default function CoursesPage({
   openCheckout,
   goProduct,
   fire,
-  isAdmin,
-  openEdit,
-  openDel,
 }) {
   const courses = products.filter((p) => matchesCategory(p, 'course'));
   const content = useContent('page', 'courses');
@@ -48,9 +45,6 @@ export default function CoursesPage({
                 openCheckout={openCheckout}
                 goProduct={goProduct}
                 fire={fire}
-                isAdmin={isAdmin}
-                openEdit={openEdit}
-                openDel={openDel}
               />
             ))}
           </SimpleGrid>
@@ -84,9 +78,6 @@ export default function CoursesPage({
                     openCheckout={openCheckout}
                     goProduct={goProduct}
                     fire={fire}
-                    isAdmin={isAdmin}
-                    openEdit={openEdit}
-                    openDel={openDel}
                   />
                 ))}
             </SimpleGrid>

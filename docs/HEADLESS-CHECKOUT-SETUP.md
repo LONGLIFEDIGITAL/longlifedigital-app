@@ -56,9 +56,9 @@ Use test customer details and Stripe's official test cards. Confirm in WooCommer
 
 If a request times out before an order can be identified, do not clear database locks and pay again blindly. Inspect the Woo order/Stripe payment first. Pending/ambiguous attempts intentionally remain blocked; support-assisted resolution is required if they cannot be reconciled. Refreshing the cart is not proof that payment failed.
 
-## Remaining account work
+## Customer accounts: bridge 0.3.1
 
-This package covers the guest checkout foundation. The planned WordPress customer login/registration, email verification/recovery, revocable account sessions, dashboard/history, cross-device guest-order recovery and verified guest purchase linking are **not implemented yet**. They follow the gateway acceptance test, using the separate identity/session design in [the architecture](Longlife-Digital-Headless-Commerce-Architecture.md). Native Woo purchase emails continue to provide guest access meanwhile.
+WordPress/WooCommerce registration, email password setup/recovery, login, revocable account sessions, logout and customer order history are now implemented. Signed checkout requests associate new orders with the verified customer while retaining guest checkout. Follow [Customer accounts setup](CUSTOMER-ACCOUNTS-SETUP.md) to install bridge **0.3.1**, enable registration and verify email delivery. This update sends account emails through WooCommerce's mailer and resends password setup when an unverified registration is retried. Cross-device guest-order recovery and verified guest purchase linking remain future work. Native Woo purchase emails continue to provide guest access.
 
 PayPal, saved cards, subscriptions and physical shipping are outside this first payment adapter. Production/live Stripe enablement requires another validation and release step; do not remove the test-mode guard to launch prematurely.
 

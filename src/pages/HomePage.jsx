@@ -20,17 +20,12 @@ export default function HomePage({
   categories,
   catalogStatus,
   retryCatalog,
-  cmsManaged,
   setPage,
   setFilterCat,
   goProduct,
   addCart,
   openCheckout,
   fire,
-  isAdmin,
-  openAdd,
-  openEdit,
-  openDel,
   subName,
   setSubName,
   subEmail,
@@ -43,28 +38,34 @@ export default function HomePage({
 }) {
   const { brand } = settings;
   const newsletter = settings.newsletter;
-  const { content, status: contentStatus, managed: contentManaged } = useHomeHero();
+  const { content, status: contentStatus } = useHomeHero();
   const collection =
     content?.collections?.[products.some((product) => product.featured) ? 'featured' : 'catalog'];
-  const more =
-    !contentManaged && !cmsManaged
-      ? { title: 'Best-Selling Products', intro: 'Our most loved digital products' }
-      : content?.collections?.more;
+  const more = content?.collections?.more;
   const loading = catalogStatus === 'loading';
   const featured = products.filter((product) => product.featured);
   const highlighted = featured[0] || products[0];
   const highlightedReview = highlighted ? cardReviews(highlighted) : null;
-  const previewStats = heroPreviewStatistics(brand.name).filter(
-    (stat) =>
-      !content?.heroStats?.some(
-        (published) => published.title?.trim().toLowerCase() === stat.label.toLowerCase(),
-      ),
-  );
-  const heroStats = [
-    ...previewStats.filter((stat) => stat.label === 'Happy Customers'),
-    { value: String(products.length), label: 'Digital Products' },
-    ...previewStats.filter((stat) => stat.label === 'Avg Rating'),
-  ];
+  const previewStats = heroPreviewStatistics(brand.name);
+  const heroStatLabels = ['Happy Customers', 'Digital Products', 'Avg Rating'];
+  const heroStats = heroStatLabels
+    .map((label) => {
+      const published = content?.heroStats?.find(
+        (stat) => stat.title?.trim().toLowerCase() === label.toLowerCase(),
+      );
+      const fallback = previewStats.find((stat) => stat.label === label);
+      const value =
+        published?.value ||
+        (label === 'Digital Products' ? String(products.length) : fallback?.value);
+      return value
+        ? {
+            value: label === 'Happy Customers' ? formatCompactCount(value) : value,
+            label,
+            demo: !published?.value && Boolean(fallback),
+          }
+        : null;
+    })
+    .filter(Boolean);
   const saleProduct = products.find((product) => product.oldPrice);
   const homeProducts = featured.length ? featured : products;
   const money = (product, amount = product.price) =>
@@ -148,10 +149,11 @@ export default function HomePage({
           <Box miw={0}>
             <HomeHeroContent website={brand.website} />
             <EditorialStatistics
-              items={content?.heroStats?.map((stat) =>
-                stat.title?.trim().toLowerCase() === 'happy customers'
-                  ? { ...stat, value: formatCompactCount(stat.value) }
-                  : stat,
+              items={content?.heroStats?.filter(
+                (stat) =>
+                  !heroStatLabels.some(
+                    (label) => label.toLowerCase() === stat.title?.trim().toLowerCase(),
+                  ),
               )}
               light
             />
@@ -390,24 +392,7 @@ export default function HomePage({
             addCart={addCart}
             openCheckout={openCheckout}
             goProduct={goProduct}
-            isAdmin={isAdmin}
-            openEdit={openEdit}
-            openDel={openDel}
           />
-          {isAdmin && (
-            <Box ta="center" mt={28}>
-              <Button
-                className="btn-h"
-                onClick={openAdd}
-                variant="filled"
-                color="brand"
-                px="lg"
-                type="button"
-              >
-                + Add Product
-              </Button>
-            </Box>
-          )}
         </Container>
       </Box>
       {saleProduct && content?.offer?.title && (
@@ -478,9 +463,6 @@ export default function HomePage({
             addCart={addCart}
             openCheckout={openCheckout}
             goProduct={goProduct}
-            isAdmin={isAdmin}
-            openEdit={openEdit}
-            openDel={openDel}
           />
         </Container>
       </Box>
