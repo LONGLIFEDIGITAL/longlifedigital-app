@@ -123,6 +123,14 @@ export async function readSiteContent({
       seo: await resolveSeo(acf, read, httpsUrl),
       heading: text(acf.lld_heading) || text(page.title?.rendered),
       intro: text(acf.lld_intro),
+      ...(key === 'services'
+        ? {
+            services: {
+              heading: text(acf.lld_services?.heading),
+              intro: text(acf.lld_services?.intro),
+            },
+          }
+        : {}),
       collection: ['ebook', 'domains'].includes(key)
         ? {
             ...Object.fromEntries(
@@ -212,6 +220,19 @@ export async function readSiteContent({
                 navLabel: text(acf.lld_nav_label),
                 navSummary: text(acf.lld_nav_summary),
                 packageDetails: text(acf.lld_package_details),
+                specialties: text(acf.lld_specialties)
+                  .split(/\r?\n/)
+                  .map((line) => line.trim())
+                  .filter(Boolean)
+                  .slice(0, 20),
+                visual: ['search', 'web', 'automation', 'advertising', 'launch'].includes(
+                  acf.lld_service_visual,
+                )
+                  ? acf.lld_service_visual
+                  : 'web',
+                process: text(acf.lld_service_process),
+                inquiryTitle: text(acf.lld_inquiry_title),
+                inquiryIntro: text(acf.lld_inquiry_intro),
               }
             : {
                 assetType: acf.lld_asset_type === 'website' ? 'website' : 'domain',

@@ -363,6 +363,48 @@
         "key": "field_lld_page_lld_intro"
       },
       {
+        "name": "lld_services",
+        "label": "Services overview",
+        "type": "group",
+        "instructions": "The hero uses the page heading/introduction above. Published Service records supply the cards.",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "heading",
+            "label": "Services section heading",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_page_lld_services_heading"
+          },
+          {
+            "name": "intro",
+            "label": "Services section introduction",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_page_lld_services_intro"
+          }
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_page_lld_page_key",
+              "operator": "==",
+              "value": "services"
+            }
+          ]
+        ],
+        "key": "field_lld_page_lld_services"
+      },
+      {
         "name": "lld_cta",
         "label": "Page closing call to action",
         "type": "group",
@@ -2032,6 +2074,73 @@
         "media_upload": 0,
         "delay": 0,
         "key": "field_lld_service_lld_package_details"
+      },
+      {
+        "name": "lld_specialties",
+        "label": "Service specialties",
+        "type": "textarea",
+        "instructions": "One specialty per line, up to 20. Appears on the card and service detail page.",
+        "required": 0,
+        "default_value": "",
+        "rows": 6,
+        "new_lines": "",
+        "maxlength": 2000,
+        "key": "field_lld_service_lld_specialties"
+      },
+      {
+        "name": "lld_service_visual",
+        "label": "Service illustration and accent",
+        "type": "select",
+        "instructions": "",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "search": "Search / green",
+          "web": "Website / purple",
+          "automation": "Automation / blue",
+          "advertising": "Advertising / rose",
+          "launch": "Business launch / gold"
+        },
+        "default_value": "web",
+        "key": "field_lld_service_lld_service_visual"
+      },
+      {
+        "name": "lld_service_process",
+        "label": "What happens next",
+        "type": "wysiwyg",
+        "instructions": "Describe your consultation, scope and proposal process. Avoid promising a fixed response time unless you can meet it.",
+        "required": 0,
+        "default_value": "",
+        "tabs": "all",
+        "toolbar": "basic",
+        "media_upload": 0,
+        "delay": 0,
+        "key": "field_lld_service_lld_service_process"
+      },
+      {
+        "name": "lld_inquiry_title",
+        "label": "Inquiry form heading",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "default_value": "Tell us about your next step.",
+        "maxlength": 160,
+        "key": "field_lld_service_lld_inquiry_title"
+      },
+      {
+        "name": "lld_inquiry_intro",
+        "label": "Inquiry form introduction",
+        "type": "textarea",
+        "instructions": "",
+        "required": 0,
+        "default_value": "Share a few details and we’ll get back to you to discuss your project and a tailored quote.",
+        "rows": 3,
+        "new_lines": "",
+        "maxlength": 1000,
+        "key": "field_lld_service_lld_inquiry_intro"
       }
     ],
     "location": [

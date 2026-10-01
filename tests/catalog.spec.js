@@ -788,6 +788,12 @@ test('Vercel endpoint restricts requests and forwards only public pagination', a
   const invoke = async (method, url) => {
     const res = {
       headers: {},
+      set statusCode(code) {
+        this.code = code;
+      },
+      end(body) {
+        this.body = JSON.parse(body);
+      },
       setHeader(key, value) {
         this.headers[key] = value;
       },

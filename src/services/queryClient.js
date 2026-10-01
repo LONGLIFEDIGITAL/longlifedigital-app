@@ -9,7 +9,8 @@ export function createStorefrontQueryClient() {
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: 'always',
     refetchOnReconnect: 'always',
-    refetchOnMount: 'always',
+    // Navigation can remount several consumers; reuse the current 15-second copy.
+    refetchOnMount: true,
     retry: false,
   };
   client.setQueryDefaults(['wordpress'], publicContent);

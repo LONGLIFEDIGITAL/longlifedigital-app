@@ -1,5 +1,7 @@
 # WordPress content model
 
+- [Digital services setup](SERVICES.md): modern service pages, the five service records, updated ACF fields and quote inquiry delivery.
+
 - [PDF reference](Longlife-Digital-ACF-Field-Definitions.pdf): field definitions, editor instructions, REST mappings and migration decisions.
 - [ACF import package](Longlife-Digital-ACF-Import.json): 10 field groups, 6 custom post types and 1 taxonomy, using ACF Free features.
 - [Editable reference](Longlife-Digital-ACF-Field-Definitions.md) and [print HTML](Longlife-Digital-ACF-Field-Definitions.html).

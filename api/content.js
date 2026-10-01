@@ -52,10 +52,10 @@ export function createContentHandler({
   baseUrl,
   preview = true,
   fetcher = fetch,
-  cacheTtl = preview ? 0 : CONTENT_SYNC.serverCacheMs,
+  cacheTtl = CONTENT_SYNC.serverCacheMs,
   now = Date.now,
   onRead,
-  requestTimeoutMs = 6000,
+  requestTimeoutMs = CONTENT_SYNC.upstreamTimeoutMs,
   buildDiagnostics = false,
 }) {
   let pagesPending;

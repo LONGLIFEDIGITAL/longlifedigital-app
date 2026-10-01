@@ -1,5 +1,33 @@
 # Local server restart failure
 
+## Diagnosed September 30, 2026: recurring API 502 responses
+
+The running `vite --host` process stayed alive on port 5173 and returned HTTP 200
+for HTML and JavaScript. The repeat failure was upstream: direct WordPress reads
+returned HTTP 429, and the content handler reported the exhausted request as 502.
+One probe captured `CMS returned HTTP 429 for posts`; subsequent reads recovered.
+This is separate from the September 29 listener race below.
+
+The repair adds a shared public-read queue per WordPress origin: at most two
+in-flight fetches, at least 200ms between starts, and a shared cooldown when any
+read receives 429. Retry-After is respected with a minimum 1.5-second pause and
+only one retry, all within the original deadline. Aborted queued reads are removed.
+Content and catalog handlers share successful requests for five seconds in memory,
+including local/preview requests; browser preview responses remain `no-store`.
+Navigation reuses the current 15-second query instead of refetching every mount.
+The local catalog now uses the same handler as deployment instead of an unpaced
+direct proxy. Public API deadlines are 12 seconds and browser deadlines 15 seconds.
+Account, inquiry and payment writes are not part of this queue or retry mechanism.
+
+Existing content remains visible when a later refresh fails. Persistent CMS
+throttling or downtime still returns an error; this is not a guarantee of WordPress
+availability. The queue is process-local, so it does not impose a site-wide limit
+across multiple Vercel instances. Investigate WordPress hosting/rate limits if
+errors continue under normal production traffic.
+
+Focused regression coverage: `node --test tests/wordpress-request.test.mjs
+tests/content-bootstrap.test.mjs`. The existing lifecycle test covers restarts.
+
 ## Diagnosed September 29, 2026
 
 The affected process was `vite --host` (the development server), not a production

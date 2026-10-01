@@ -1,0 +1,62 @@
+[
+  {
+    "slug": "seo-local-seo",
+    "title": "SEO & Local SEO",
+    "excerpt": "Help the right people find your business, wherever they’re searching.",
+    "content": "<h2>Be easier to discover.</h2><p>Your next customer may already be looking for what you offer. We help you connect your website and local presence to the searches that matter to your business.</p><p>Whether you serve a neighborhood or a wider audience, we start with your goals, your current visibility and the people you want to reach. Then we shape a practical plan for improving your search presence.</p>",
+    "visual": "search",
+    "icon": "🔎",
+    "navLabel": "SEO & Local SEO",
+    "specialties": ["Search engine optimization", "Google Business Profile optimization", "Keyword research", "Local search optimization"],
+    "packageDetails": "<p>Depending on your needs, our work can include a website search review, page structure and content recommendations, keyword mapping, and improvements to your Google Business Profile and local business information.</p><p>We agree on priorities and the scope of work before starting. Search results develop over time; rankings and traffic are not guaranteed.</p>",
+    "process": "<ol><li>Tell us about your business, website and target locations.</li><li>We discuss your goals and review the search areas that need attention.</li><li>You receive a proposed scope and quote before work begins.</li></ol>"
+  },
+  {
+    "slug": "website-design-development",
+    "title": "Website Design & Development",
+    "excerpt": "A thoughtful digital home for your business, designed around the people who use it.",
+    "content": "<h2>Make a strong first impression. Make the next step easy.</h2><p>Your website should explain what you do, feel like your brand and help visitors take action. We bring design and development together to create a clear, useful experience across phones, tablets and larger screens.</p><p>From a focused landing page to a business website or online store, we work with you to turn your ideas into a site with a purpose.</p>",
+    "visual": "web",
+    "icon": "💻",
+    "navLabel": "Website Design",
+    "specialties": ["Business websites", "E-commerce websites", "Landing pages"],
+    "packageDetails": "<p>We can help with page planning, responsive interface design, website development, contact forms and the integrations your site needs. For e-commerce projects, we discuss your catalog, checkout requirements and the tools you already use.</p><p>Your proposal sets out the pages, features, content responsibilities and launch support included. Hosting, third-party subscriptions and ongoing maintenance are discussed separately.</p>",
+    "process": "<ol><li>Share your business goals, existing website and the kind of site you have in mind.</li><li>We define the pages, functionality and design direction together.</li><li>We prepare a tailored quote and delivery plan for your review.</li></ol>"
+  },
+  {
+    "slug": "ai-automation-chatbot-setup",
+    "title": "AI Automation & Chatbot Setup",
+    "excerpt": "Give repetitive tasks a better system, and give your team more room to focus.",
+    "content": "<h2>Less repetition. More time for meaningful work.</h2><p>Good automation starts with understanding how your business works. We help you identify useful opportunities for chatbots and connected workflows, then build around the tools and processes you rely on.</p><p>From answering common questions to organizing incoming leads, the aim is a system that supports your team and keeps a clear path to human help.</p>",
+    "visual": "automation",
+    "icon": "🤖",
+    "navLabel": "AI & Automation",
+    "specialties": ["AI chatbots", "Lead automation", "CRM workflows", "Automated email/SMS follow-ups"],
+    "packageDetails": "<p>Possible projects include a chatbot grounded in your approved business content, lead capture and routing, CRM updates, and follow-up workflows. We define what can be automated, where human review is needed, and how exceptions should be handled.</p><p>Platform subscriptions and usage charges are outlined separately. Email and SMS workflows are scoped around your approved contacts and communication preferences.</p>",
+    "process": "<ol><li>Tell us which tasks take up your time and which tools you currently use.</li><li>We map a focused workflow and agree on the information it needs.</li><li>You receive a setup proposal covering integrations, testing and handover.</li></ol>"
+  },
+  {
+    "slug": "digital-advertising-management",
+    "title": "Digital Advertising Management",
+    "excerpt": "Reach people with intention through campaigns connected to your business goals.",
+    "content": "<h2>Put your message in the right places.</h2><p>Effective advertising takes more than launching an ad. It needs a clear offer, a relevant audience and a useful next step. We help plan and manage campaigns around what you want your business to achieve.</p><p>Whether you want to introduce your brand, attract inquiries or reconnect with interested visitors, we work with you on a campaign approach that fits your goals and budget.</p>",
+    "visual": "advertising",
+    "icon": "📣",
+    "navLabel": "Digital Advertising",
+    "specialties": ["Google Ads", "Facebook & Instagram Ads", "Retargeting"],
+    "packageDetails": "<p>Our agreed scope can include campaign planning, account setup or review, audience and keyword research, ad coordination, conversion tracking and ongoing adjustments.</p><p>Media spend is separate from management fees. We agree on the budget, reporting and responsibilities in advance; advertising performance and sales are not guaranteed.</p>",
+    "process": "<ol><li>Share your offer, audience, current campaigns and intended budget.</li><li>We review the channels and measurement needed for your goals.</li><li>We prepare a campaign scope and management quote for your approval.</li></ol>"
+  },
+  {
+    "slug": "business-llc-launch-services",
+    "title": "Business & LLC Launch Services",
+    "excerpt": "Get organized for your next venture, from the first setup steps to your online presence.",
+    "content": "<h2>Give your business a considered beginning.</h2><p>Starting a business comes with a lot of moving parts. We help you organize the practical setup tasks, understand the information you need and build a digital foundation for your new venture.</p><p>Bring your idea and your questions. We’ll work with you to identify the support that fits your stage of the journey.</p>",
+    "visual": "launch",
+    "icon": "🏢",
+    "navLabel": "Business & LLC Launch",
+    "specialties": ["LLC formation assistance", "EIN guidance", "Business startup support", "Domain and business email setup"],
+    "packageDetails": "<p>Support can include organizing information for formation steps, guidance on the EIN application process, a startup checklist, and setting up a domain and business email.</p><p>The scope depends on your location and business needs. Government filing fees, domain registration and email subscriptions are separate from service fees. This is administrative and technical support; legal and tax advice should come from a qualified professional.</p>",
+    "process": "<ol><li>Tell us about your business idea, location and what you have already completed.</li><li>We identify the setup tasks and digital tools you need help with.</li><li>You receive a clear outline of our assistance and a quote before we start.</li></ol>"
+  }
+]

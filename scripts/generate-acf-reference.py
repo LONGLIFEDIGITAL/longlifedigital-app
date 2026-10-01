@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'docs' / 'cms'
 OUT.mkdir(parents=True, exist_ok=True)
 VERSION = '1.0'
-DATE = 'September 28, 2026'
+DATE = 'September 30, 2026'
 
 
 def field(name, label, kind='text', help='', required=False, **settings):
@@ -126,6 +126,10 @@ add_group('page', 'Page content', [('post_type', 'page')], [
     field('lld_eyebrow', 'Small heading / badge', help='Optional text above the page heading; Home uses this as the hero badge.'),
     field('lld_heading', 'Display heading', help='Optional override of the WordPress page title. Home uses its three hero segments when supplied.'),
     field('lld_intro', 'Page introduction', 'textarea', 'Home uses this as the hero paragraph; other pages use it below the heading.'),
+    group('lld_services', 'Services overview', [
+        field('heading', 'Services section heading'),
+        field('intro', 'Services section introduction', 'textarea'),
+    ], 'The hero uses the page heading/introduction above. Published Service records supply the cards.', conditional_logic=when(PAGE_KEY, 'services')),
     cta('lld_cta', 'Page closing call to action', heading=True),
     group('lld_collection', 'Collection page editorial content', [
         cta('primary', 'Primary hero button'), cta('secondary', 'Secondary hero button'),
@@ -196,6 +200,11 @@ add_group('service', 'Service details', [('post_type', 'lld_service')], [
     field('lld_nav_summary', 'Menu description', 'textarea', maxlength=160),
     *pricing('service'), cta('lld_cta', 'Service inquiry / consultation button'),
     field('lld_package_details', 'Included work / package details', 'wysiwyg'),
+    field('lld_specialties', 'Service specialties', 'textarea', 'One specialty per line, up to 20. Appears on the card and service detail page.', maxlength=2000, rows=6),
+    select('lld_service_visual', 'Service illustration and accent', [('search', 'Search / green'), ('web', 'Website / purple'), ('automation', 'Automation / blue'), ('advertising', 'Advertising / rose'), ('launch', 'Business launch / gold')], default='web'),
+    field('lld_service_process', 'What happens next', 'wysiwyg', 'Describe your consultation, scope and proposal process. Avoid promising a fixed response time unless you can meet it.'),
+    field('lld_inquiry_title', 'Inquiry form heading', default_value='Tell us about your next step.'),
+    field('lld_inquiry_intro', 'Inquiry form introduction', 'textarea', default_value='Share a few details and we’ll get back to you to discuss your project and a tailored quote.'),
 ], 'Native title is the service name, excerpt is the card description, content is extended copy, featured image is optional and menu_order controls sorting. The same records feed the Services menu and contact form service choices.')
 
 add_group('asset', 'Domain and website listing', [('post_type', 'lld_asset')], [
@@ -304,6 +313,8 @@ assert all(item['show_in_rest'] == 1 for item in GROUPS)
 (OUT / 'Longlife-Digital-ACF-Import.json').write_text(json.dumps(IMPORT, indent=2, ensure_ascii=False) + '\n')
 (OUT / 'Longlife-Digital-ACF-Collection-Pages-Update.json').write_text(
     json.dumps([entry for entry in GROUPS if entry['key'] == 'group_lld_page'], indent=2, ensure_ascii=False) + '\n')
+(OUT / 'Longlife-Digital-ACF-Services-Update.json').write_text(
+    json.dumps([entry for entry in GROUPS if entry['key'] in ('group_lld_page', 'group_lld_service')], indent=2, ensure_ascii=False) + '\n')
 
 # The rest of this generator builds the human reference from these same definitions.
 SECTIONS = []

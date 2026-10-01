@@ -25,6 +25,27 @@ import SkeletonBlock from './skeletons/SkeletonBlock';
 import SkeletonRegion from './skeletons/SkeletonRegion';
 import { getCartCount } from '../utils/cart';
 import classes from './Nav.module.css';
+
+function MenuChevron({ className }) {
+  return (
+    <svg
+      className={className}
+      width="1em"
+      height="1em"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="m5 7.5 5 5 5-5" />
+    </svg>
+  );
+}
+
 export default function Nav({
   customer,
   settings,
@@ -203,7 +224,7 @@ export default function Nav({
                           variant="subtle"
                           color="dark"
                           size="sm"
-                          rightSection={<span aria-hidden="true">▾</span>}
+                          rightSection={<MenuChevron />}
                           title={item.title}
                         >
                           {item.title}
@@ -365,34 +386,64 @@ export default function Nav({
               View search results
             </Button>
           )}
-          {navigation.header.map((item) => (
-            <Box key={item.id}>
+          {navigation.header.map((item) => {
+            const children = item.children.map((child) => (
               <NavLink
+                key={child.id}
+                pl="xl"
                 component={ContentLink}
-                item={item}
+                item={child}
                 website={brand.website}
-                label={item.title}
+                label={child.title}
                 className={classes.drawerLink}
-                data-active={isActive(item) || undefined}
-                aria-current={isCurrent(item) ? 'page' : undefined}
+                data-active={isCurrent(child) || undefined}
+                aria-current={isCurrent(child) ? 'page' : undefined}
                 onClick={closeNavigation}
               />
-              {item.children.map((child) => (
+            ));
+            if (
+              item.children.length &&
+              (item.childrenSource === 'services' ||
+                /^\/services\/?(?:[?#].*)?$/.test(item.destination))
+            ) {
+              return (
+                <details key={`${item.id}:${menuOpen}`} className={classes.drawerGroup}>
+                  <summary
+                    className={classes.drawerSummary}
+                    data-active={isActive(item) || undefined}
+                  >
+                    <span>{item.title}</span>
+                    <MenuChevron className={classes.drawerChevron} />
+                  </summary>
+                  <NavLink
+                    component={ContentLink}
+                    item={item}
+                    website={brand.website}
+                    label="View all services"
+                    pl="xl"
+                    className={classes.drawerLink}
+                    onClick={closeNavigation}
+                  />
+                  {children}
+                </details>
+              );
+            }
+            return (
+              <Box key={item.id}>
                 <NavLink
-                  key={child.id}
-                  pl="xl"
                   component={ContentLink}
-                  item={child}
+                  item={item}
                   website={brand.website}
-                  label={child.title}
+                  label={item.title}
                   className={classes.drawerLink}
-                  data-active={isCurrent(child) || undefined}
-                  aria-current={isCurrent(child) ? 'page' : undefined}
+                  data-active={isActive(item) || undefined}
+                  aria-current={isCurrent(item) ? 'page' : undefined}
                   onClick={closeNavigation}
                 />
-              ))}
-            </Box>
-          ))}
+                {children}
+              </Box>
+            );
+          })}
           <NavLink
             component="button"
             label={`Cart (${cartCount})`}

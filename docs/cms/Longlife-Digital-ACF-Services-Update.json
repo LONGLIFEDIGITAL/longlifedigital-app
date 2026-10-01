@@ -1032,5 +1032,285 @@
     "active": true,
     "description": "Shared page headings and structured sections. Policy prose lives in the native WordPress editor. Collection cards remain separate records. No CSS or React layout code is stored in these fields.",
     "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_service",
+    "title": "Longlife Digital | Service details",
+    "fields": [
+      {
+        "name": "lld_icon",
+        "label": "Icon",
+        "type": "text",
+        "instructions": "A short emoji or symbol; no HTML or SVG.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 12,
+        "key": "field_lld_service_lld_icon"
+      },
+      {
+        "name": "lld_nav_label",
+        "label": "Short menu label",
+        "type": "text",
+        "instructions": "Optional; fallback is the service title.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 60,
+        "key": "field_lld_service_lld_nav_label"
+      },
+      {
+        "name": "lld_nav_summary",
+        "label": "Menu description",
+        "type": "textarea",
+        "instructions": "",
+        "required": 0,
+        "default_value": "",
+        "rows": 3,
+        "new_lines": "",
+        "maxlength": 160,
+        "key": "field_lld_service_lld_nav_summary"
+      },
+      {
+        "name": "lld_pricing_mode",
+        "label": "Pricing display",
+        "type": "select",
+        "instructions": "A quoted amount is informational only. Purchasable prices always come from the linked WooCommerce product.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "contact": "Contact for pricing",
+          "estimate": "Indicative asking / starting price",
+          "product": "Linked WooCommerce product"
+        },
+        "default_value": "contact",
+        "key": "field_lld_service_lld_pricing_mode"
+      },
+      {
+        "name": "lld_amount",
+        "label": "Indicative amount",
+        "type": "number",
+        "instructions": "Never used to charge a customer.",
+        "required": 1,
+        "min": 0,
+        "step": 0.01,
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_amount"
+      },
+      {
+        "name": "lld_currency",
+        "label": "Quote currency",
+        "type": "select",
+        "instructions": "Initial business currency; expand deliberately if other currencies are supported.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "USD": "USD"
+        },
+        "default_value": "USD",
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_currency"
+      },
+      {
+        "name": "lld_billing_period",
+        "label": "Price wording",
+        "type": "select",
+        "instructions": "Display wording only; this does not create a subscription.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "once": "One time",
+          "month": "Per month",
+          "year": "Per year"
+        },
+        "default_value": "once",
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_billing_period"
+      },
+      {
+        "name": "lld_product",
+        "label": "Linked WooCommerce product",
+        "type": "post_object",
+        "instructions": "Choose a published product. Resolve its ID through the WooCommerce catalog. Checkout remains a later integration.",
+        "required": 1,
+        "return_format": "id",
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "post_type": [
+          "product"
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "product"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_product"
+      },
+      {
+        "name": "lld_cta",
+        "label": "Service inquiry / consultation button",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "label",
+            "label": "Button label",
+            "type": "text",
+            "instructions": "Leave both label and destination empty to hide this button.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 60,
+            "key": "field_lld_service_lld_cta_label"
+          },
+          {
+            "name": "destination",
+            "label": "Destination",
+            "type": "text",
+            "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 500,
+            "key": "field_lld_service_lld_cta_destination"
+          }
+        ],
+        "key": "field_lld_service_lld_cta"
+      },
+      {
+        "name": "lld_package_details",
+        "label": "Included work / package details",
+        "type": "wysiwyg",
+        "instructions": "",
+        "required": 0,
+        "default_value": "",
+        "tabs": "all",
+        "toolbar": "basic",
+        "media_upload": 0,
+        "delay": 0,
+        "key": "field_lld_service_lld_package_details"
+      },
+      {
+        "name": "lld_specialties",
+        "label": "Service specialties",
+        "type": "textarea",
+        "instructions": "One specialty per line, up to 20. Appears on the card and service detail page.",
+        "required": 0,
+        "default_value": "",
+        "rows": 6,
+        "new_lines": "",
+        "maxlength": 2000,
+        "key": "field_lld_service_lld_specialties"
+      },
+      {
+        "name": "lld_service_visual",
+        "label": "Service illustration and accent",
+        "type": "select",
+        "instructions": "",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "search": "Search / green",
+          "web": "Website / purple",
+          "automation": "Automation / blue",
+          "advertising": "Advertising / rose",
+          "launch": "Business launch / gold"
+        },
+        "default_value": "web",
+        "key": "field_lld_service_lld_service_visual"
+      },
+      {
+        "name": "lld_service_process",
+        "label": "What happens next",
+        "type": "wysiwyg",
+        "instructions": "Describe your consultation, scope and proposal process. Avoid promising a fixed response time unless you can meet it.",
+        "required": 0,
+        "default_value": "",
+        "tabs": "all",
+        "toolbar": "basic",
+        "media_upload": 0,
+        "delay": 0,
+        "key": "field_lld_service_lld_service_process"
+      },
+      {
+        "name": "lld_inquiry_title",
+        "label": "Inquiry form heading",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "default_value": "Tell us about your next step.",
+        "maxlength": 160,
+        "key": "field_lld_service_lld_inquiry_title"
+      },
+      {
+        "name": "lld_inquiry_intro",
+        "label": "Inquiry form introduction",
+        "type": "textarea",
+        "instructions": "",
+        "required": 0,
+        "default_value": "Share a few details and we’ll get back to you to discuss your project and a tailored quote.",
+        "rows": 3,
+        "new_lines": "",
+        "maxlength": 1000,
+        "key": "field_lld_service_lld_inquiry_intro"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_service"
+        }
+      ]
+    ],
+    "menu_order": 2,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Native title is the service name, excerpt is the card description, content is extended copy, featured image is optional and menu_order controls sorting. The same records feed the Services menu and contact form service choices.",
+    "show_in_rest": 1
   }
 ]

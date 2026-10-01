@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "routes": [
     { "handle": "filesystem" },
-    { "src": "^/(?:products|blog)(?:/.*)?$", "dest": "/index.html" },
+    { "src": "^/(?:products|blog|services)(?:/.*)?$", "dest": "/index.html" },
     {
       "src": "^/(?:login|register|forgot-password|reset-password|account|ebook|checkout|order-confirmation|about|services|courses|domains|contact|faq|refund-policy|privacy-policy|terms-of-service)/?$",
       "dest": "/index.html"

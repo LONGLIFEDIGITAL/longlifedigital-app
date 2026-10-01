@@ -2,9 +2,11 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { createContentHandler } from './api/content.js';
 import { contentBootstrapPlugin } from './server/contentBootstrap.js';
-import { freshWordPressUrl } from './server/wordpressRequest.js';
+import { createCatalogHandler } from './api/catalog.js';
+import { CONTENT_SYNC } from './shared/contentSync.js';
 import { devServerLifecyclePlugin } from './server/devServerLifecycle.js';
 import { createAccountHandler } from './api/account.js';
+import { createInquiryHandler } from './api/inquiry.js';
 import { createCommerceHandler } from './api/commerce.js';
 import retiredPaymentHandler from './api/create-payment-intent.js';
 
@@ -12,14 +14,13 @@ import retiredPaymentHandler from './api/create-payment-intent.js';
 export default defineConfig(({ mode, command }) => {
   // Server handlers need private settings too; Vite still exposes only VITE_ values to React.
   const env = { ...process.env, ...loadEnv(mode, process.cwd(), '') };
-  const storeApiUrl = env.VITE_WOOCOMMERCE_STORE_API_URL?.trim();
-  const store = storeApiUrl ? new URL(storeApiUrl) : null;
+  const catalogHandler = createCatalogHandler({ baseUrl: env.VITE_WOOCOMMERCE_STORE_API_URL });
   const commerceHandler = createCommerceHandler({ env });
   const contentListeners = new Set();
   const contentHandler = createContentHandler({
     baseUrl: env.VITE_WORDPRESS_API_URL,
     // Pre-rendering can wait longer than a visitor-facing API request.
-    requestTimeoutMs: command === 'build' ? 15000 : 6000,
+    requestTimeoutMs: command === 'build' ? 15000 : CONTENT_SYNC.upstreamTimeoutMs,
     buildDiagnostics: command === 'build',
     onRead: (entry) => contentListeners.forEach((listener) => listener(entry)),
   });
@@ -41,6 +42,7 @@ export default defineConfig(({ mode, command }) => {
         name: 'wordpress-content',
         configureServer(server) {
           server.middlewares.use('/api/content', (req, res) => contentHandler(req, res));
+          server.middlewares.use('/api/catalog', catalogHandler);
           // Give local Vite responses the same small interface as Vercel Functions.
           const adapt = (handler) => (req, res) => {
             res.status = (code) => {
@@ -55,6 +57,7 @@ export default defineConfig(({ mode, command }) => {
           };
           server.middlewares.use('/api/commerce', commerceHandler);
           server.middlewares.use('/api/account', createAccountHandler({ env }));
+          server.middlewares.use('/api/inquiry', createInquiryHandler({ env }));
           server.middlewares.use('/api/create-payment-intent', adapt(retiredPaymentHandler));
           server.middlewares.use('/api/stripe-webhook', adapt(retiredPaymentHandler));
         },
@@ -68,30 +71,6 @@ export default defineConfig(({ mode, command }) => {
       port: 5173,
       strictPort: true,
       watch: { ignored: ['**/.cache/**'] },
-      proxy: store
-        ? {
-            '/api/catalog': {
-              target: store.origin,
-              changeOrigin: true,
-              rewrite: (path) => {
-                const upstream = freshWordPressUrl(
-                  new URL(
-                    path.replace('/api/catalog', `${store.pathname.replace(/\/+$/, '')}/products`),
-                    store.origin,
-                  ),
-                );
-                return upstream.pathname + upstream.search;
-              },
-              configure: (proxy) => {
-                proxy.on('proxyReq', (request) => request.setHeader('Cache-Control', 'no-cache'));
-                proxy.on('proxyRes', (response) => {
-                  // Local publishing checks should not reuse browser-cached CMS responses.
-                  response.headers['cache-control'] = 'no-store';
-                });
-              },
-            },
-          }
-        : undefined,
     },
     build: {
       cssCodeSplit: false,

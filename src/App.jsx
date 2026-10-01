@@ -32,6 +32,7 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
+const ServiceDetailPage = lazy(() => import('./pages/ServiceDetailPage'));
 const CoursesPage = lazy(() => import('./pages/CoursesPage'));
 const EbookPage = lazy(() => import('./pages/EbookPage'));
 const DomainsPage = lazy(() => import('./pages/DomainsPage'));
@@ -44,7 +45,7 @@ export default function App() {
   useLayoutEffect(() => {
     document.getElementById('initial-content')?.remove();
   }, []);
-  const { page, setPage, productId, postSlug, goProduct } = useAppNavigation();
+  const { page, setPage, productId, postSlug, serviceSlug, goProduct } = useAppNavigation();
   const auth = useCustomer();
   const { products, status: catalogStatus, retry: retryCatalog, categories } = useCatalog();
   const { settings, status: settingsStatus, retry: retrySettings } = useSiteSettings();
@@ -271,7 +272,8 @@ export default function App() {
           {page === 'about' && <AboutPage brand={settings.brand} contact={contact} />}
           {page === 'blog' && <BlogPage />}
           {page === 'post' && <BlogPostPage key={postSlug} slug={postSlug} />}
-          {page === 'services' && <ServicesPage setPage={setPage} />}
+          {page === 'services' && <ServicesPage />}
+          {page === 'service' && <ServiceDetailPage key={serviceSlug} slug={serviceSlug} />}
           {page === 'courses' && (
             <CoursesPage
               openCheckout={openCheckout}

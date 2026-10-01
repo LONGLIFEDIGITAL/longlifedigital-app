@@ -22,7 +22,9 @@ function routeContent(snapshot, path) {
       ? entry(snapshot, key === 'home' ? 'home' : `page:${key}`)
       : path.startsWith('/blog/')
         ? entry(snapshot, `post:${path.slice(6)}`)
-        : null,
+        : path.startsWith('/services/')
+          ? (entry(snapshot, 'services') || []).find((service) => encodeURIComponent(service.slug) === path.slice(10))
+          : null,
   };
 }
 export function metadataMarkup(snapshot, path) {
@@ -39,7 +41,10 @@ export function metadataMarkup(snapshot, path) {
       .join(' | ') ||
     'Storefront';
   const description =
-    seo.description || content?.hero?.intro || content?.intro || plain(content?.excerpt || '');
+    seo.description ||
+    content?.hero?.intro ||
+    content?.intro ||
+    plain(content?.excerpt || content?.description || '');
   const canonical = settings?.brand.website ? new URL(path, settings.brand.website).href : '';
   return `<!--metadata-start--><title data-initial-meta>${escape(title)}</title><meta data-initial-meta name="description" content="${escape(description)}"><meta data-initial-meta name="robots" content="${seo.noindex ? 'noindex,follow' : 'index,follow'}"><meta data-initial-meta property="og:title" content="${escape(title)}"><meta data-initial-meta property="og:description" content="${escape(description)}">${canonical ? `<link data-initial-meta rel="canonical" href="${escape(canonical)}"><meta data-initial-meta property="og:url" content="${escape(canonical)}">` : ''}${seo.image ? `<meta data-initial-meta property="og:image" content="${escape(seo.image)}">` : ''}<!--metadata-end-->`;
 }

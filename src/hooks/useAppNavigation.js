@@ -28,12 +28,15 @@ export default function useAppNavigation() {
   const navigate = useNavigate();
   const postMatch = useMatch('/blog/:postSlug');
   const productMatch = useMatch('/products/:productId');
+  const serviceMatch = useMatch('/services/:serviceSlug');
   const page = productMatch
     ? 'product'
-    : postMatch
-      ? 'post'
-      : Object.keys(PAGE_PATHS).find((id) => matchPath(PAGE_PATHS[id], location.pathname)) ||
-        'not-found';
+    : serviceMatch
+      ? 'service'
+      : postMatch
+        ? 'post'
+        : Object.keys(PAGE_PATHS).find((id) => matchPath(PAGE_PATHS[id], location.pathname)) ||
+          'not-found';
 
   const visit = (path) => {
     // Searches can request the shop on every keystroke. Only actual page changes
@@ -48,6 +51,7 @@ export default function useAppNavigation() {
     setPage: (id) => visit(PAGE_PATHS[id]),
     postSlug: postMatch?.params.postSlug,
     productId: productMatch?.params.productId,
+    serviceSlug: serviceMatch?.params.serviceSlug,
     goProduct: (product) => visit(`/products/${encodeURIComponent(product.id)}`),
   };
 }

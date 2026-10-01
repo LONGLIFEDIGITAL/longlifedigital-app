@@ -3,7 +3,8 @@ export const CONTENT_SYNC = Object.freeze({
   intervalMs: 15_000,
   serverCacheMs: 5_000,
   edgeCacheSeconds: 5,
-  requestTimeoutMs: 8_000,
+  upstreamTimeoutMs: 12_000,
+  requestTimeoutMs: 15_000,
 });
 
 export const contentCacheKey = (params) => {

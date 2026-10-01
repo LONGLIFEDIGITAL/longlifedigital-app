@@ -408,12 +408,12 @@ test('services, assets, FAQ and contact service choices use the same published r
   await routeCms(page, state);
   await page.goto('/services');
   await expect(page.getByRole('heading', { name: 'CMS Website Design' })).toBeVisible();
-  await expect(page.getByText('Five pages included')).toBeVisible();
-  await expect(page.getByText('From $125.00 / month')).toBeVisible();
   await page.getByRole('button', { name: 'How is the work delivered?' }).click();
   await expect(page.locator('.mantine-Accordion-panel strong')).toHaveText('details');
-  await page.getByRole('button', { name: 'Request a quote' }).click();
-  await expect(page.locator('select option', { hasText: 'CMS Website Design' })).toHaveCount(1);
+  await page.getByRole('link', { name: /CMS Website Design.*Explore service/ }).click();
+  await expect(page).toHaveURL(/\/services\/item-1$/);
+  await expect(page.getByText('Five pages included')).toBeVisible();
+  await expect(page.getByLabel('First name')).toBeVisible();
   await page.goto('/domains?category=brandable');
   await expect(page.getByRole('heading', { name: 'example-domain.test' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Buy domain' })).toHaveCount(0);
@@ -443,19 +443,19 @@ test('CMS navigation connects manual and derived children on mobile and desktop'
   await page.getByRole('button', { name: 'What we do' }).click();
   await expect(page.getByRole('menuitem', { name: 'Design help' })).toHaveAttribute(
     'href',
-    '/services#item-5',
+    '/services/item-5',
   );
   await page.getByRole('menuitem', { name: 'Design help' }).click();
-  await expect(page).toHaveURL(/\/services#item-5$/);
-  await expect(page.locator('#item-5')).toBeInViewport();
+  await expect(page).toHaveURL(/\/services\/item-5$/);
+  await expect(page.getByRole('heading', { name: 'Published Service', exact: true })).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL(/\/about$/);
   await page.setViewportSize({ width: 393, height: 852 });
   await page.getByRole('button', { name: 'Open navigation menu' }).click();
   await page.getByRole('link', { name: 'Design help' }).click();
-  await expect(page).toHaveURL(/\/services#item-5$/);
+  await expect(page).toHaveURL(/\/services\/item-5$/);
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.locator('#item-5')).toBeInViewport();
+  await expect(page.getByRole('heading', { name: 'Published Service', exact: true })).toBeVisible();
   await expect(page.locator('footer').getByRole('link', { name: 'Our story' })).toHaveAttribute(
     'href',
     '/about',

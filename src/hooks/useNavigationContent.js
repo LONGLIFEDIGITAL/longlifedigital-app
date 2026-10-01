@@ -36,6 +36,15 @@ export default function useNavigationContent() {
   const services = useContent('services');
   const categories = useContent('asset-categories');
   const records = navigation.data || [];
+  const serviceLinks = (services.data || [])
+    .filter((service) => service.slug)
+    .map((service) => ({
+      id: `service-${service.id}`,
+      title: service.navLabel || service.title,
+      description: service.navSummary || service.description,
+      icon: service.icon,
+      destination: `/services/${encodeURIComponent(service.slug)}`,
+    }));
   const areas = {};
   for (const [area, routes] of Object.entries(defaults)) {
     const items = records.filter(
@@ -52,14 +61,7 @@ export default function useNavigationContent() {
                 child.destination &&
                 child.id !== item.id,
             );
-          if (item.childrenSource === 'services')
-            children = (services.data || []).map((service) => ({
-              id: `service-${service.id}`,
-              title: service.navLabel || service.title,
-              description: service.navSummary,
-              icon: service.icon,
-              destination: `/services#${encodeURIComponent(service.slug)}`,
-            }));
+          if (item.childrenSource === 'services') children = serviceLinks;
           if (item.childrenSource === 'asset_categories')
             children = (categories.data || []).map((category) => ({
               ...category,
@@ -74,6 +76,13 @@ export default function useNavigationContent() {
           children: [],
         }));
   }
+  // Services always lists the published offerings, including when the header
+  // uses fallback links or the CMS menu record has no dropdown source selected.
+  areas.header = areas.header.map((item) =>
+    /^\/services\/?(?:[?#].*)?$/.test(item.destination)
+      ? { ...item, children: serviceLinks }
+      : item,
+  );
   // Stable sorting preserves CMS order for the links between Home and About/Contact.
   areas.header.sort((a, b) => headerPriority(a) - headerPriority(b));
   return { ...areas, status: navigation.status };

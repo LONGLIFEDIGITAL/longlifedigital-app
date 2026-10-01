@@ -264,6 +264,9 @@ export function contentBootstrapPlugin({ handler, cmsUrl, mode, root, subscribe 
           ...Object.keys(snapshot.entries)
             .filter((key) => key.startsWith('post:') && snapshot.entries[key]?.data)
             .map((key) => `/blog/${key.slice(5)}`),
+          ...(snapshot.entries.services?.data || [])
+            .filter((service) => /^[a-z0-9_%~-]+$/i.test(service.slug))
+            .map((service) => `/services/${encodeURIComponent(service.slug)}`),
         ];
         for (const path of paths) {
           const html = source

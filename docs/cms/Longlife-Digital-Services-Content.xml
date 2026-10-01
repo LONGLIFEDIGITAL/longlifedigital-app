@@ -1,0 +1,514 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/" xmlns:wp="http://wordpress.org/export/1.2/" version="2.0">
+  <channel>
+    <title>Longlife Digital — Digital Services</title>
+    <link>https://longlifedigital.co</link>
+    <description>The five service records requested for the storefront.</description>
+    <wp:wxr_version>1.2</wp:wxr_version>
+    <wp:base_site_url>https://longlifedigital.co</wp:base_site_url>
+    <wp:base_blog_url>https://longlifedigital.co</wp:base_blog_url>
+    <item>
+      <title>SEO &amp; Local SEO</title>
+      <dc:creator>longlife-services</dc:creator>
+      <content:encoded>&lt;h2&gt;Be easier to discover.&lt;/h2&gt;&lt;p&gt;Your next customer may already be looking for what you offer. We help you connect your website and local presence to the searches that matter to your business.&lt;/p&gt;&lt;p&gt;Whether you serve a neighborhood or a wider audience, we start with your goals, your current visibility and the people you want to reach. Then we shape a practical plan for improving your search presence.&lt;/p&gt;</content:encoded>
+      <excerpt:encoded>Help the right people find your business, wherever they’re searching.</excerpt:encoded>
+      <wp:post_id>900001</wp:post_id>
+      <wp:post_date>2026-09-30 00:00:00</wp:post_date>
+      <wp:post_date_gmt>2026-09-30 00:00:00</wp:post_date_gmt>
+      <wp:post_name>seo-local-seo</wp:post_name>
+      <wp:status>publish</wp:status>
+      <wp:post_type>lld_service</wp:post_type>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:menu_order>1</wp:menu_order>
+      <wp:post_password />
+      <wp:comment_status>closed</wp:comment_status>
+      <wp:ping_status>closed</wp:ping_status>
+      <wp:is_sticky>0</wp:is_sticky>
+      <wp:postmeta>
+        <wp:meta_key>lld_icon</wp:meta_key>
+        <wp:meta_value>🔎</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_icon</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_icon</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_nav_label</wp:meta_key>
+        <wp:meta_value>SEO &amp; Local SEO</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_nav_label</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_nav_label</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_nav_summary</wp:meta_key>
+        <wp:meta_value>Help the right people find your business, wherever they’re searching.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_nav_summary</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_nav_summary</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_service_visual</wp:meta_key>
+        <wp:meta_value>search</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_service_visual</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_service_visual</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_specialties</wp:meta_key>
+        <wp:meta_value>Search engine optimization
+Google Business Profile optimization
+Keyword research
+Local search optimization</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_specialties</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_specialties</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_package_details</wp:meta_key>
+        <wp:meta_value>&lt;p&gt;Depending on your needs, our work can include a website search review, page structure and content recommendations, keyword mapping, and improvements to your Google Business Profile and local business information.&lt;/p&gt;&lt;p&gt;We agree on priorities and the scope of work before starting. Search results develop over time; rankings and traffic are not guaranteed.&lt;/p&gt;</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_package_details</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_package_details</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_service_process</wp:meta_key>
+        <wp:meta_value>&lt;ol&gt;&lt;li&gt;Tell us about your business, website and target locations.&lt;/li&gt;&lt;li&gt;We discuss your goals and review the search areas that need attention.&lt;/li&gt;&lt;li&gt;You receive a proposed scope and quote before work begins.&lt;/li&gt;&lt;/ol&gt;</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_service_process</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_service_process</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_pricing_mode</wp:meta_key>
+        <wp:meta_value>contact</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_pricing_mode</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_pricing_mode</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_inquiry_title</wp:meta_key>
+        <wp:meta_value>Tell us about your next step.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_inquiry_title</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_inquiry_title</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_inquiry_intro</wp:meta_key>
+        <wp:meta_value>Share a few details and we’ll get back to you to discuss your project and a tailored quote.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_inquiry_intro</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_inquiry_intro</wp:meta_value>
+      </wp:postmeta>
+    </item>
+    <item>
+      <title>Website Design &amp; Development</title>
+      <dc:creator>longlife-services</dc:creator>
+      <content:encoded>&lt;h2&gt;Make a strong first impression. Make the next step easy.&lt;/h2&gt;&lt;p&gt;Your website should explain what you do, feel like your brand and help visitors take action. We bring design and development together to create a clear, useful experience across phones, tablets and larger screens.&lt;/p&gt;&lt;p&gt;From a focused landing page to a business website or online store, we work with you to turn your ideas into a site with a purpose.&lt;/p&gt;</content:encoded>
+      <excerpt:encoded>A thoughtful digital home for your business, designed around the people who use it.</excerpt:encoded>
+      <wp:post_id>900002</wp:post_id>
+      <wp:post_date>2026-09-30 00:00:00</wp:post_date>
+      <wp:post_date_gmt>2026-09-30 00:00:00</wp:post_date_gmt>
+      <wp:post_name>website-design-development</wp:post_name>
+      <wp:status>publish</wp:status>
+      <wp:post_type>lld_service</wp:post_type>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:menu_order>2</wp:menu_order>
+      <wp:post_password />
+      <wp:comment_status>closed</wp:comment_status>
+      <wp:ping_status>closed</wp:ping_status>
+      <wp:is_sticky>0</wp:is_sticky>
+      <wp:postmeta>
+        <wp:meta_key>lld_icon</wp:meta_key>
+        <wp:meta_value>💻</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_icon</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_icon</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_nav_label</wp:meta_key>
+        <wp:meta_value>Website Design</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_nav_label</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_nav_label</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_nav_summary</wp:meta_key>
+        <wp:meta_value>A thoughtful digital home for your business, designed around the people who use it.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_nav_summary</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_nav_summary</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_service_visual</wp:meta_key>
+        <wp:meta_value>web</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_service_visual</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_service_visual</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_specialties</wp:meta_key>
+        <wp:meta_value>Business websites
+E-commerce websites
+Landing pages</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_specialties</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_specialties</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_package_details</wp:meta_key>
+        <wp:meta_value>&lt;p&gt;We can help with page planning, responsive interface design, website development, contact forms and the integrations your site needs. For e-commerce projects, we discuss your catalog, checkout requirements and the tools you already use.&lt;/p&gt;&lt;p&gt;Your proposal sets out the pages, features, content responsibilities and launch support included. Hosting, third-party subscriptions and ongoing maintenance are discussed separately.&lt;/p&gt;</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_package_details</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_package_details</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_service_process</wp:meta_key>
+        <wp:meta_value>&lt;ol&gt;&lt;li&gt;Share your business goals, existing website and the kind of site you have in mind.&lt;/li&gt;&lt;li&gt;We define the pages, functionality and design direction together.&lt;/li&gt;&lt;li&gt;We prepare a tailored quote and delivery plan for your review.&lt;/li&gt;&lt;/ol&gt;</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_service_process</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_service_process</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_pricing_mode</wp:meta_key>
+        <wp:meta_value>contact</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_pricing_mode</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_pricing_mode</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_inquiry_title</wp:meta_key>
+        <wp:meta_value>Tell us about your next step.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_inquiry_title</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_inquiry_title</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_inquiry_intro</wp:meta_key>
+        <wp:meta_value>Share a few details and we’ll get back to you to discuss your project and a tailored quote.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_inquiry_intro</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_inquiry_intro</wp:meta_value>
+      </wp:postmeta>
+    </item>
+    <item>
+      <title>AI Automation &amp; Chatbot Setup</title>
+      <dc:creator>longlife-services</dc:creator>
+      <content:encoded>&lt;h2&gt;Less repetition. More time for meaningful work.&lt;/h2&gt;&lt;p&gt;Good automation starts with understanding how your business works. We help you identify useful opportunities for chatbots and connected workflows, then build around the tools and processes you rely on.&lt;/p&gt;&lt;p&gt;From answering common questions to organizing incoming leads, the aim is a system that supports your team and keeps a clear path to human help.&lt;/p&gt;</content:encoded>
+      <excerpt:encoded>Give repetitive tasks a better system, and give your team more room to focus.</excerpt:encoded>
+      <wp:post_id>900003</wp:post_id>
+      <wp:post_date>2026-09-30 00:00:00</wp:post_date>
+      <wp:post_date_gmt>2026-09-30 00:00:00</wp:post_date_gmt>
+      <wp:post_name>ai-automation-chatbot-setup</wp:post_name>
+      <wp:status>publish</wp:status>
+      <wp:post_type>lld_service</wp:post_type>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:menu_order>3</wp:menu_order>
+      <wp:post_password />
+      <wp:comment_status>closed</wp:comment_status>
+      <wp:ping_status>closed</wp:ping_status>
+      <wp:is_sticky>0</wp:is_sticky>
+      <wp:postmeta>
+        <wp:meta_key>lld_icon</wp:meta_key>
+        <wp:meta_value>🤖</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_icon</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_icon</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_nav_label</wp:meta_key>
+        <wp:meta_value>AI &amp; Automation</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_nav_label</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_nav_label</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_nav_summary</wp:meta_key>
+        <wp:meta_value>Give repetitive tasks a better system, and give your team more room to focus.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_nav_summary</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_nav_summary</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_service_visual</wp:meta_key>
+        <wp:meta_value>automation</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_service_visual</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_service_visual</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_specialties</wp:meta_key>
+        <wp:meta_value>AI chatbots
+Lead automation
+CRM workflows
+Automated email/SMS follow-ups</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_specialties</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_specialties</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_package_details</wp:meta_key>
+        <wp:meta_value>&lt;p&gt;Possible projects include a chatbot grounded in your approved business content, lead capture and routing, CRM updates, and follow-up workflows. We define what can be automated, where human review is needed, and how exceptions should be handled.&lt;/p&gt;&lt;p&gt;Platform subscriptions and usage charges are outlined separately. Email and SMS workflows are scoped around your approved contacts and communication preferences.&lt;/p&gt;</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_package_details</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_package_details</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_service_process</wp:meta_key>
+        <wp:meta_value>&lt;ol&gt;&lt;li&gt;Tell us which tasks take up your time and which tools you currently use.&lt;/li&gt;&lt;li&gt;We map a focused workflow and agree on the information it needs.&lt;/li&gt;&lt;li&gt;You receive a setup proposal covering integrations, testing and handover.&lt;/li&gt;&lt;/ol&gt;</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_service_process</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_service_process</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_pricing_mode</wp:meta_key>
+        <wp:meta_value>contact</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_pricing_mode</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_pricing_mode</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_inquiry_title</wp:meta_key>
+        <wp:meta_value>Tell us about your next step.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_inquiry_title</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_inquiry_title</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_inquiry_intro</wp:meta_key>
+        <wp:meta_value>Share a few details and we’ll get back to you to discuss your project and a tailored quote.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_inquiry_intro</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_inquiry_intro</wp:meta_value>
+      </wp:postmeta>
+    </item>
+    <item>
+      <title>Digital Advertising Management</title>
+      <dc:creator>longlife-services</dc:creator>
+      <content:encoded>&lt;h2&gt;Put your message in the right places.&lt;/h2&gt;&lt;p&gt;Effective advertising takes more than launching an ad. It needs a clear offer, a relevant audience and a useful next step. We help plan and manage campaigns around what you want your business to achieve.&lt;/p&gt;&lt;p&gt;Whether you want to introduce your brand, attract inquiries or reconnect with interested visitors, we work with you on a campaign approach that fits your goals and budget.&lt;/p&gt;</content:encoded>
+      <excerpt:encoded>Reach people with intention through campaigns connected to your business goals.</excerpt:encoded>
+      <wp:post_id>900004</wp:post_id>
+      <wp:post_date>2026-09-30 00:00:00</wp:post_date>
+      <wp:post_date_gmt>2026-09-30 00:00:00</wp:post_date_gmt>
+      <wp:post_name>digital-advertising-management</wp:post_name>
+      <wp:status>publish</wp:status>
+      <wp:post_type>lld_service</wp:post_type>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:menu_order>4</wp:menu_order>
+      <wp:post_password />
+      <wp:comment_status>closed</wp:comment_status>
+      <wp:ping_status>closed</wp:ping_status>
+      <wp:is_sticky>0</wp:is_sticky>
+      <wp:postmeta>
+        <wp:meta_key>lld_icon</wp:meta_key>
+        <wp:meta_value>📣</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_icon</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_icon</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_nav_label</wp:meta_key>
+        <wp:meta_value>Digital Advertising</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_nav_label</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_nav_label</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_nav_summary</wp:meta_key>
+        <wp:meta_value>Reach people with intention through campaigns connected to your business goals.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_nav_summary</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_nav_summary</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_service_visual</wp:meta_key>
+        <wp:meta_value>advertising</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_service_visual</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_service_visual</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_specialties</wp:meta_key>
+        <wp:meta_value>Google Ads
+Facebook &amp; Instagram Ads
+Retargeting</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_specialties</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_specialties</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_package_details</wp:meta_key>
+        <wp:meta_value>&lt;p&gt;Our agreed scope can include campaign planning, account setup or review, audience and keyword research, ad coordination, conversion tracking and ongoing adjustments.&lt;/p&gt;&lt;p&gt;Media spend is separate from management fees. We agree on the budget, reporting and responsibilities in advance; advertising performance and sales are not guaranteed.&lt;/p&gt;</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_package_details</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_package_details</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_service_process</wp:meta_key>
+        <wp:meta_value>&lt;ol&gt;&lt;li&gt;Share your offer, audience, current campaigns and intended budget.&lt;/li&gt;&lt;li&gt;We review the channels and measurement needed for your goals.&lt;/li&gt;&lt;li&gt;We prepare a campaign scope and management quote for your approval.&lt;/li&gt;&lt;/ol&gt;</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_service_process</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_service_process</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_pricing_mode</wp:meta_key>
+        <wp:meta_value>contact</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_pricing_mode</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_pricing_mode</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_inquiry_title</wp:meta_key>
+        <wp:meta_value>Tell us about your next step.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_inquiry_title</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_inquiry_title</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_inquiry_intro</wp:meta_key>
+        <wp:meta_value>Share a few details and we’ll get back to you to discuss your project and a tailored quote.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_inquiry_intro</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_inquiry_intro</wp:meta_value>
+      </wp:postmeta>
+    </item>
+    <item>
+      <title>Business &amp; LLC Launch Services</title>
+      <dc:creator>longlife-services</dc:creator>
+      <content:encoded>&lt;h2&gt;Give your business a considered beginning.&lt;/h2&gt;&lt;p&gt;Starting a business comes with a lot of moving parts. We help you organize the practical setup tasks, understand the information you need and build a digital foundation for your new venture.&lt;/p&gt;&lt;p&gt;Bring your idea and your questions. We’ll work with you to identify the support that fits your stage of the journey.&lt;/p&gt;</content:encoded>
+      <excerpt:encoded>Get organized for your next venture, from the first setup steps to your online presence.</excerpt:encoded>
+      <wp:post_id>900005</wp:post_id>
+      <wp:post_date>2026-09-30 00:00:00</wp:post_date>
+      <wp:post_date_gmt>2026-09-30 00:00:00</wp:post_date_gmt>
+      <wp:post_name>business-llc-launch-services</wp:post_name>
+      <wp:status>publish</wp:status>
+      <wp:post_type>lld_service</wp:post_type>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:menu_order>5</wp:menu_order>
+      <wp:post_password />
+      <wp:comment_status>closed</wp:comment_status>
+      <wp:ping_status>closed</wp:ping_status>
+      <wp:is_sticky>0</wp:is_sticky>
+      <wp:postmeta>
+        <wp:meta_key>lld_icon</wp:meta_key>
+        <wp:meta_value>🏢</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_icon</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_icon</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_nav_label</wp:meta_key>
+        <wp:meta_value>Business &amp; LLC Launch</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_nav_label</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_nav_label</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_nav_summary</wp:meta_key>
+        <wp:meta_value>Get organized for your next venture, from the first setup steps to your online presence.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_nav_summary</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_nav_summary</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_service_visual</wp:meta_key>
+        <wp:meta_value>launch</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_service_visual</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_service_visual</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_specialties</wp:meta_key>
+        <wp:meta_value>LLC formation assistance
+EIN guidance
+Business startup support
+Domain and business email setup</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_specialties</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_specialties</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_package_details</wp:meta_key>
+        <wp:meta_value>&lt;p&gt;Support can include organizing information for formation steps, guidance on the EIN application process, a startup checklist, and setting up a domain and business email.&lt;/p&gt;&lt;p&gt;The scope depends on your location and business needs. Government filing fees, domain registration and email subscriptions are separate from service fees. This is administrative and technical support; legal and tax advice should come from a qualified professional.&lt;/p&gt;</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_package_details</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_package_details</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_service_process</wp:meta_key>
+        <wp:meta_value>&lt;ol&gt;&lt;li&gt;Tell us about your business idea, location and what you have already completed.&lt;/li&gt;&lt;li&gt;We identify the setup tasks and digital tools you need help with.&lt;/li&gt;&lt;li&gt;You receive a clear outline of our assistance and a quote before we start.&lt;/li&gt;&lt;/ol&gt;</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_service_process</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_service_process</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_pricing_mode</wp:meta_key>
+        <wp:meta_value>contact</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_pricing_mode</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_pricing_mode</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_inquiry_title</wp:meta_key>
+        <wp:meta_value>Tell us about your next step.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_inquiry_title</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_inquiry_title</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>lld_inquiry_intro</wp:meta_key>
+        <wp:meta_value>Share a few details and we’ll get back to you to discuss your project and a tailored quote.</wp:meta_value>
+      </wp:postmeta>
+      <wp:postmeta>
+        <wp:meta_key>_lld_inquiry_intro</wp:meta_key>
+        <wp:meta_value>field_lld_service_lld_inquiry_intro</wp:meta_value>
+      </wp:postmeta>
+    </item>
+  </channel>
+</rss>
