@@ -70,7 +70,7 @@ export default function SiteFooter({ setPage, setFilterCat }) {
         </div>
         <div className={classes.bottom}>
           <span>
-            © {new Date().getFullYear()} {footer.copyrightName || brand.name}
+            © {new Date().getFullYear()} {footer.copyrightName || brand.name}. All rights reserved.
           </span>
           <nav aria-label="Footer legal" className={classes.legal}>
             {navigation.footer_legal.map((item) => (
