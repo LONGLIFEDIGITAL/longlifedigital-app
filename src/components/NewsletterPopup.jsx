@@ -1,5 +1,5 @@
 import ResponsiveModal from './ResponsiveModal';
-import { ActionIcon, Box, Button, Flex, Input, Text, Title } from '@mantine/core';
+import { Alert, ActionIcon, Box, Button, Flex, Input, Text, Title } from '@mantine/core';
 export default function NewsletterPopup({
   fire,
   newsletter,
@@ -12,8 +12,30 @@ export default function NewsletterPopup({
   setPopupName,
   setShowPopup,
   setSubscribed,
-  setSubscribers,
+  newsletterRequest,
 }) {
+  async function submitNewsletter(event) {
+    event.preventDefault();
+    const website = new FormData(event.currentTarget).get('website') || '';
+    if (
+      await newsletterRequest.submit({
+        name: popupName,
+        email: popupEmail,
+        consent: popupConsent,
+        website,
+      })
+    ) {
+      setSubscribed(true);
+      setPopupName('');
+      setPopupEmail('');
+      setPopupConsent(false);
+      setPopupDone(true);
+      setShowPopup(false);
+      fire(
+        `${newsletter.success_message || 'Thank you for signing up.'} Check your inbox for any confirmation steps.`,
+      );
+    }
+  }
   return (
     <ResponsiveModal
       onClose={() => {
@@ -25,6 +47,8 @@ export default function NewsletterPopup({
       label="Join the community"
     >
       <Box
+        component="form"
+        onSubmit={submitNewsletter}
         onClick={(e) => e.stopPropagation()}
         bg="linear-gradient(135deg,#1a0533,#2d1066)"
         w="100%"
@@ -86,9 +110,28 @@ export default function NewsletterPopup({
             {newsletter.popup_body || newsletter.body}
           </Text>
         </Box>
+        {newsletterRequest.error && (
+          <Alert color="red" role="alert" mb="md">
+            {newsletterRequest.error}
+          </Alert>
+        )}
+        <input
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          style={{ display: 'none' }}
+        />
         <Flex direction="column" gap={10} wrap="nowrap" mb={14}>
           <Input
             placeholder="Your first name..."
+            id="popup-newsletter-name"
+            name="name"
+            aria-label="First name"
+            autoComplete="given-name"
+            required
+            maxLength={100}
+            disabled={newsletterRequest.busy}
             value={popupName}
             onChange={(e) => setPopupName(e.target.value)}
             styles={{
@@ -104,6 +147,14 @@ export default function NewsletterPopup({
           />
           <Input
             placeholder="Your email address..."
+            id="popup-newsletter-email"
+            name="email"
+            aria-label="Email address"
+            autoComplete="email"
+            required
+            maxLength={150}
+            disabled={newsletterRequest.busy}
+            type="email"
             value={popupEmail}
             onChange={(e) => setPopupEmail(e.target.value)}
             styles={{
@@ -130,6 +181,8 @@ export default function NewsletterPopup({
         >
           <input
             type="checkbox"
+            required
+            disabled={newsletterRequest.busy}
             checked={popupConsent}
             onChange={(e) => setPopupConsent(e.target.checked)}
             style={{
@@ -146,37 +199,11 @@ export default function NewsletterPopup({
         </Box>
         <Button
           className="btn-h"
-          onClick={() => {
-            if (!popupName.trim()) {
-              fire('Please enter your name.', 'err');
-              return;
-            }
-            if (!popupEmail.trim() || !popupEmail.includes('@')) {
-              fire('Please enter a valid email.', 'err');
-              return;
-            }
-            if (!popupConsent) {
-              fire('Please check the consent box.', 'err');
-              return;
-            }
-            setSubscribers((prev) => [
-              ...prev,
-              {
-                name: popupName,
-                email: popupEmail,
-                date: new Date().toLocaleDateString(),
-                time: new Date().toLocaleTimeString(),
-              },
-            ]);
-            setSubscribed(true);
-            setPopupDone(true);
-            setShowPopup(false);
-            fire(newsletter.success_message || 'Thank you for subscribing.');
-          }}
+          loading={newsletterRequest.busy}
           variant="transparent"
           color="dark"
           px={0}
-          type="button"
+          type="submit"
           c="#1a0533"
           bg="linear-gradient(135deg,#C9963F,#E8C97A)"
           fz={14}

@@ -20,6 +20,7 @@ export default function useCustomer() {
     const channel = new BroadcastChannel('lld-account');
     channel.onmessage = () => {
       client.removeQueries({ queryKey: ['customer', 'orders'] });
+      client.removeQueries({ queryKey: ['customer', 'downloads'] });
       client.invalidateQueries({ queryKey: key });
     };
     return () => channel.close();
@@ -34,6 +35,7 @@ export default function useCustomer() {
       if (!['login', 'logout', 'reset'].includes(action)) return;
       await client.cancelQueries({ queryKey: ['customer'] });
       client.removeQueries({ queryKey: ['customer', 'orders'] });
+      client.removeQueries({ queryKey: ['customer', 'downloads'] });
       client.setQueryData(key, { user: data.user || null });
       if (globalThis.BroadcastChannel) {
         const channel = new BroadcastChannel('lld-account');
@@ -46,6 +48,7 @@ export default function useCustomer() {
       if (action === 'logout') {
         client.invalidateQueries({ queryKey: key });
         client.removeQueries({ queryKey: ['customer', 'orders'] });
+        client.removeQueries({ queryKey: ['customer', 'downloads'] });
       }
     },
   });

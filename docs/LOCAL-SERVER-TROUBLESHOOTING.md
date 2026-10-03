@@ -1,5 +1,53 @@
 # Local server restart failure
 
+## Diagnosed October 2, 2026: missing local modules and slow builds
+
+`ERR_EMPTY_RESPONSE` followed by `ERR_CONNECTION_REFUSED` on port 5173 means
+the browser lost the local development server, including its JavaScript/CSS
+requests. It is different from an HTTP 502 returned by the CMS proxy. The original
+Vite process was no longer present during investigation; its exit reason was not
+captured. The terminal also showed a full-page reload caused by a generated HTML
+file under `docs/cms`. A monitored replacement then reproduced repeated restart
+events for dozens of unchanged configuration dependencies and environment files.
+
+The project lives under iCloud Drive. `ls -lO` reported `dataless` on the Vite
+configuration, source files, lockfile, CMS snapshots, optimized dependency metadata,
+and Mantine CSS. Cloud-only files can stall local reads until downloaded. Keep the
+project folder downloaded in Finder (right-click → **Keep Downloaded**), or use a
+working checkout outside iCloud Drive. Do not delete the existing checkout before
+preserving its uncommitted changes and local environment files.
+
+Code changes:
+
+- Ignore documentation, WordPress plugin exports, and browser reports in Vite's
+  watcher, so generated HTML does not reload the storefront.
+- When the working directory is inside macOS iCloud Drive, poll timestamps every
+  750ms instead of using filesystem notifications. This avoids metadata-only
+  notifications triggering restarts. Polling adds some local CPU work and can
+  delay detection of edits by up to the polling interval; other workspaces keep
+  Vite's default watcher. The development dependency cache is also kept under
+  the OS temporary directory, scoped to this checkout, outside iCloud Drive.
+- Local startup never waits for WordPress. Give a saved CMS snapshot up to 150ms
+  to load, then finish restoring it in the background. Normal browser requests
+  fetch current public content and save it for subsequent starts.
+- Share the published page listing between page projections: once per build and
+  for five seconds at runtime. Failed requests are never cached. Fetch homepage
+  and blog index concurrently within the existing upstream rate-limit queue.
+- Production builds still fetch published CMS content and retain their existing
+  required-content validation. `cssCodeSplit: false` is unchanged.
+
+The `PLUGIN_TIMINGS` line is a performance warning, not a build failure. Measured
+healthy local responses were about 30ms for HTML, 1ms for a warm JS module, and
+1.3s for catalog data. These are point-in-time local measurements, not a production
+latency guarantee. A successful verification build still took 3m 48s while files
+were offloaded; the filesystem issue needs the Finder step above.
+
+After initial dependency optimization, a Chrome check reached the interactive
+homepage in 1.3s with no failed requests or JavaScript errors. Twelve repeated
+HTML/module reads succeeded, and creating a temporary documentation HTML file
+caused no full-page reload. The startup/content regression suite passed 13 tests.
+The monitored server showed no further restart storm with the polling watcher.
+
 ## Diagnosed September 30, 2026: recurring API 502 responses
 
 The running `vite --host` process stayed alive on port 5173 and returned HTTP 200

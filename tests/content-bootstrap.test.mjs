@@ -146,26 +146,139 @@ test('the production plugin recovers from a cold-start failure and renders initi
 
 test('local restarts reuse the saved snapshot, while production builds refresh it', async () => {
   const root = await mkdtemp(join(tmpdir(), 'lld-bootstrap-restart-'));
-  const context = { error(message) { throw new Error(message); } };
+  const context = {
+    error(message) {
+      throw new Error(message);
+    },
+  };
   try {
     const initial = cms(() => Response.json([homeRecord]));
-    const build = contentBootstrapPlugin({ handler: initial.handler, cmsUrl, root, mode: 'production' });
+    const build = contentBootstrapPlugin({
+      handler: initial.handler,
+      cmsUrl,
+      root,
+      mode: 'production',
+    });
     await build.buildStart.call(context);
 
     let reads = 0;
-    const dev = contentBootstrapPlugin({ handler: () => { reads++; throw new Error('CMS offline'); }, cmsUrl, root, mode: 'development' });
+    const dev = contentBootstrapPlugin({
+      handler: () => {
+        reads++;
+        throw new Error('CMS offline');
+      },
+      cmsUrl,
+      root,
+      mode: 'development',
+    });
     dev.configResolved({ command: 'serve' });
     await dev.buildStart.call(context);
     assert.equal(reads, 0, 'a warm local restart must not wait for CMS requests');
-    const output = dev.transformIndexHtml.handler('<html><!--initial-content--></html>', { path: '/' });
+    const output = dev.transformIndexHtml.handler('<html><!--initial-content--></html>', {
+      path: '/',
+    });
     assert.match(output.html, /Created in WordPress/);
 
     const latest = cms(() => Response.json([homeRecord]));
-    const prod = contentBootstrapPlugin({ handler: latest.handler, cmsUrl, root, mode: 'production' });
+    const prod = contentBootstrapPlugin({
+      handler: latest.handler,
+      cmsUrl,
+      root,
+      mode: 'production',
+    });
     prod.configResolved({ command: 'build' });
     await prod.buildStart.call(context);
     assert.equal(latest.calls(), 1, 'production builds still fetch current CMS content');
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('a cold local startup does not wait for or require WordPress', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'lld-bootstrap-offline-'));
+  try {
+    let reads = 0;
+    const plugin = contentBootstrapPlugin({
+      handler: () => {
+        reads++;
+        throw new Error('CMS offline');
+      },
+      cmsUrl,
+      root,
+      mode: 'development',
+    });
+    plugin.configResolved({ command: 'serve' });
+    await plugin.buildStart.call({
+      error(message) {
+        throw new Error(message);
+      },
+    });
+    assert.equal(reads, 0, 'local HTTP startup must not depend on upstream requests');
+    const output = plugin.transformIndexHtml.handler('<html><!--initial-content--></html>', {
+      path: '/',
+    });
+    assert.equal(JSON.parse(output.tags[0].children).cmsUrl, cmsUrl);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('sequential page projections reuse the listing, then refresh after its TTL', async () => {
+  let calls = 0;
+  let clock = 100;
+  const handler = createContentHandler({
+    baseUrl: cmsUrl,
+    cacheTtl: 0,
+    pagesCacheTtl: 10,
+    now: () => clock,
+    fetcher: async () => {
+      calls++;
+      return Response.json([]);
+    },
+  });
+  const read = async (key) => {
+    let status;
+    await handler(
+      { method: 'GET', url: `/api/content?resource=page&key=${key}` },
+      {
+        set statusCode(value) {
+          status = value;
+        },
+        setHeader() {},
+        end() {},
+      },
+    );
+    assert.equal(status, 404);
+  };
+  await read('about');
+  await read('contact');
+  await read('ebook');
+  assert.equal(calls, 1, 'different page projections need only one upstream listing');
+  clock += 11;
+  await read('contact');
+  assert.equal(calls, 2, 'published changes remain visible after the cache expires');
+});
+
+test('a failed page listing is not cached', async () => {
+  let calls = 0;
+  const handler = createContentHandler({
+    baseUrl: cmsUrl,
+    pagesCacheTtl: Infinity,
+    fetcher: async () => (++calls === 1 ? new Response('', { status: 503 }) : Response.json([])),
+  });
+  const statuses = [];
+  for (const key of ['about', 'contact', 'ebook']) {
+    await handler(
+      { method: 'GET', url: `/api/content?resource=page&key=${key}` },
+      {
+        set statusCode(value) {
+          statuses.push(value);
+        },
+        setHeader() {},
+        end() {},
+      },
+    );
+  }
+  assert.deepEqual(statuses, [502, 404, 404]);
+  assert.equal(calls, 2);
 });

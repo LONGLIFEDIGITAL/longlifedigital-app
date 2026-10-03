@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: ['responsive.spec.js', 'newsletter.spec.js'],
+  testMatch: ['responsive.spec.js', 'newsletter.spec.js', 'public-forms.spec.js'],
   timeout: 60000,
   workers: 1,
   use: {

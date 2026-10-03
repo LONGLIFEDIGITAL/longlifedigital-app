@@ -42,9 +42,9 @@
 }
 .brandName {
   overflow-wrap: anywhere;
-  color: #000;
+  color: #100e2f;
   font-family: var(--mantine-font-family-headings);
-  font-weight: 700;
+  font-weight: 1000;
   line-height: 1.25;
 }
 .brandSubtitle {
@@ -243,4 +243,8 @@
   .menuGrid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+.brandAccent {
+  color: #9333ea;
 }

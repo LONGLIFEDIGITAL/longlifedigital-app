@@ -53,13 +53,16 @@ export function createContentHandler({
   preview = true,
   fetcher = fetch,
   cacheTtl = CONTENT_SYNC.serverCacheMs,
+  pagesCacheTtl = cacheTtl,
   now = Date.now,
   onRead,
   requestTimeoutMs = CONTENT_SYNC.upstreamTimeoutMs,
   buildDiagnostics = false,
 }) {
   let pagesPending;
+  let pagesCache;
   const readPages = async (read) => {
+    if (pagesCache && pagesCache.expires > now()) return pagesCache.records;
     if (pagesPending) return pagesPending;
     const slugs = Object.entries(CONTENT_PAGES)
       .filter(([key]) => key !== 'home')
@@ -69,6 +72,7 @@ export function createContentHandler({
     )
       .then((records) => {
         if (!Array.isArray(records)) throw new Error('Invalid pages.');
+        pagesCache = { records, expires: now() + pagesCacheTtl };
         return records;
       })
       .finally(() => {

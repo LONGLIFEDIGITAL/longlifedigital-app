@@ -81,7 +81,7 @@ add_filter('woocommerce_allow_send_queued_transactional_email', function ($allow
 function lld_account($request) {
     $action = $request->get_param('action');
     if (in_array($action, array('register', 'forgot'), true)) lld_account_email_log($action . '_request_received');
-    if (in_array($action, array('session', 'orders', 'logout'), true)) {
+    if (in_array($action, array('session', 'orders', 'downloads', 'logout'), true)) {
         $token = $request->get_param('token');
         $user = lld_account_user($token);
         if (is_wp_error($user)) return $user;
@@ -91,6 +91,24 @@ function lld_account($request) {
             return lld_response(array('ok' => true));
         }
         if ($action === 'session') return lld_response(array('user' => lld_customer_profile($user)));
+        if ($action === 'downloads') {
+            $downloads = array();
+            foreach (wc_get_customer_available_downloads($user->ID) as $item) {
+                $order = wc_get_order((int) $item['order_id']);
+                if (!$order || (int) $order->get_customer_id() !== (int) $user->ID || !$order->is_download_permitted()) continue;
+                $remaining = $item['downloads_remaining'] ?? '';
+                if ($remaining !== '' && (int) $remaining <= 0) continue;
+                $expires = $item['access_expires'] ?? null;
+                if ($expires instanceof DateTimeInterface) $expires = $expires->format(DATE_ATOM);
+                if ($expires && (strtotime($expires) === false || strtotime($expires) < time())) continue;
+                $downloads[] = array(
+                    'id' => (string) $item['order_id'] . ':' . $item['download_id'],
+                    'name' => $item['download_name'], 'productName' => $item['product_name'],
+                    'url' => $item['download_url'], 'remaining' => $remaining, 'expires' => $expires ?: null,
+                );
+            }
+            return lld_response(array('downloads' => $downloads));
+        }
         $page = $request->get_param('page');
         if (!is_int($page) || $page < 1 || $page > 1000) return lld_error('Invalid page.');
         $result = wc_get_orders(array('customer_id' => $user->ID, 'limit' => 10, 'page' => $page, 'paginate' => true, 'orderby' => 'date', 'order' => 'DESC', 'status' => array_keys(wc_get_order_statuses())));
@@ -102,7 +120,7 @@ function lld_account($request) {
             $orders[] = array('number' => $order->get_order_number(), 'date' => $order->get_date_created() ? $order->get_date_created()->date(DATE_ATOM) : null,
                 'status' => wc_get_order_status_name($order->get_status()), 'total' => $order->get_total(), 'currency' => $order->get_currency(), 'items' => $items);
         }
-        return lld_response(array('orders' => $orders, 'hasMore' => $page < $result->max_num_pages));
+        return lld_response(array('orders' => $orders, 'hasMore' => $page < $result->max_num_pages, 'totalOrders' => (int) $result->total));
     }
     if (!in_array($action, array('login', 'register', 'forgot', 'reset'), true)) return lld_error('Unknown account operation.', 404);
     $email = $request->get_param('email');

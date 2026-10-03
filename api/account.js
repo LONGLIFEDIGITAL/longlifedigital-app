@@ -1,3 +1,4 @@
+import { storeRoot } from '../server/commerce/woo.js';
 import { CommerceError, readBody, requireSameOrigin, send } from '../server/commerce/http.js';
 import {
   accountBridge,
@@ -17,15 +18,26 @@ export function createAccountHandler({ env = process.env, fetchImpl = fetch } = 
     try {
       const url = new URL(req.url, 'http://localhost');
       const action = url.searchParams.get('action') || 'session';
-      if (!['session', 'orders', 'login', 'register', 'forgot', 'reset', 'logout'].includes(action))
+      if (
+        ![
+          'session',
+          'orders',
+          'downloads',
+          'login',
+          'register',
+          'forgot',
+          'reset',
+          'logout',
+        ].includes(action)
+      )
         throw new CommerceError('Unknown account operation.', 404);
-      if (req.method !== (['session', 'orders'].includes(action) ? 'GET' : 'POST'))
+      if (req.method !== (['session', 'orders', 'downloads'].includes(action) ? 'GET' : 'POST'))
         throw new CommerceError('Method not allowed.', 405);
       if (req.method === 'POST') requireSameOrigin(req, env);
       const account = readAccount(req, env);
       if (action === 'session' && !account) return send(res, 200, { user: null });
       const payload = {};
-      if (['session', 'orders', 'logout'].includes(action)) {
+      if (['session', 'orders', 'downloads', 'logout'].includes(action)) {
         if (!account) {
           if (action === 'logout') {
             writeAccount(res, null, env);
@@ -79,9 +91,9 @@ export function createAccountHandler({ env = process.env, fetchImpl = fetch } = 
       try {
         data = await accountBridge(action, payload, env, fetchImpl);
       } catch (error) {
-        if (error.status === 401 && ['session', 'orders', 'logout'].includes(action)) {
+        if (error.status === 401 && ['session', 'orders', 'downloads', 'logout'].includes(action)) {
           writeAccount(res, null, env);
-          if (action !== 'orders') return send(res, 200, { user: null });
+          if (['session', 'logout'].includes(action)) return send(res, 200, { user: null });
         }
         // Logout still clears the browser session when WordPress cannot be reached.
         if (action === 'logout') writeAccount(res, null, env);
@@ -106,6 +118,46 @@ export function createAccountHandler({ env = process.env, fetchImpl = fetch } = 
         writeAccount(res, null, env);
         return send(res, 200, { user: null });
       }
+      if (action === 'downloads') {
+        const origin = new URL(storeRoot(env)).origin;
+        const downloads = (Array.isArray(data.downloads) ? data.downloads : []).flatMap((file) => {
+          try {
+            const url = new URL(file.url);
+            // Only WooCommerce's permission-checked download endpoint, never raw file paths.
+            if (
+              url.protocol !== 'https:' ||
+              url.origin !== origin ||
+              url.username ||
+              url.password ||
+              !url.searchParams.has('download_file')
+            )
+              return [];
+            if (
+              file.remaining !== '' &&
+              (!Number.isSafeInteger(Number(file.remaining)) || Number(file.remaining) <= 0)
+            )
+              return [];
+            if (
+              file.expires &&
+              (!Number.isFinite(Date.parse(file.expires)) || Date.parse(file.expires) < Date.now())
+            )
+              return [];
+            return [
+              {
+                id: String(file.id),
+                name: String(file.name),
+                productName: String(file.productName),
+                url: url.href,
+                remaining: file.remaining === '' ? '' : Number(file.remaining),
+                expires: file.expires || null,
+              },
+            ];
+          } catch {
+            return [];
+          }
+        });
+        return send(res, 200, { downloads });
+      }
       if (action === 'orders') {
         // Do not pass through payment tokens, addresses or arbitrary Woo metadata.
         const orders = Array.isArray(data.orders)
@@ -121,7 +173,13 @@ export function createAccountHandler({ env = process.env, fetchImpl = fetch } = 
               })),
             }))
           : [];
-        return send(res, 200, { orders, hasMore: data.hasMore === true });
+        return send(res, 200, {
+          orders,
+          hasMore: data.hasMore === true,
+          ...(Number.isSafeInteger(data.totalOrders) && data.totalOrders >= 0
+            ? { totalOrders: data.totalOrders }
+            : {}),
+        });
       }
       if (data?.ok !== true)
         throw new CommerceError('Unable to confirm your request. Please try again later.', 502);

@@ -95,8 +95,10 @@ export async function createBootstrap({
       );
     return entries[key].data;
   };
-  const home = await read('home', 'resource=home', true);
-  const latest = await read('posts:1:9:', 'resource=posts&page=1&limit=9', true);
+  const [home, latest] = await Promise.all([
+    read('home', 'resource=home', true),
+    read('posts:1:9:', 'resource=posts&page=1&limit=9', true),
+  ]);
   const selected = home?.blog?.postIds || [];
   if (selected.length) {
     await read(
@@ -206,24 +208,31 @@ export function contentBootstrapPlugin({ handler, cmsUrl, mode, root, subscribe 
     },
     async buildStart() {
       if (!enabled) return;
+      if (development) {
+        // A CMS outage or an offloaded iCloud cache must not hold the HTTP
+        // listener closed. The browser fetches public content as usual, and
+        // subscribe() persists those reads for subsequent local starts.
+        snapshot = { version: 1, cmsUrl, entries: {} };
+        const restore = readFile(filename, 'utf8')
+          .then((encoded) => {
+            const saved = JSON.parse(encoded);
+            if (saved.version !== 1 || saved.cmsUrl !== cmsUrl || !saved.entries) return;
+            for (const [key, entry] of Object.entries(saved.entries)) {
+              if (!snapshot.entries[key] || snapshot.entries[key].updatedAt < entry.updatedAt)
+                snapshot.entries[key] = entry;
+            }
+          })
+          .catch(() => {});
+        // Warm local snapshots still provide initial HTML. Slow reads finish
+        // in the background instead of preventing Vite from accepting requests.
+        await Promise.race([restore, delay(150)]);
+        return;
+      }
       let previous;
       try {
         previous = JSON.parse(await readFile(filename, 'utf8'));
       } catch {
         /* First run. */
-      }
-      // The browser refreshes published content automatically. Local restarts
-      // can reuse the last good snapshot instead of waiting for every CMS read.
-      // Builds still validate/fetch current published content below.
-      if (
-        development &&
-        previous?.version === 1 &&
-        previous.cmsUrl === cmsUrl &&
-        previous.entries?.home &&
-        previous.entries?.['posts:1:9:']
-      ) {
-        snapshot = previous;
-        return;
       }
       try {
         snapshot = await createBootstrap({ handler, cmsUrl, previous });

@@ -1,6 +1,6 @@
 import PageMetadata from '../components/PageMetadata';
 import { formatCompactCount } from '../utils/numbers';
-import { Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
+import { Alert, Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
 import { cardEmoji, cardReviews, heroPreviewStatistics } from '../utils/cardPresentation';
 import HomeHeroContent from '../components/HomeHeroContent';
 import HomeEditorial, { EditorialStatistics, SectionHeading } from '../components/HomeEditorial';
@@ -34,8 +34,28 @@ export default function HomePage({
   setSubConsent,
   subscribed,
   setSubscribed,
-  setSubscribers,
+  newsletterRequest,
 }) {
+  async function submitNewsletter(event) {
+    event.preventDefault();
+    const website = new FormData(event.currentTarget).get('website') || '';
+    if (
+      await newsletterRequest.submit({
+        name: subName,
+        email: subEmail,
+        consent: subConsent,
+        website,
+      })
+    ) {
+      setSubscribed(true);
+      setSubName('');
+      setSubEmail('');
+      setSubConsent(false);
+      fire(
+        `${newsletter.success_message || 'Thank you for signing up.'} Check your inbox for any confirmation steps.`,
+      );
+    }
+  }
   const { brand } = settings;
   const newsletter = settings.newsletter;
   const { content, status: contentStatus } = useHomeHero();
@@ -499,11 +519,14 @@ export default function HomePage({
               {newsletter.body}
             </Text>
             {subscribed ? (
-              <Box c="#E8C97A" fz={18} fw={700}>
-                {newsletter.success_message || 'Thank you for subscribing.'}
+              <Box c="#E8C97A" fz={18} fw={700} role="status">
+                {newsletter.success_message || 'Thank you for signing up.'}
+                <Text mt="sm">Check your inbox for any confirmation steps.</Text>
               </Box>
             ) : (
               <Box
+                component="form"
+                onSubmit={submitNewsletter}
                 bg="rgba(255,255,255,0.06)"
                 p="24px"
                 style={{
@@ -511,6 +534,18 @@ export default function HomePage({
                   borderRadius: '0.875rem',
                 }}
               >
+                {newsletterRequest.error && (
+                  <Alert color="red" role="alert" mb="md">
+                    {newsletterRequest.error}
+                  </Alert>
+                )}
+                <input
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  style={{ display: 'none' }}
+                />
                 <SimpleGrid
                   cols={{
                     base: 1,
@@ -522,6 +557,7 @@ export default function HomePage({
                   <div>
                     <Box
                       component="label"
+                      htmlFor="newsletter-name"
                       c="#E8C97A"
                       fz={10}
                       lts={2}
@@ -534,6 +570,13 @@ export default function HomePage({
                     </Box>
                     <Input
                       placeholder="e.g. John"
+                      id="newsletter-name"
+                      name="name"
+                      aria-label="First name"
+                      autoComplete="given-name"
+                      required
+                      maxLength={100}
+                      disabled={newsletterRequest.busy}
                       value={subName}
                       onChange={(e) => setSubName(e.target.value)}
                       styles={{
@@ -549,6 +592,7 @@ export default function HomePage({
                   <div>
                     <Box
                       component="label"
+                      htmlFor="newsletter-email"
                       c="#E8C97A"
                       fz={10}
                       lts={2}
@@ -561,6 +605,14 @@ export default function HomePage({
                     </Box>
                     <Input
                       placeholder="e.g. john@email.com"
+                      id="newsletter-email"
+                      name="email"
+                      aria-label="Email address"
+                      autoComplete="email"
+                      required
+                      maxLength={150}
+                      disabled={newsletterRequest.busy}
+                      type="email"
                       value={subEmail}
                       onChange={(e) => setSubEmail(e.target.value)}
                       styles={{
@@ -587,6 +639,8 @@ export default function HomePage({
                 >
                   <input
                     type="checkbox"
+                    required
+                    disabled={newsletterRequest.busy}
                     checked={subConsent}
                     onChange={(e) => setSubConsent(e.target.checked)}
                     style={{
@@ -615,38 +669,11 @@ export default function HomePage({
                 </Box>
                 <Button
                   className="btn-h"
-                  onClick={() => {
-                    if (!subName.trim()) {
-                      fire('Enter your name', 'err');
-                      return;
-                    }
-                    if (!subEmail.includes('@')) {
-                      fire('Enter valid email', 'err');
-                      return;
-                    }
-                    if (!subConsent) {
-                      fire('Please check consent box', 'err');
-                      return;
-                    }
-                    setSubscribers((p) => [
-                      ...p,
-                      {
-                        name: subName,
-                        email: subEmail,
-                        date: new Date().toLocaleDateString(),
-                        time: new Date().toLocaleTimeString(),
-                      },
-                    ]);
-                    setSubscribed(true);
-                    setSubName('');
-                    setSubEmail('');
-                    setSubConsent(false);
-                    fire(newsletter.success_message || 'Thank you for subscribing.');
-                  }}
+                  loading={newsletterRequest.busy}
                   variant="transparent"
                   color="dark"
                   px={0}
-                  type="button"
+                  type="submit"
                   c="#1a0533"
                   bg="linear-gradient(135deg,#C9963F,#E8C97A)"
                   fz={13}

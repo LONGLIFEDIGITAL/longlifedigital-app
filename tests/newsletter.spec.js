@@ -12,6 +12,9 @@ async function visibility(page, state) {
 
 test.beforeEach(async ({ page, context }) => {
   await mockLayoutStorefront(context);
+  await context.route('**/api/forms?action=newsletter', (route) =>
+    route.fulfill({ json: { ok: true } }),
+  );
   await page.clock.install({ time: new Date('2030-01-01T12:00:00Z') });
   await page.clock.pauseAt(new Date('2030-01-01T12:00:01Z'));
   await page.setViewportSize({ width: 393, height: 852 });
@@ -78,6 +81,8 @@ test('the popup waits for a visible page and does not interrupt the cart', async
 test('an earlier page subscription suppresses the popup on this visit and later visits', async ({
   page,
 }) => {
+  // Let React Query deliver the initial CMS response before exercising the form.
+  await page.clock.resume();
   await page.goto('/');
   await page.getByPlaceholder('e.g. John', { exact: true }).fill('Example');
   await page.getByPlaceholder('e.g. john@email.com', { exact: true }).fill('reader@example.com');

@@ -4,11 +4,11 @@ The storefront now supports WordPress/WooCommerce customer accounts. No new auth
 
 ## Activate on WordPress and Vercel
 
-1. Upload `docs/cms/Longlife-Headless-Commerce.zip` under **WordPress → Plugins → Add New → Upload Plugin** and replace the existing Longlife Headless Commerce plugin with **0.3.2**. Keep the existing integration secret and checkout settings. If this is a first installation, activate the plugin to create its database table and secret.
+1. Upload `docs/cms/Longlife-Headless-Commerce.zip` under **WordPress → Plugins → Add New → Upload Plugin** and replace the existing Longlife Headless Commerce plugin with **0.5.1**. Keep the existing integration secret and checkout settings. If this is a first installation, activate the plugin to create its database table and secret.
 2. In **WooCommerce → Settings → Accounts & Privacy**, enable customer registration on the **My account** page (`woocommerce_enable_myaccount_registration`). Keep guest checkout enabled. The React registration flow uses these WooCommerce accounts and does not require an ACF page.
 3. Ensure WordPress can deliver password-reset emails. Registration emails contain a link to the React `/reset-password` page. New customers choose their password through that email before logging in. If delivery fails, fix the mail setup and use **Forgot password** to resend.
 4. In Vercel, keep the existing server-only `COMMERCE_SESSION_SECRET` and `LLD_COMMERCE_BRIDGE_SECRET`, and the existing public WooCommerce Store API URL and `VITE_HEADLESS_COMMERCE=true`. Keep every storefront origin used for login in `STOREFRONT_ORIGINS` (including the exact preview branch URL). Redeploy this app after updating the plugin. No new environment variables are needed.
-5. Try a new registration with an inbox you control, follow the emailed link, log in, then place a Stripe **test-mode** order while logged in. Verify the WooCommerce order has the correct customer and appears under **My account → Your orders**. Also confirm guest checkout still works.
+5. Try a new registration with an inbox you control, follow the emailed link, log in, then place a Stripe **test-mode** order while logged in. Verify the WooCommerce order has the correct customer and appears under **My account → Orders**. Also confirm guest checkout still works.
 
 Plugin replacement preserves existing WordPress users, orders, settings and the integration secret. The updated ZIP is generated from the plugin source; no customer data or credentials are included.
 
@@ -18,10 +18,16 @@ Plugin replacement preserves existing WordPress users, orders, settings and the 
 - `/login`: email and password. Customer/subscriber accounts are supported; administrator and shop-manager accounts continue using WordPress admin.
 - `/forgot-password`: sends a generic confirmation without revealing whether an email exists.
 - `/reset-password`: consumes the WordPress reset key from the email URL fragment, removes it from the address bar, and accepts a new password. Resetting a password revokes prior WordPress sessions. Refreshing after the fragment was removed requires reopening the email link.
-- `/account`: current identity, paginated order history, password-reset link and logout.
+- `/account`: responsive purple-and-gold dashboard with order totals, recent orders, purchased items, available downloads, account details, password-reset link and logout. Sidebar sections use shareable `?view=` URLs; order pagination uses `?view=orders&page=2`.
 - Navigation menu: Login with an account icon at the bottom, changing to My account after login. Login/registration forms are in the initial app bundle and render without waiting for CMS or session requests. Checkout offers login/registration and keeps guest checkout available. Login returns to checkout when started there.
 
-Guest carts remain guest cart-token sessions, so logging in does not discard their items or merge another device’s cart. At checkout, the signed server-to-WordPress request supplies a server-held WordPress token; WordPress validates it and assigns the order customer before payment. Billing email and browser-supplied customer IDs cannot choose the owner. Older guest orders are not proactively claimed by this integration. Existing WooCommerce order/download emails and order-confirmation downloads remain in place; this account page currently lists orders, not a download library or profile/address editor.
+Guest carts remain guest cart-token sessions, so logging in does not discard their items or merge another device’s cart. At checkout, the signed server-to-WordPress request supplies a server-held WordPress token; WordPress validates it and assigns the order customer before payment. Billing email and browser-supplied customer IDs cannot choose the owner. Older guest orders are not proactively claimed by this integration. Existing WooCommerce order/download emails and order-confirmation downloads remain in place; the account download library exposes WooCommerce permission URLs for the authenticated customer, excluding other customers’ orders and expired/exhausted permissions. Raw file paths are never exposed. Existing WooCommerce download delivery/login settings still apply. A profile/address editor is not included.
+
+## Dashboard deployment
+
+Upload commerce plugin **0.5.1** from `docs/cms/Longlife-Headless-Commerce.zip`, then deploy the app. No new secrets, ACF fields or database migrations are required. The release adds authenticated `downloads` reads and a full order count to the account bridge. Private download data is cleared on logout and account changes.
+
+The Services and Domains dashboard sections provide browsing and support links. There are no customer service-contract or domain-ownership records in the existing integration, so the dashboard does not invent active-service/domain counts. “Available downloads” counts currently eligible files, not lifetime download activity. “My Products” lists order line items with their order status, including pending orders; only WooCommerce-authorized files are downloadable.
 
 ## Authentication handling
 

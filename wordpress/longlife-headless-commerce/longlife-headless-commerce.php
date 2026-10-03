@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Longlife Headless Commerce
  * Description: Authenticated React checkout bridge for WooCommerce Store API and Stripe Gateway 11.0.0. Test payments only.
- * Version: 0.4.4
+ * Version: 0.5.1
  * Requires Plugins: woocommerce
  * Requires PHP: 8.0
  */
@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) { exit; }
 require_once __DIR__ . '/security.php';
 require_once __DIR__ . '/account.php';
 require_once __DIR__ . '/inquiry.php';
+require_once __DIR__ . '/forms.php';
 require_once __DIR__ . '/service-admin.php';
 require_once __DIR__ . '/checkout.php';
 
@@ -60,6 +61,12 @@ add_action('rest_api_init', function () {
     ));
     register_rest_route('lld-headless/v1', '/inquiry', array(
         'methods' => 'POST', 'permission_callback' => 'lld_authenticate_bridge', 'callback' => 'lld_service_inquiry',
+    ));
+    register_rest_route('lld-headless/v1', '/contact', array(
+        'methods' => 'POST', 'permission_callback' => 'lld_authenticate_bridge', 'callback' => 'lld_contact_form',
+    ));
+    register_rest_route('lld-headless/v1', '/newsletter', array(
+        'methods' => 'POST', 'permission_callback' => 'lld_authenticate_bridge', 'callback' => 'lld_newsletter_signup',
     ));
     register_rest_route('lld-headless/v1', '/order', array(
         'methods' => 'POST', 'permission_callback' => 'lld_authenticate_bridge', 'callback' => 'lld_order_status',

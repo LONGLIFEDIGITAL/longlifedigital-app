@@ -14,6 +14,7 @@ const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage')
 import useCatalog from './hooks/useCatalog';
 import useSiteSettings from './hooks/useSiteSettings';
 import useNewsletterPopup from './hooks/useNewsletterPopup';
+import usePublicForm from './hooks/usePublicForm';
 import useAppNavigation from './hooks/useAppNavigation';
 import CatalogStatus from './components/CatalogStatus';
 import ProductDetailsSkeleton from './components/skeletons/ProductDetailsSkeleton';
@@ -61,7 +62,7 @@ export default function App() {
   const [annBarHidden, setAnnBarHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
-  const [, setSubscribers] = useState([]);
+  const newsletterRequest = usePublicForm('newsletter');
   const [subName, setSubName] = useState('');
   const [subEmail, setSubEmail] = useState('');
   const [subConsent, setSubConsent] = useState(false);
@@ -198,7 +199,7 @@ export default function App() {
           {['login', 'register', 'forgot-password', 'reset-password'].includes(page) && (
             <AuthPage key={page} mode={page} auth={auth} />
           )}
-          {page === 'account' && <AccountPage auth={auth} />}
+          {page === 'account' && <AccountPage auth={auth} brand={settings.brand} />}
           {page === 'checkout' && <CheckoutPage cartState={cartState} customer={auth.user} />}
           {page === 'order-confirmation' && <OrderConfirmationPage reloadCart={cartState.reload} />}
           {page === 'home' && (
@@ -222,7 +223,7 @@ export default function App() {
               setSubConsent={setSubConsent}
               subscribed={subscribed}
               setSubscribed={setSubscribed}
-              setSubscribers={setSubscribers}
+              newsletterRequest={newsletterRequest}
               contact={contact}
             />
           )}
@@ -334,7 +335,7 @@ export default function App() {
             setPopupName={setPopupName}
             setShowPopup={setShowPopup}
             setSubscribed={setSubscribed}
-            setSubscribers={setSubscribers}
+            newsletterRequest={newsletterRequest}
           />
         )}
       </Suspense>

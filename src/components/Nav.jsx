@@ -189,7 +189,15 @@ export default function Nav({
                           sm: 16,
                         }}
                       >
-                        {brand.name || 'Storefront'}
+                        {(brand.name || 'Storefront').split(/(Digital)/i).map((part, index) =>
+                          /^digital$/i.test(part) ? (
+                            <span className={classes.brandAccent} key={index}>
+                              {part}
+                            </span>
+                          ) : (
+                            part
+                          ),
+                        )}
                       </Text>
                       {brand.tagline && (
                         <Text className={classes.brandSubtitle} visibleFrom="sm">

@@ -62,7 +62,8 @@ function wc_get_order_status_name($status) { return ucfirst($status); }
 class AccountOrder extends Order {
     function __construct(public $owner) {} function get_customer_id() { return $this->owner; } function get_date_created() { return null; }
 }
-function wc_get_orders($args) { check($args['customer_id'] === 7, 'orders query is scoped to authenticated customer'); return (object) array('orders' => array(new AccountOrder(7), new AccountOrder(99)), 'max_num_pages' => 1); }
+function wc_get_orders($args) { check($args['customer_id'] === 7, 'orders query is scoped to authenticated customer'); return (object) array('orders' => array(new AccountOrder(7), new AccountOrder(99)), 'max_num_pages' => 1, 'total' => 12); }
+function wc_get_customer_available_downloads($id) { check($id === 7, 'downloads use authenticated customer'); return $GLOBALS['customer_downloads']; }
 function account_call($action, $data = array()) {
     $payload = array_merge(array('action' => $action, 'client' => str_repeat('b', 64)), $data);
     $request = new Request('/lld-headless/v1/account', json_encode($payload));
@@ -78,6 +79,14 @@ $token = $login->data['token'];
 check($login->data['user']['id'] === 7, 'valid customer gets a session');
 check(account_call('session', array('token' => $token, 'customer_id' => 99))->data['user']['id'] === 7, 'session uses only validated WordPress token');
 check(count(account_call('orders', array('token' => $token, 'page' => 1))->data['orders']) === 1, 'orders belonging to another customer are excluded');
+check(account_call('orders', array('token' => $token, 'page' => 1))->data['totalOrders'] === 12, 'total orders comes from full Woo count, not current page');
+$orders[12] = new AccountOrder(7); $orders[13] = new AccountOrder(99);
+$file = array('order_id' => 12, 'download_id' => 'book', 'download_name' => 'PDF', 'product_name' => 'Book', 'download_url' => 'https://wp.example.test/?download_file=12&key=permission', 'downloads_remaining' => '', 'access_expires' => null, 'file' => '/private.pdf');
+$customer_downloads = array($file, array_merge($file, array('order_id' => 13)), array_merge($file, array('downloads_remaining' => '0')), array_merge($file, array('access_expires' => '2000-01-01')));
+$files = account_call('downloads', array('token' => $token, 'customer_id' => 99))->data['downloads'];
+check(count($files) === 1 && $files[0]['id'] === '12:book', 'downloads exclude foreign orders and expired/exhausted permissions');
+check(!isset($files[0]['file']), 'raw download file is not exposed');
+check(is_wp_error(account_call('downloads', array('token' => 'invalid'))), 'invalid session cannot list downloads');
 $checkout = new Request('/wc/store/v1/checkout', json_encode(array('_lld_account' => $token, 'customer_id' => 99)));
 check($hooks['rest_pre_dispatch'](null, null, $checkout) === null, 'authenticated customer can dispatch checkout');
 $order = new Order();

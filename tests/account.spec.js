@@ -40,9 +40,25 @@ async function setup(page) {
             },
           ],
           hasMore: false,
+          totalOrders: 12,
         },
       });
     }
+    if (action === 'downloads')
+      return route.fulfill({
+        json: {
+          downloads: [
+            {
+              id: '42:book',
+              name: 'Ebook PDF',
+              productName: 'An ebook',
+              remaining: '',
+              expires: null,
+              url: 'https://wp.example.test/?download_file=42&key=permission',
+            },
+          ],
+        },
+      });
     if (action === 'reset') {
       if (body.key !== 'valid-key')
         return route.fulfill({
@@ -253,3 +269,104 @@ for (const width of [320, 393, 1440]) {
     ).toBeLessThanOrEqual(1);
   });
 }
+
+test('dashboard navigation, real statistics, downloads, account details and unchanged basket', async ({
+  page,
+}, testInfo) => {
+  await setup(page);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await login(page);
+  await expect(page.getByRole('link', { name: 'Total orders 12 View orders' })).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Available downloads 1 View downloads' }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: /Open cart/ })).toBeVisible();
+  await expect(page.locator('header').getByText('Digital', { exact: true })).toHaveCSS(
+    'color',
+    'rgb(147, 51, 234)',
+  );
+  await page.screenshot({ path: testInfo.outputPath('dashboard-desktop.png'), fullPage: true });
+  const nav = page.getByRole('navigation', { name: 'Account navigation' });
+  await nav.getByRole('link', { name: 'My Products', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'An ebook' })).toBeVisible();
+  await nav.getByRole('link', { name: 'Downloads', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Download', exact: true })).toHaveAttribute(
+    'href',
+    'https://wp.example.test/?download_file=42&key=permission',
+  );
+  await nav.getByRole('link', { name: 'Account', exact: true }).click();
+  await expect(page.getByText(customer.email, { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Reset password' })).toHaveAttribute(
+    'href',
+    '/forgot-password',
+  );
+  for (const name of ['My Services', 'My Domains']) {
+    await nav.getByRole('link', { name, exact: true }).click();
+    await expect(page.getByRole('link', { name: 'Contact our team' })).toBeVisible();
+  }
+  await nav.getByRole('link', { name: 'Home', exact: true }).click();
+  await page.setViewportSize({ width: 393, height: 852 });
+  await page.screenshot({ path: testInfo.outputPath('dashboard-mobile.png'), fullPage: true });
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+  ).toBeLessThanOrEqual(1);
+});
+
+test('dashboard handles empty purchases and unavailable downloads without invented totals', async ({
+  page,
+}) => {
+  await setup(page);
+  await page.route('**/api/account?action=orders**', (route) =>
+    route.fulfill({ json: { orders: [], hasMore: false, totalOrders: 0 } }),
+  );
+  await page.route('**/api/account?action=downloads', (route) =>
+    route.fulfill({ status: 503, json: { error: 'Downloads are temporarily unavailable.' } }),
+  );
+  await login(page);
+  await expect(page.getByRole('link', { name: 'Total orders 0 View orders' })).toBeVisible();
+  await expect(page.getByText('Your next chapter is waiting.')).toBeVisible();
+  await page
+    .getByRole('navigation', { name: 'Account navigation' })
+    .getByRole('link', { name: 'Downloads', exact: true })
+    .click();
+  await expect(page.getByRole('alert')).toContainText('temporarily unavailable');
+  await page.route('**/api/account?action=downloads', (route) =>
+    route.fulfill({ json: { downloads: [] } }),
+  );
+  await page.getByRole('button', { name: 'Try again' }).click();
+  await expect(page.getByText('Your library is ready to grow.')).toBeVisible();
+});
+
+test('dashboard order pagination keeps the full total and overview returns to recent orders', async ({
+  page,
+}) => {
+  await setup(page);
+  await page.route('**/api/account?action=orders**', (route) => {
+    const current = Number(new URL(route.request().url()).searchParams.get('page') || 1);
+    return route.fulfill({
+      json: {
+        totalOrders: 12,
+        hasMore: current === 1,
+        orders: [
+          {
+            number: current === 1 ? '42' : '30',
+            status: 'Completed',
+            date: null,
+            total: '19.99',
+            currency: 'USD',
+            items: [{ name: 'An ebook', quantity: 1 }],
+          },
+        ],
+      },
+    });
+  });
+  await login(page);
+  const nav = page.getByRole('navigation', { name: 'Account navigation' });
+  await nav.getByRole('link', { name: 'Orders', exact: true }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(page).toHaveURL(/view=orders&page=2/);
+  await expect(page.getByText('Order #30', { exact: true })).toBeVisible();
+  await nav.getByRole('link', { name: 'Home', exact: true }).click();
+  await expect(page.getByText('Order #42', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Total orders 12 View orders' })).toBeVisible();
+});

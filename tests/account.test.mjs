@@ -190,6 +190,7 @@ test('orders require authentication and strip upstream private metadata', async 
           },
         ],
         hasMore: false,
+        totalOrders: 42,
         token: 'hidden',
       });
     },
@@ -198,6 +199,7 @@ test('orders require authentication and strip upstream private metadata', async 
   assert.equal(response.status, 200);
   assert.ok(!JSON.stringify(response.body).includes('hidden'));
   assert.equal(response.body.orders[0].items[0].key, undefined);
+  assert.equal(response.body.totalOrders, 42);
 });
 test('logout revokes the WP token and clears the browser cookie, including upstream failures', async () => {
   for (const status of [200, 500]) {
@@ -224,4 +226,49 @@ test('login and reset errors are generic and hide upstream details', async () =>
     assert.equal(response.status, status);
     assert.ok(!JSON.stringify(response.body).includes('PRIVATE'));
   }
+});
+
+test('customer downloads require authentication and expose only valid Woo permission URLs', async () => {
+  assert.equal((await call('downloads')).status, 401);
+  const file = {
+    id: '12:book',
+    name: 'Book PDF',
+    productName: 'An ebook',
+    url: 'https://wp.example.test/?download_file=12&key=permission',
+    remaining: '',
+    expires: null,
+    rawFile: '/private/book.pdf',
+  };
+  const response = await call(
+    'downloads',
+    undefined,
+    async (_url, init) => {
+      const payload = JSON.parse(init.body);
+      assert.equal(payload.token, state.token);
+      assert.equal(payload.customer_id, undefined);
+      return Response.json({
+        downloads: [
+          file,
+          { ...file, url: 'javascript:alert(1)' },
+          { ...file, url: 'https://evil.test/?download_file=12' },
+          { ...file, url: 'https://wp.example.test/raw-book.pdf' },
+          { ...file, remaining: 0 },
+          { ...file, expires: '2000-01-01' },
+        ],
+      });
+    },
+    { headers: { cookie } },
+  );
+  assert.equal(response.status, 200);
+  assert.equal(response.body.downloads.length, 1);
+  assert.equal(response.body.downloads[0].rawFile, undefined);
+  assert.equal(response.headers['Cache-Control'], 'no-store, private');
+  const expired = await call(
+    'downloads',
+    undefined,
+    async () => Response.json({ message: 'Expired' }, { status: 401 }),
+    { headers: { cookie } },
+  );
+  assert.equal(expired.status, 401);
+  assert.match(expired.headers['Set-Cookie'], /Max-Age=0/);
 });

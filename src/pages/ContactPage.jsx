@@ -1,8 +1,9 @@
 import useContent from '../hooks/useContent';
 import { PageHeader, ContentState, PageCta } from '../components/ContentPage';
 import RichText from '../components/RichText';
-import { Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
+import { Alert, Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
 import { useState } from 'react';
+import usePublicForm from '../hooks/usePublicForm';
 import classes from './ContactPage.module.css';
 export default function ContactPage({ fire, contact, settings }) {
   const [cf, setCf] = useState({
@@ -12,8 +13,18 @@ export default function ContactPage({ fire, contact, settings }) {
     message: '',
   });
   const [sent, setSent] = useState(false);
+  const request = usePublicForm('contact');
   const content = useContent('page', 'contact');
   const services = useContent('services');
+  async function submit(event) {
+    event.preventDefault();
+    const website = new FormData(event.currentTarget).get('website') || '';
+    if (await request.submit({ ...cf, website })) {
+      setSent(true);
+      setCf({ name: '', email: '', service: '', message: '' });
+      fire(content.data?.contact.success_body || 'Your message has been sent.');
+    }
+  }
   return (
     <div>
       <PageHeader pageKey="contact" content={content.data} />
@@ -146,7 +157,7 @@ export default function ContactPage({ fire, contact, settings }) {
               }}
             />
             {sent ? (
-              <Box ta="center" p="40px 0">
+              <Box ta="center" p="40px 0" role="status">
                 <Box fz={48} mb={16}>
                   ✦
                 </Box>
@@ -154,7 +165,8 @@ export default function ContactPage({ fire, contact, settings }) {
                   {content.data?.contact.success_heading || 'Thank you'}
                 </Title>
                 <Text component="p" inherit c="#9CA3AF" mb={24}>
-                  {content.data?.contact.success_body || ''}
+                  {content.data?.contact.success_body ||
+                    'Your message has been sent. We’ll reply using the email address you provided.'}
                 </Text>
                 <Button
                   className="btn-h"
@@ -168,170 +180,201 @@ export default function ContactPage({ fire, contact, settings }) {
                 </Button>
               </Box>
             ) : (
-              <Box pos="relative">
+              <Box pos="relative" component="form" onSubmit={submit}>
                 <Title order={3} c="#1a0533" fz={20} ff="'Plus Jakarta Sans',sans-serif" mb={20}>
                   {content.data?.contact.form_heading || 'Send Us a Message'}
                 </Title>
                 {content.data?.contact.form_intro && (
                   <Text mb="md">{content.data.contact.form_intro}</Text>
                 )}
-                <SimpleGrid
-                  cols={{
-                    base: 1,
-                    sm: 2,
-                  }}
-                  spacing={12}
+                {request.error && (
+                  <Alert color="red" role="alert" mb="md">
+                    {request.error}
+                  </Alert>
+                )}
+                <fieldset
+                  disabled={request.busy}
+                  style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
                 >
-                  <div>
-                    <Box
-                      component="label"
-                      c="#9CA3AF"
-                      fz={11}
-                      lts={1}
-                      tt="uppercase"
-                      mt={10}
-                      mb={5}
-                      style={{
-                        display: 'block',
-                      }}
-                    >
-                      Your Name *
-                    </Box>
-                    <Input
-                      className="inp-f"
-                      placeholder="John Smith"
-                      value={cf.name}
-                      onChange={(e) =>
-                        setCf({
-                          ...cf,
-                          name: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Box
-                      component="label"
-                      c="#9CA3AF"
-                      fz={11}
-                      lts={1}
-                      tt="uppercase"
-                      mt={10}
-                      mb={5}
-                      style={{
-                        display: 'block',
-                      }}
-                    >
-                      Email *
-                    </Box>
-                    <Input
-                      className="inp-f"
-                      placeholder="john@email.com"
-                      value={cf.email}
-                      onChange={(e) =>
-                        setCf({
-                          ...cf,
-                          email: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </SimpleGrid>
-                <SimpleGrid
-                  cols={{
-                    base: 1,
-                    sm: 2,
-                  }}
-                  spacing={12}
-                >
-                  <div>
-                    <Box
-                      component="label"
-                      c="#9CA3AF"
-                      fz={11}
-                      lts={1}
-                      tt="uppercase"
-                      mt={10}
-                      mb={5}
-                      style={{
-                        display: 'block',
-                      }}
-                    >
-                      Service Interested In
-                    </Box>
-                    <Input
-                      className="inp-f"
-                      value={cf.service}
-                      onChange={(e) =>
-                        setCf({
-                          ...cf,
-                          service: e.target.value,
-                        })
-                      }
-                      component="select"
-                    >
-                      <option value="">Select a service...</option>
-                      {(services.data || []).map((service) => (
-                        <option key={service.id} value={service.title}>
-                          {service.title}
-                        </option>
-                      ))}
-                      <option value="Other">Other</option>
-                    </Input>
-                  </div>
-                </SimpleGrid>
-                <Box
-                  component="label"
-                  c="#9CA3AF"
-                  fz={11}
-                  lts={1}
-                  tt="uppercase"
-                  mt={10}
-                  mb={5}
-                  style={{
-                    display: 'block',
-                  }}
-                >
-                  Message *
-                </Box>
-                <Input
-                  className="inp-f"
-                  placeholder="Tell us about your project or question..."
-                  value={cf.message}
-                  onChange={(e) =>
-                    setCf({
-                      ...cf,
-                      message: e.target.value,
-                    })
-                  }
-                  component="textarea"
-                  styles={{
-                    input: {
-                      height: '7.5rem',
-                      resize: 'vertical',
-                    },
-                  }}
-                />
-                <Button
-                  className="btn-h"
-                  onClick={() => {
-                    if (cf.name && cf.email && cf.message) {
-                      setSent(true);
-                      fire(content.data?.contact.success_body || 'Thank you');
-                    } else {
-                      fire('Please fill all required fields.', 'err');
+                  <input
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    style={{ display: 'none' }}
+                  />
+                  <SimpleGrid
+                    cols={{
+                      base: 1,
+                      sm: 2,
+                    }}
+                    spacing={12}
+                  >
+                    <div>
+                      <Box
+                        component="label"
+                        htmlFor="contact-name"
+                        c="#9CA3AF"
+                        fz={11}
+                        lts={1}
+                        tt="uppercase"
+                        mt={10}
+                        mb={5}
+                        style={{
+                          display: 'block',
+                        }}
+                      >
+                        Your Name *
+                      </Box>
+                      <Input
+                        className="inp-f"
+                        placeholder="John Smith"
+                        id="contact-name"
+                        name="name"
+                        autoComplete="name"
+                        required
+                        maxLength={100}
+                        value={cf.name}
+                        onChange={(e) =>
+                          setCf({
+                            ...cf,
+                            name: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Box
+                        component="label"
+                        htmlFor="contact-email"
+                        c="#9CA3AF"
+                        fz={11}
+                        lts={1}
+                        tt="uppercase"
+                        mt={10}
+                        mb={5}
+                        style={{
+                          display: 'block',
+                        }}
+                      >
+                        Email *
+                      </Box>
+                      <Input
+                        className="inp-f"
+                        placeholder="john@email.com"
+                        id="contact-email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        required
+                        maxLength={254}
+                        value={cf.email}
+                        onChange={(e) =>
+                          setCf({
+                            ...cf,
+                            email: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </SimpleGrid>
+                  <SimpleGrid
+                    cols={{
+                      base: 1,
+                      sm: 2,
+                    }}
+                    spacing={12}
+                  >
+                    <div>
+                      <Box
+                        component="label"
+                        htmlFor="contact-service"
+                        c="#9CA3AF"
+                        fz={11}
+                        lts={1}
+                        tt="uppercase"
+                        mt={10}
+                        mb={5}
+                        style={{
+                          display: 'block',
+                        }}
+                      >
+                        Service Interested In
+                      </Box>
+                      <Input
+                        className="inp-f"
+                        value={cf.service}
+                        id="contact-service"
+                        name="service"
+                        onChange={(e) =>
+                          setCf({
+                            ...cf,
+                            service: e.target.value,
+                          })
+                        }
+                        component="select"
+                      >
+                        <option value="">Select a service...</option>
+                        {(services.data || []).map((service) => (
+                          <option key={service.id} value={service.title}>
+                            {service.title}
+                          </option>
+                        ))}
+                        <option value="Other">Other</option>
+                      </Input>
+                    </div>
+                  </SimpleGrid>
+                  <Box
+                    component="label"
+                    htmlFor="contact-message"
+                    c="#9CA3AF"
+                    fz={11}
+                    lts={1}
+                    tt="uppercase"
+                    mt={10}
+                    mb={5}
+                    style={{
+                      display: 'block',
+                    }}
+                  >
+                    Message *
+                  </Box>
+                  <Input
+                    className="inp-f"
+                    placeholder="Tell us about your project or question..."
+                    id="contact-message"
+                    name="message"
+                    required
+                    maxLength={5000}
+                    value={cf.message}
+                    onChange={(e) =>
+                      setCf({
+                        ...cf,
+                        message: e.target.value,
+                      })
                     }
-                  }}
-                  variant="filled"
-                  color="brand"
-                  px="lg"
-                  type="button"
-                  w="100%"
-                  mt={16}
-                  p="14px"
-                >
-                  ✦ Send Message
-                </Button>
+                    component="textarea"
+                    styles={{
+                      input: {
+                        height: '7.5rem',
+                        resize: 'vertical',
+                      },
+                    }}
+                  />
+                  <Button
+                    className="btn-h"
+                    loading={request.busy}
+                    variant="filled"
+                    color="brand"
+                    px="lg"
+                    type="submit"
+                    w="100%"
+                    mt={16}
+                    p="14px"
+                  >
+                    ✦ Send Message
+                  </Button>
+                </fieldset>
               </Box>
             )}
           </Box>
