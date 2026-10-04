@@ -1,26 +1,16 @@
 import { CommerceError } from './http.js';
-import { createHmac, randomBytes, randomUUID } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import { sessionKey } from './session.js';
 import { billingErrors, billingErrorMessage } from './validation.js';
 
-export function signedHeaders(
-  env,
-  route,
-  session,
-  attempt,
-  body,
-  token = '',
-  method = 'POST',
-  accountToken = '',
-) {
+export function signedHeaders(env, route, session, attempt, body, token = '') {
   const secret = env.LLD_COMMERCE_BRIDGE_SECRET;
   if (!secret || secret.length < 32)
     throw new CommerceError('Checkout is being configured. Please try again later.', 503);
   const timestamp = String(Math.floor(Date.now() / 1000));
   const nonce = randomBytes(16).toString('hex');
   const identity = sessionKey(session);
-  const canonical = [method, route, identity, attempt, timestamp, nonce, token, body];
-  if (accountToken) canonical.push(accountToken);
+  const canonical = ['POST', route, identity, attempt, timestamp, nonce, token, body];
   const signature = createHmac('sha256', secret).update(canonical.join('\n')).digest('hex');
   return {
     'X-LLD-Session': identity,
@@ -28,7 +18,6 @@ export function signedHeaders(
     'X-LLD-Timestamp': timestamp,
     'X-LLD-Nonce': nonce,
     'X-LLD-Signature': signature,
-    ...(accountToken ? { 'X-LLD-Account': accountToken } : {}),
   };
 }
 export function storeRoot(env) {
@@ -46,7 +35,7 @@ export function storeRoot(env) {
   url.hash = '';
   return url.href.replace(/\/$/, '');
 }
-export function createWoo(env, fetchImpl = fetch, accountToken = '') {
+export function createWoo(env, fetchImpl = fetch) {
   const store = storeRoot(env);
   async function request(url, init) {
     const response = await fetchImpl(url, {
@@ -82,16 +71,14 @@ export function createWoo(env, fetchImpl = fetch, accountToken = '') {
           Accept: 'application/json',
           'Content-Type': 'application/json',
           ...(session.token ? { 'Cart-Token': session.token } : {}),
-          ...(attempt || accountToken
+          ...(attempt
             ? signedHeaders(
                 env,
                 `/wc/store/v1/${path}`,
                 session,
-                attempt || randomUUID(),
+                attempt,
                 body ? JSON.stringify(body) : '',
                 session.token || '',
-                method,
-                accountToken,
               )
             : {}),
         },

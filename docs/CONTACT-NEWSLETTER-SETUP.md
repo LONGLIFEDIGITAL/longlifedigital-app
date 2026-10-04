@@ -10,7 +10,7 @@ From. Service inquiries still go to their existing recipient.
 
 1. Upload `docs/cms/Longlife-Headless-Commerce.zip` through WordPress → Plugins →
    Add New → Upload Plugin, and replace the installed plugin. This release is
-   **0.5.2**. Activate WooCommerce and MailPoet.
+   **0.5.3**. Activate WooCommerce and MailPoet.
 2. In MailPoet → Lists, create or choose a regular newsletter list.
 3. In WordPress → Settings → General, select that list under **Longlife storefront
    newsletter**, then save. Choosing “Disabled — select a list” disables signup.
@@ -38,35 +38,53 @@ CMS continues to control newsletter copy and visibility. Use a success message
 such as “Thank you for signing up” that fits both single and double opt-in. The
 app also displays “Check your inbox for any confirmation steps.”
 
-## WELCOME10 subscriber discount (0.5.2)
+## Personal newsletter discounts (0.5.3)
 
-Keep the existing `WELCOME10` coupon and welcome automation. Under WooCommerce
-→ Marketing → Coupons, keep **Usage limit per user = 1**; the total coupon usage
-limit can remain unlimited. MailPoet's **Run automation once per subscriber**
-controls email delivery; WooCommerce controls redemption.
+Newsletter signup and discount redemption do not require a customer account.
+MailPoet issues personal coupons; WooCommerce validates their billing-email
+restrictions, expiry, usage limits and final checkout total.
 
-Upload the **0.5.2** plugin ZIP first, then deploy the storefront/API. No new
-secrets or ACF fields are needed. The plugin uses the newsletter list already
-selected under WordPress → Settings → General → Longlife storefront newsletter.
+1. In MailPoet, enable signup confirmation and use a subscription-triggered
+   welcome automation for the storefront's selected newsletter list.
+2. Keep **Run automation once per subscriber** enabled. Edit its email's Coupon
+   block and choose **Create new**, replacing the existing shared `WELCOME10`.
+3. Set **Percentage discount = 10**, **Usage limit per coupon = 1**, and
+   **Usage limit per user = 1**. Enable **Restrict to subscriber email** (called
+   **Limit this coupon to the recipient’s email address** in the block editor).
+   Leave additional allowed emails empty. The restriction is available in
+   automation emails; a normal newsletter can generate a shared code instead.
+4. Save/activate the email. Stop any other welcome email that would issue another
+   discount. Keep subscriber/automation history to preserve once-per-subscriber
+   delivery; do not delete and recreate subscribers to resend this offer.
+5. Upload plugin **0.5.3** from `docs/cms/Longlife-Headless-Commerce.zip`, replacing
+   the old plugin, then deploy the app/API. The plugin rejects shared `WELCOME10`
+   even while it is still published or saved in a cart. Trash that coupon under
+   **Marketing → Coupons** after switching the email to personal codes.
+6. Subscribe with an address you control, confirm, and inspect the generated
+   Woo coupon: correct allowed email, 10%, total usage limit 1. At guest checkout,
+   enter that billing email and apply the personal code. Verify a different email
+   and a previously redeemed code are rejected, including if the billing email
+   changes after application.
 
-The welcome code requires a logged-in customer whose **account email** is
-subscribed to that list in MailPoet. Unconfirmed, unsubscribed, bounced, deleted,
-and other-list subscribers are rejected. Enable MailPoet signup confirmation to
-require double opt-in. Guest shoppers see login/registration links that return
-to checkout with the code prefilled; guest checkout and other coupons still work.
+The storefront sends the current billing email to Woo before applying a coupon
+when one is entered. No account or MailPoet lookup is used to authorize redemption.
+A published site-wide coupon still works according to its own Woo settings.
+These coupons reward a confirmed signup; later unsubscribing does not revoke an
+already-issued personal coupon. Email restrictions match the billing address;
+anyone given both the personal code and its email can use them, so these are not
+identity-verification credentials.
 
-WordPress validates eligibility on coupon application and again at checkout.
-The account credential is sent only server-to-server, signed together with the
-cart request; no browser-supplied customer ID or email establishes eligibility.
-WooCommerce's coupon usage records (including pending holds and past guest uses
-against the account email) enforce the configured per-user limit. Resubscribing
-does not clear those records. MailPoet errors reject the discount with a retry
-message instead of accepting an unverified subscriber.
+Existing recipients of `WELCOME10` need a replacement personal coupon; retiring
+that code does not automatically resend the welcome email. Do not reset the
+entire automation's once-per-subscriber history.
 
-After deployment, verify an eligible subscriber can apply the code, a guest or
-non-subscriber cannot, and an already-used code is rejected for that account.
 Local coverage: `node --test tests/commerce.test.mjs`,
-`php tests/coupons-bridge.php`, and the welcome-coupon checkout browser test.
+`php tests/coupons-bridge.php`, and the personal-coupon checkout browser test.
+These use stubs/mocks; live MailPoet coupon generation and redemption require the
+WordPress setup above.
+
+References: [MailPoet coupon setup](https://kb.mailpoet.com/article/399-adding-a-discount-coupon-to-emails)
+and [WooCommerce coupon settings](https://woocommerce.com/document/coupon-management/).
 
 ## Failure handling
 

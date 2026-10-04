@@ -47,8 +47,6 @@ add_filter('rest_pre_dispatch', function ($result, $server, $request) {
         if (is_wp_error($customer)) return $customer;
         $customer_id = $customer->ID;
     }
-    // Re-resolve eligibility for this checkout; never trust a previously discounted cart.
-    $GLOBALS['lld_coupon_customer'] = $customer_id ? $customer : false;
     $identity = lld_request_identity($request);
     $identity['customer_id'] = $customer_id;
     $hash = hash('sha256', $request->get_body());

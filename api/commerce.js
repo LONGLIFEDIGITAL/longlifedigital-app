@@ -42,8 +42,7 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
       if (!['GET', 'POST'].includes(req.method))
         throw new CommerceError('Method not allowed.', 405);
       if (req.method === 'POST') requireSameOrigin(req, env);
-      const account = readAccount(req, env);
-      const woo = createWoo(env, fetchImpl, account?.token);
+      const woo = createWoo(env, fetchImpl);
       // Public configuration must never create or overwrite a customer's cart cookie.
       if (req.method === 'GET' && action === 'config') return send(res, 200, await woo.config());
       const session = readSession(req, env);
@@ -94,6 +93,7 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
           )
             throw new CommerceError('Checkout is being configured. Please try again later.', 503);
           const billing = address(body.billing_address, config.billingFields);
+          const account = readAccount(req, env);
           const paymentData = {
             payment_method: 'stripe',
             wc_payment_intent_id: '',
@@ -137,12 +137,23 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
         } else if (action === 'apply-coupon' || action === 'remove-coupon') {
           if (typeof body.code !== 'string' || !body.code.trim() || body.code.length > 100)
             throw new CommerceError('Please enter a coupon code.');
-          if (
-            action === 'apply-coupon' &&
-            body.code.trim().toLowerCase() === 'welcome10' &&
-            !account
-          )
-            throw new CommerceError('Log in with your newsletter email to use WELCOME10.', 401);
+          // Woo validates email-restricted coupons against the cart's billing email.
+          // Sync the current form value before applying, even before address review.
+          if (action === 'apply-coupon' && body.email !== undefined) {
+            if (
+              typeof body.email !== 'string' ||
+              body.email.length > 200 ||
+              !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email.trim())
+            )
+              throw new CommerceError(
+                'Enter a valid billing email address before applying your coupon.',
+                400,
+                { email: 'Enter a valid email address.' },
+              );
+            await woo.store('cart/update-customer', session, 'POST', {
+              billing_address: { email: body.email.trim() },
+            });
+          }
           data = await woo.store(`cart/${action}`, session, 'POST', { code: body.code.trim() });
         } else if (action === 'customer') {
           const config = await woo.config();

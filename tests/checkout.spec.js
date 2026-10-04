@@ -413,21 +413,21 @@ test('checkout reviews server-calculated taxes and coupons before enabling payme
   ).toBeTruthy();
   expect(calls.some((c) => c.action === 'checkout')).toBeFalsy();
 });
-test('welcome coupon asks guests to log in and preserves the code on return', async ({ page }) => {
+test('personal welcome coupon works for a guest using their billing email', async ({ page }) => {
   const calls = await setup(page);
   await page.route('**/api/account?**', (route) => route.fulfill({ json: { user: null } }));
   await page.goto('/checkout');
-  await page.getByLabel('Coupon code').fill(' Welcome10 ');
+  await page
+    .getByRole('textbox', { name: 'Email address', exact: true })
+    .fill('reader@example.test');
+  await page.getByLabel('Coupon code').fill('PERSONAL-8X7Q');
   await page.getByRole('button', { name: 'Apply', exact: true }).click();
-  const notice = page.getByRole('alert').filter({ hasText: 'Log in to use your welcome discount' });
-  await expect(notice).toBeVisible();
-  await expect(notice.getByRole('link', { name: 'Log in', exact: true })).toHaveAttribute(
-    'href',
-    '/login?next=%2Fcheckout%3Fcoupon%3DWELCOME10',
-  );
-  expect(calls.some((call) => call.action === 'apply-coupon')).toBeFalsy();
-  await page.goto('/checkout?coupon=WELCOME10');
-  await expect(page.getByLabel('Coupon code')).toHaveValue('WELCOME10');
+  await expect(page.getByRole('button', { name: 'Remove coupon: PERSONAL-8X7Q' })).toBeVisible();
+  expect(calls.find((call) => call.action === 'apply-coupon').body).toEqual({
+    code: 'PERSONAL-8X7Q',
+    email: 'reader@example.test',
+  });
+  await expect(page.getByText('Log in to use your welcome discount')).toHaveCount(0);
 });
 test('free Woo order completes natively and displays only server-verified downloads', async ({
   page,

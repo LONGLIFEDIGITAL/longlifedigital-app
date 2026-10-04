@@ -37,7 +37,8 @@ function lld_authenticate_bridge($request) {
     $signature = $request->get_header('x-lld-signature');
     if (!$identity || !is_string($secret) || strlen($secret) < 32 || !ctype_digit($stamp) || abs(time() - (int) $stamp) > 120 || !preg_match('/^[a-f0-9]{32}$/D', $nonce)) return lld_error('Request not authorized.', 403);
     $canonical = implode("\n", array($request->get_method(), $request->get_route(), $identity['session'], $identity['attempt'], $stamp, $nonce, $request->get_header('cart-token'), $request->get_body()));
-    // Bind the account credential to this request, including GET cart reads.
+    // Accept signed account headers from 0.5.2 storefronts during rollout.
+    // Current storefronts authenticate checkout through the signed request body.
     $account_token = $request->get_header('x-lld-account');
     if ($account_token) $canonical .= "\n" . $account_token;
     if (!hash_equals(hash_hmac('sha256', $canonical, $secret), $signature)) return lld_error('Request not authorized.', 403);
