@@ -42,7 +42,8 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
       if (!['GET', 'POST'].includes(req.method))
         throw new CommerceError('Method not allowed.', 405);
       if (req.method === 'POST') requireSameOrigin(req, env);
-      const woo = createWoo(env, fetchImpl);
+      const account = readAccount(req, env);
+      const woo = createWoo(env, fetchImpl, account?.token);
       // Public configuration must never create or overwrite a customer's cart cookie.
       if (req.method === 'GET' && action === 'config') return send(res, 200, await woo.config());
       const session = readSession(req, env);
@@ -93,7 +94,6 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
           )
             throw new CommerceError('Checkout is being configured. Please try again later.', 503);
           const billing = address(body.billing_address, config.billingFields);
-          const account = readAccount(req, env);
           const paymentData = {
             payment_method: 'stripe',
             wc_payment_intent_id: '',
@@ -137,6 +137,12 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
         } else if (action === 'apply-coupon' || action === 'remove-coupon') {
           if (typeof body.code !== 'string' || !body.code.trim() || body.code.length > 100)
             throw new CommerceError('Please enter a coupon code.');
+          if (
+            action === 'apply-coupon' &&
+            body.code.trim().toLowerCase() === 'welcome10' &&
+            !account
+          )
+            throw new CommerceError('Log in with your newsletter email to use WELCOME10.', 401);
           data = await woo.store(`cart/${action}`, session, 'POST', { code: body.code.trim() });
         } else if (action === 'customer') {
           const config = await woo.config();

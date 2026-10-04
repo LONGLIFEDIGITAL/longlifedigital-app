@@ -381,3 +381,67 @@ test('authenticated checkout binds the server-held account token and ignores cli
   assert.equal(result.status, 200);
   assert.equal(dispatched, true);
 });
+
+test('WELCOME10 requires a server-held account; guest coupons and removal still work', async () => {
+  const rejected = await call('apply-coupon', { code: ' Welcome10 ', _lld_account: 'forged' }, () =>
+    assert.fail('guest welcome coupon must not reach Woo'),
+  );
+  assert.equal(rejected.status, 401);
+  assert.match(rejected.body.error, /Log in/);
+  for (const [action, code] of [
+    ['apply-coupon', 'SUMMER'],
+    ['remove-coupon', 'WELCOME10'],
+  ]) {
+    const result = await call(action, { code }, async () => reply({ coupons: [] }));
+    assert.equal(result.status, 200);
+  }
+});
+
+test('cart reads and coupon mutations bind the account token to the signed request', async () => {
+  const account = `lld_account=${seal({ kind: 'account', store: state.store, token: 'verified-wp-session', expires: Date.now() + 60000 }, env)}`;
+  for (const [action, body, route] of [
+    ['cart', undefined, 'cart'],
+    ['apply-coupon', { code: 'WELCOME10', _lld_account: 'forged' }, 'cart/apply-coupon'],
+  ]) {
+    const result = await call(
+      action,
+      body,
+      async (url, init) => {
+        assert.equal(url, `${state.store}/${route}`);
+        const h = init.headers;
+        assert.equal(h['X-LLD-Account'], 'verified-wp-session');
+        assert.equal(init.body?.includes('forged'), body ? false : undefined);
+        const canonical = [
+          init.method,
+          `/wc/store/v1/${route}`,
+          h['X-LLD-Session'],
+          h['X-LLD-Attempt'],
+          h['X-LLD-Timestamp'],
+          h['X-LLD-Nonce'],
+          state.token,
+          init.body || '',
+          h['X-LLD-Account'],
+        ].join('\n');
+        assert.equal(
+          h['X-LLD-Signature'],
+          createHmac('sha256', env.LLD_COMMERCE_BRIDGE_SECRET).update(canonical).digest('hex'),
+        );
+        return reply({ coupons: [] });
+      },
+      { cookie: `${cookie}; ${account}` },
+    );
+    assert.equal(result.status, 200);
+  }
+});
+
+test('WordPress subscriber rejection is shown to the shopper', async () => {
+  const account = `lld_account=${seal({ kind: 'account', store: state.store, token: 'verified-wp-session', expires: Date.now() + 60000 }, env)}`;
+  const result = await call(
+    'apply-coupon',
+    { code: 'WELCOME10' },
+    async () => reply({ message: 'WELCOME10 is for confirmed newsletter subscribers.' }, 400),
+    { cookie: `${cookie}; ${account}` },
+  );
+  assert.equal(result.status, 400);
+  assert.match(result.body.error, /confirmed newsletter subscribers/);
+});

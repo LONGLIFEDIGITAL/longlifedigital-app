@@ -413,6 +413,22 @@ test('checkout reviews server-calculated taxes and coupons before enabling payme
   ).toBeTruthy();
   expect(calls.some((c) => c.action === 'checkout')).toBeFalsy();
 });
+test('welcome coupon asks guests to log in and preserves the code on return', async ({ page }) => {
+  const calls = await setup(page);
+  await page.route('**/api/account?**', (route) => route.fulfill({ json: { user: null } }));
+  await page.goto('/checkout');
+  await page.getByLabel('Coupon code').fill(' Welcome10 ');
+  await page.getByRole('button', { name: 'Apply', exact: true }).click();
+  const notice = page.getByRole('alert').filter({ hasText: 'Log in to use your welcome discount' });
+  await expect(notice).toBeVisible();
+  await expect(notice.getByRole('link', { name: 'Log in', exact: true })).toHaveAttribute(
+    'href',
+    '/login?next=%2Fcheckout%3Fcoupon%3DWELCOME10',
+  );
+  expect(calls.some((call) => call.action === 'apply-coupon')).toBeFalsy();
+  await page.goto('/checkout?coupon=WELCOME10');
+  await expect(page.getByLabel('Coupon code')).toHaveValue('WELCOME10');
+});
 test('free Woo order completes natively and displays only server-verified downloads', async ({
   page,
 }) => {

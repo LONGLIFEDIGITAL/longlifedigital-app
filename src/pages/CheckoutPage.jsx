@@ -16,7 +16,7 @@ import {
 } from '@mantine/core';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js/pure';
-import { Link, Navigate, useNavigate } from 'react-router';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
 import {
   commerce,
   headlessEnabled,
@@ -300,13 +300,17 @@ function Summary({ data }) {
 export default function CheckoutPage({ cartState, customer }) {
   const { data, busy, error: cartError, mutate, reload } = cartState;
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [config, setConfig] = useState(null);
   const [error, setError] = useState('');
   const [billing, setBilling] = useState(() => ({ ...initialBilling, ...readBillingDraft() }));
   const [fieldErrors, setFieldErrors] = useState({});
   const [paying, setPaying] = useState(false);
   const [reviewed, setReviewed] = useState(null);
-  const [coupon, setCoupon] = useState('');
+  const [coupon, setCoupon] = useState(() =>
+    searchParams.get('coupon') === 'WELCOME10' ? 'WELCOME10' : '',
+  );
+  const [couponLoginRequired, setCouponLoginRequired] = useState(false);
   const [submittingFree, setSubmittingFree] = useState(false);
   const [previous] = useState(readAttempt);
   useEffect(() => {
@@ -354,12 +358,19 @@ export default function CheckoutPage({ cartState, customer }) {
   };
   const couponAction = async (action, code) => {
     setError('');
+    setCouponLoginRequired(false);
+    if (action === 'apply-coupon' && code.trim().toLowerCase() === 'welcome10' && !customer) {
+      setCouponLoginRequired(true);
+      return;
+    }
     try {
       await mutate(action, { code });
       setCoupon('');
       setReviewed(null);
     } catch (e) {
       setError(e.message);
+      if (action === 'apply-coupon' && code.trim().toLowerCase() === 'welcome10' && e.status === 401)
+        setCouponLoginRequired(true);
     }
   };
   const freeOrder = async () => {
@@ -601,6 +612,17 @@ export default function CheckoutPage({ cartState, customer }) {
                       Remove coupon: {code}
                     </Button>
                   ))}
+                  {couponLoginRequired && (
+                    <Alert color="violet" title="Log in to use your welcome discount" role="alert">
+                      Use the account with your confirmed newsletter email.{' '}
+                      <Link to="/login?next=%2Fcheckout%3Fcoupon%3DWELCOME10">Log in</Link>
+                      {' or '}
+                      <Link to="/register?next=%2Fcheckout%3Fcoupon%3DWELCOME10">
+                        create an account
+                      </Link>
+                      .
+                    </Alert>
+                  )}
                   <Anchor component={Link} to="/products">
                     Continue shopping
                   </Anchor>
