@@ -10,7 +10,7 @@ From. Service inquiries still go to their existing recipient.
 
 1. Upload `docs/cms/Longlife-Headless-Commerce.zip` through WordPress → Plugins →
    Add New → Upload Plugin, and replace the installed plugin. This release is
-   **0.5.3**. Activate WooCommerce and MailPoet.
+   **0.5.4**. Activate WooCommerce and MailPoet.
 2. In MailPoet → Lists, create or choose a regular newsletter list.
 3. In WordPress → Settings → General, select that list under **Longlife storefront
    newsletter**, then save. Choosing “Disabled — select a list” disables signup.
@@ -56,10 +56,11 @@ restrictions, expiry, usage limits and final checkout total.
 4. Save/activate the email. Stop any other welcome email that would issue another
    discount. Keep subscriber/automation history to preserve once-per-subscriber
    delivery; do not delete and recreate subscribers to resend this offer.
-5. Upload plugin **0.5.3** from `docs/cms/Longlife-Headless-Commerce.zip`, replacing
-   the old plugin, then deploy the app/API. The plugin rejects shared `WELCOME10`
-   even while it is still published or saved in a cart. Trash that coupon under
-   **Marketing → Coupons** after switching the email to personal codes.
+5. Upload plugin **0.5.4** from `docs/cms/Longlife-Headless-Commerce.zip`, replacing
+   the old plugin, then deploy the app/API. Manage coupon availability under
+   **Marketing → Coupons**. Trash `WELCOME10` if retiring the shared offer, or
+   keep it published with its own restrictions if offering a public discount.
+   The plugin does not block specific coupon codes; WooCommerce validates them.
 6. Subscribe with an address you control, confirm, and inspect the generated
    Woo coupon: correct allowed email, 10%, total usage limit 1. At guest checkout,
    enter that billing email and apply the personal code. Verify a different email
@@ -74,12 +75,12 @@ already-issued personal coupon. Email restrictions match the billing address;
 anyone given both the personal code and its email can use them, so these are not
 identity-verification credentials.
 
-Existing recipients of `WELCOME10` need a replacement personal coupon; retiring
+If you retire `WELCOME10`, existing recipients need a replacement coupon; retiring
 that code does not automatically resend the welcome email. Do not reset the
 entire automation's once-per-subscriber history.
 
 Local coverage: `node --test tests/commerce.test.mjs`,
-`php tests/coupons-bridge.php`, and the personal-coupon checkout browser test.
+`php tests/account-bridge.php`, and the personal-coupon checkout browser test.
 These use stubs/mocks; live MailPoet coupon generation and redemption require the
 WordPress setup above.
 

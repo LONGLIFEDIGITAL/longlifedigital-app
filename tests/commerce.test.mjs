@@ -451,11 +451,11 @@ test('invalid billing emails cannot reach Woo coupon application', async () => {
   }
 });
 
-test('Woo email, usage and retired-code rejections reach guests unchanged', async () => {
+test('Woo email, usage and expiry rejections reach guests unchanged', async () => {
   for (const message of [
     'This coupon is not valid for your email.',
     'Coupon usage limit has been reached.',
-    'WELCOME10 has been retired.',
+    'This coupon has expired.',
   ]) {
     const result = await call('apply-coupon', { code: 'PERSONAL-10' }, async () =>
       reply({ message }, 400),
