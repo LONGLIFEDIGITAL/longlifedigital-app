@@ -456,6 +456,7 @@ test('Woo email, usage and expiry rejections reach guests unchanged', async () =
     'This coupon is not valid for your email.',
     'Coupon usage limit has been reached.',
     'This coupon has expired.',
+    'This discount is available for first orders only. Remove it to continue with your order.',
   ]) {
     const result = await call('apply-coupon', { code: 'PERSONAL-10' }, async () =>
       reply({ message }, 400),

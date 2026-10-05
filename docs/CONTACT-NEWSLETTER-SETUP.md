@@ -10,7 +10,7 @@ From. Service inquiries still go to their existing recipient.
 
 1. Upload `docs/cms/Longlife-Headless-Commerce.zip` through WordPress → Plugins →
    Add New → Upload Plugin, and replace the installed plugin. This release is
-   **0.5.4**. Activate WooCommerce and MailPoet.
+   **0.5.5**. Activate WooCommerce and MailPoet.
 2. In MailPoet → Lists, create or choose a regular newsletter list.
 3. In WordPress → Settings → General, select that list under **Longlife storefront
    newsletter**, then save. Choosing “Disabled — select a list” disables signup.
@@ -56,7 +56,7 @@ restrictions, expiry, usage limits and final checkout total.
 4. Save/activate the email. Stop any other welcome email that would issue another
    discount. Keep subscriber/automation history to preserve once-per-subscriber
    delivery; do not delete and recreate subscribers to resend this offer.
-5. Upload plugin **0.5.4** from `docs/cms/Longlife-Headless-Commerce.zip`, replacing
+5. Upload plugin **0.5.5** from `docs/cms/Longlife-Headless-Commerce.zip`, replacing
    the old plugin, then deploy the app/API. Manage coupon availability under
    **Marketing → Coupons**. Trash `WELCOME10` if retiring the shared offer, or
    keep it published with its own restrictions if offering a public discount.
@@ -86,6 +86,60 @@ WordPress setup above.
 
 References: [MailPoet coupon setup](https://kb.mailpoet.com/article/399-adding-a-discount-coupon-to-emails)
 and [WooCommerce coupon settings](https://woocommerce.com/document/coupon-management/).
+
+## Public first-order offer (0.5.5)
+
+No extra coupon plugin, customer account, or newsletter subscription is needed.
+Upload the updated ZIP, then go to **Marketing → Coupons** and create or edit a
+coupon. Restore a trashed coupon first if reusing its code.
+
+1. **General:** choose Percentage discount and set the amount (for example, 10).
+   Set an expiry date only if the entire promotion should end on that date.
+2. **Usage restriction:** enable **First order only**. Leave Allowed emails blank
+   for a public offer. Enable **Individual use only** to prevent stacking with
+   other coupons. Configure any product exclusions or minimum spend normally.
+3. **Usage limits:** set Usage limit per user to 1. Leave Usage limit per coupon
+   empty unless you want a campaign-wide redemption cap.
+4. Publish/update. Update **Site Settings → Announcement bar** with the matching
+   offer and code. Customers enter their billing email and apply the code in
+   checkout; automatic application is not part of this change.
+
+The new checkbox defaults off. Unmarked coupons retain normal WooCommerce
+validation. Code names and discount amounts are not hard-coded. To restrict
+newsletter coupons to first orders too, those coupons must also carry this
+setting; MailPoet-generated coupons do not automatically inherit this policy.
+
+Implementation: `wordpress/longlife-headless-commerce/first-order-coupons.php`.
+Checks run during coupon validation and again on final Store API/classic checkout
+and order-pay. History uses WooCommerce's order query API (HPOS and legacy), checks
+billing email, authenticated account history, and previous guest purchases at
+the account email. Matching an email never authenticates a customer or changes
+order ownership. No React eligibility calculation or new public endpoint is used.
+
+Pending, on-hold, processing, completed and refunded orders count as previous
+orders, even if no coupon was used. Failed/cancelled attempts and checkout drafts
+do not. The same pending order can retry payment. Unknown custom order statuses
+are not counted by this rule and would need an explicit policy addition.
+
+First-order checkouts reserve an account/email identity atomically in the existing
+`lld_commerce` table, across marked coupons. Records contain hashed identity keys
+and an order ID, not raw emails. This prevents separate discounted checkouts from
+claiming the same first-order offer concurrently. Definitively failed/cancelled
+unpaid orders can be retried with a new order; pre-payment draft failures release
+their reservation. Pending or ambiguous payments are not expired by a timer.
+Resolve an abandoned pending order in WooCommerce before retrying another order.
+If a process dies leaving a reserved checkout draft, confirm no payment occurred
+and cancel that draft in WooCommerce to release eligibility on the next attempt.
+Keep order history: deleting orders is not a supported way to reset eligibility.
+
+As with email-based coupon plugins, another email/account can appear to be a new
+customer. This is a first-order rule per known customer identity, not proof of a
+unique person. Newsletter consent remains independent.
+
+Local checks: `php tests/first-order-coupons.php`, `php tests/account-bridge.php`,
+and `node --test tests/commerce.test.mjs`. These use WordPress/Woo stubs and mocked
+HTTP. After upload, check one eligible guest, one email with a previous order,
+and a billing-email change before payment on the actual store in test mode.
 
 ## Failure handling
 
