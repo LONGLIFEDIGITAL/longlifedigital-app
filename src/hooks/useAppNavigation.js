@@ -9,6 +9,7 @@ export const PAGE_PATHS = {
   account: '/account',
   checkout: '/checkout',
   'order-confirmation': '/order-confirmation',
+  'newsletter-confirmed': '/newsletter-confirmed',
   shop: '/products',
   about: '/about',
   blog: '/blog',

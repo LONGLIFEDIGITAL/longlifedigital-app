@@ -4,13 +4,40 @@ The storefront now supports WordPress/WooCommerce customer accounts. No new auth
 
 ## Activate on WordPress and Vercel
 
-1. Upload `docs/cms/Longlife-Headless-Commerce.zip` under **WordPress → Plugins → Add New → Upload Plugin** and replace the existing Longlife Headless Commerce plugin with **0.5.1**. Keep the existing integration secret and checkout settings. If this is a first installation, activate the plugin to create its database table and secret.
+1. Upload `docs/cms/Longlife-Headless-Commerce.zip` under **WordPress → Plugins → Add New → Upload Plugin** and replace the existing Longlife Headless Commerce plugin with **0.5.7**. Deploy the frontend first for the newsletter confirmation page described below. Keep the existing integration secret and checkout settings. If this is a first installation, activate the plugin to create its database table and secret.
 2. In **WooCommerce → Settings → Accounts & Privacy**, enable customer registration on the **My account** page (`woocommerce_enable_myaccount_registration`). Keep guest checkout enabled. The React registration flow uses these WooCommerce accounts and does not require an ACF page.
 3. Ensure WordPress can deliver password-reset emails. Registration emails contain a link to the React `/reset-password` page. New customers choose their password through that email before logging in. If delivery fails, fix the mail setup and use **Forgot password** to resend.
 4. In Vercel, keep the existing server-only `COMMERCE_SESSION_SECRET` and `LLD_COMMERCE_BRIDGE_SECRET`, and the existing public WooCommerce Store API URL and `VITE_HEADLESS_COMMERCE=true`. Keep every storefront origin used for login in `STOREFRONT_ORIGINS` (including the exact preview branch URL). Redeploy this app after updating the plugin. No new environment variables are needed.
 5. Try a new registration with an inbox you control, follow the emailed link, log in, then place a Stripe **test-mode** order while logged in. Verify the WooCommerce order has the correct customer and appears under **My account → Orders**. Also confirm guest checkout still works.
 
 Plugin replacement preserves existing WordPress users, orders, settings and the integration secret. The updated ZIP is generated from the plugin source; no customer data or credentials are included.
+
+## Customer email links
+
+Version **0.5.6** routes WordPress/WooCommerce customer account email links to the React storefront. In **Site Settings → Storefront → Brand**, set **Public storefront URL** (`lld_brand.website`) to the deployed frontend origin, normally `https://longlifedigital.co`, and publish the record. Use an HTTPS origin with no path, query or fragment. If ACF, the published record or a valid URL is missing, the plugin leaves the original email URLs intact.
+
+- WordPress new-user and password-reset notifications for customers/subscribers, and WooCommerce new-account/password-reset links, open `/reset-password#key=…&login=…`. Existing single-use keys are retained. Staff password notifications stay in WordPress.
+- The WooCommerce logo/header link and links to the WordPress homepage open the public storefront. Logo image files continue loading from their existing media URLs.
+- Account, orders, downloads and password-recovery navigation use `/account`, `/account?view=orders`, `/account?view=downloads` and `/forgot-password`. HTML, plain-text and WooCommerce multipart text alternatives are covered, including customized WooCommerce account page/endpoint URLs.
+- Emails requested through the React register/forgot-password forms retain their verified request origin, so preview/local account testing still works. Their branding uses the published public storefront URL.
+
+Install the ZIP on **longlifedigital-zmuro.wpcomstaging.com**. This email change requires no React deployment or new environment variables. Do not change WordPress's core site addresses or the app's WordPress API addresses to fix email navigation. After installation, request a **new** account/password email and verify its password button, logo and account links. Previously delivered emails do not change.
+
+The app confirms a new account through password setup. A newsletter opt-in token is not interchangeable with a WordPress reset key. MailPoet confirmation is handled separately below. Payment links, protected download URLs, admin actions, external URLs and other plugins' tokenized actions are preserved.
+
+Implementation references: [WordPress new-user email filter](https://developer.wordpress.org/reference/hooks/wp_new_user_notification_email/), [WordPress password notification](https://developer.wordpress.org/reference/functions/retrieve_password/), [WooCommerce email pipeline](https://woocommerce.github.io/code-reference/files/woocommerce-includes-emails-class-wc-email.html), [WooCommerce logo link hook](https://woocommerce.github.io/code-reference/files/woocommerce-templates-emails-email-header.html).
+
+### Newsletter subscription confirmation
+
+Version **0.5.7** also returns MailPoet subscribers to the frontend after they click **Confirm your subscription**. Deploy this app (including the `/newsletter-confirmed` route in `vercel.json`) **before** uploading plugin 0.5.7. The same published **Public storefront URL** sets the destination. No additional MailPoet confirmation page, ACF fields or environment variables are required.
+
+The email link still points to MailPoet on WordPress so MailPoet can verify its token, save the subscription, schedule welcome emails and run confirmation listeners. After successful confirmation, the plugin sends the browser to `<public storefront URL>/newsletter-confirmed`, which displays a thank-you message and suppresses the newsletter popup. The redirect is uncached and sends no subscriber email, token or referrer to the frontend. The frontend page itself never creates or confirms a subscription.
+
+Valid links opened again after confirmation also redirect, including links sent before this update. The repeat-click path checks the existing subscribed state and uses MailPoet's own token verifier before its confirmation handler runs. Invalid/missing tokens, previews, pending changes, unsubscribe/manage-subscription actions and provider failures retain MailPoet's normal handling. Keep signup confirmation enabled and keep the original confirmation shortcode/link in the email; replacing it with a static frontend URL would skip verification.
+
+After deploying both parts, subscribe with an inbox you control, open the confirmation email and verify that you land on the frontend thank-you page and the subscriber is **Subscribed** in MailPoet. Reopening that link should return to the same page. MailPoet subscription management and unsubscribe pages remain on WordPress.
+
+References: [MailPoet confirmation-page behavior](https://kb.mailpoet.com/article/178-customize-your-confirmation-page), [confirmation processing and completion action](https://github.com/mailpoet/mailpoet/blob/trunk/mailpoet/lib/Subscription/Pages.php), [router validation and dispatch](https://github.com/mailpoet/mailpoet/blob/trunk/mailpoet/lib/Router/Router.php).
 
 ## Storefront flow
 
@@ -75,6 +102,9 @@ References: [WooCommerce mailer](https://woocommerce.github.io/code-reference/fi
 
 - `node --test tests/account-client.test.mjs tests/account.test.mjs tests/commerce.test.mjs`
 - `php tests/account-bridge.php` (includes the commerce bridge checks)
+- `php tests/email-links.php` (includes account/commerce checks, native email reset-key consumption, HTML/plain/multipart links and preserved backend actions)
+- `php tests/newsletter-confirmation.php` and `php tests/forms-bridge.php` (MailPoet confirmation redirects and existing opt-in signup behavior)
+- `npx playwright test --config playwright.config.js tests/newsletter.spec.js` (confirmation page, direct navigation and popup suppression)
 - `PLAYWRIGHT_CHANNEL=chrome npx playwright test --config playwright.account.config.js`
 
 The PHP harness stubs WordPress/WooCommerce primitives and exercises the actual bridge logic. Browser tests use mocked endpoints against an optimized Vite build. Real email delivery and a live staging checkout still require the WordPress deployment steps above.

@@ -26,6 +26,7 @@ import AIChat from './components/AIChat';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import NewsletterPopup from './components/NewsletterPopup';
+import NewsletterConfirmationPage from './pages/NewsletterConfirmationPage';
 import CartDrawer from './components/CartDrawer';
 const ShopPage = lazy(() => import('./pages/ShopPage'));
 const ProductPage = lazy(() => import('./pages/ProductPage'));
@@ -72,7 +73,7 @@ export default function App() {
   const contact = settings.contact;
   const [activeDropdown, setActiveDropdown] = useState(null);
   const { showPopup, setShowPopup, popupDone, setPopupDone } = useNewsletterPopup({
-    subscribed,
+    subscribed: subscribed || page === 'newsletter-confirmed',
     delaySeconds: settings.newsletter?.popupDelay,
     blocked:
       !settings.newsletter?.enabled ||
@@ -202,6 +203,7 @@ export default function App() {
           {page === 'account' && <AccountPage auth={auth} brand={settings.brand} />}
           {page === 'checkout' && <CheckoutPage cartState={cartState} customer={auth.user} />}
           {page === 'order-confirmation' && <OrderConfirmationPage reloadCart={cartState.reload} />}
+          {page === 'newsletter-confirmed' && <NewsletterConfirmationPage />}
           {page === 'home' && (
             <HomePage
               openCheckout={openCheckout}

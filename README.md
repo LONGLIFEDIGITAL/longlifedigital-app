@@ -91,6 +91,8 @@ VITE_WORDPRESS_API_URL=https://longlifedigital-zmuro.wpcomstaging.com/wp-json/wp
 
 This is the CMS address. The **Public storefront URL** field in WordPress remains
 `https://longlifedigital.co`; it supplies customer-facing website links.
+Commerce plugin 0.5.6 also uses this published field for customer account email
+navigation and WooCommerce logo links; see [email link setup](docs/CUSTOMER-ACCOUNTS-SETUP.md#customer-email-links).
 Restart Vite after editing environment values. For Vercel Preview, set the same
 variable in the Preview environment and redeploy; no deployment is performed here.
 
@@ -254,6 +256,10 @@ are stored, never the entered name or email. Tabs coordinate the display, and a
 hidden tab or an open cart/checkout/dialog defers it until the page is available.
 Subscribing through the page also suppresses the popup on future visits. If browser
 storage is unavailable, repeat prevention lasts for the current page visit only.
+
+Commerce plugin 0.5.7 returns successful MailPoet email confirmations to the
+frontend `/newsletter-confirmed` thank-you page. Deploy the app before updating
+the plugin; see [newsletter confirmation setup](docs/CUSTOMER-ACCOUNTS-SETUP.md#newsletter-subscription-confirmation).
 
 The app uses React, Vite, and Mantine. Brand colors, typography, and shared
 component defaults live in `src/theme.js`; `src/main.jsx` installs the provider.
