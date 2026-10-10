@@ -1,0 +1,11 @@
+# Local recovery copies must not be uploaded by CLI deployments.
+backups/
+
+# Numbered working copies are not application entry points.
+**/* [0-9].js
+**/* [0-9].jsx
+**/* [0-9].mjs
+**/* [0-9].css
+**/* [0-9].py
+.nvmrc [0-9]*
+**/* [0-9]/

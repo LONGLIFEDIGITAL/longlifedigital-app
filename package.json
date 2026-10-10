@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
+    "check:source": "node scripts/check-source-files.mjs",
+    "prebuild": "npm run check:source",
     "build": "vite build",
     "lint": "eslint .",
     "test:e2e": "playwright test",

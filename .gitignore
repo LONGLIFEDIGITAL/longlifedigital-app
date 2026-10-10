@@ -59,6 +59,16 @@ coverage/
 /exports/
 *.bak
 *.orig
+
+# Numbered working copies of source files, such as account 2.js.
+**/* [0-9].js
+**/* [0-9].jsx
+**/* [0-9].mjs
+**/* [0-9].css
+**/* [0-9].py
+.nvmrc [0-9]*
+**/* [0-9]/
+
 *.sql.gz
 *.sql.zip
 *.wpress
