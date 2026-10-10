@@ -1,0 +1,112 @@
+[
+  {
+    "key": "group_lld_ebook_preview",
+    "title": "Longlife Digital | Ebook preview",
+    "fields": [
+      {
+        "name": "lld_ebook_preview_page_1",
+        "label": "Sample page 1",
+        "type": "group",
+        "instructions": "Public presentation media only. Purchased files and signed download links do not belong here.",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "attachment",
+            "label": "WordPress image",
+            "type": "image",
+            "instructions": "Optional public preview image; REST value is an attachment ID.",
+            "required": 0,
+            "return_format": "id",
+            "preview_size": "medium",
+            "library": "all",
+            "mime_types": "jpg,jpeg,png,webp,avif",
+            "max_size": 5,
+            "key": "field_lld_ebook_preview_lld_ebook_preview_page_1_attachment"
+          },
+          {
+            "name": "public_url",
+            "label": "Public image URL",
+            "type": "url",
+            "instructions": "Optional HTTPS public image, including a public Firebase preview. If set, this takes precedence over the attachment.",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_ebook_preview_lld_ebook_preview_page_1_public_url"
+          },
+          {
+            "name": "alt",
+            "label": "Alternative text",
+            "type": "text",
+            "instructions": "Describe meaningful images; empty for purely decorative images.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_ebook_preview_lld_ebook_preview_page_1_alt"
+          }
+        ],
+        "key": "field_lld_ebook_preview_lld_ebook_preview_page_1"
+      },
+      {
+        "name": "lld_ebook_preview_page_2",
+        "label": "Sample page 2",
+        "type": "group",
+        "instructions": "Public presentation media only. Purchased files and signed download links do not belong here.",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "attachment",
+            "label": "WordPress image",
+            "type": "image",
+            "instructions": "Optional public preview image; REST value is an attachment ID.",
+            "required": 0,
+            "return_format": "id",
+            "preview_size": "medium",
+            "library": "all",
+            "mime_types": "jpg,jpeg,png,webp,avif",
+            "max_size": 5,
+            "key": "field_lld_ebook_preview_lld_ebook_preview_page_2_attachment"
+          },
+          {
+            "name": "public_url",
+            "label": "Public image URL",
+            "type": "url",
+            "instructions": "Optional HTTPS public image, including a public Firebase preview. If set, this takes precedence over the attachment.",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_ebook_preview_lld_ebook_preview_page_2_public_url"
+          },
+          {
+            "name": "alt",
+            "label": "Alternative text",
+            "type": "text",
+            "instructions": "Describe meaningful images; empty for purely decorative images.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 160,
+            "key": "field_lld_ebook_preview_lld_ebook_preview_page_2_alt"
+          }
+        ],
+        "key": "field_lld_ebook_preview_lld_ebook_preview_page_2"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "product"
+        }
+      ]
+    ],
+    "menu_order": 10,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "For ebook products only. Export one or two selected interior pages as separate JPG, PNG, WebP or AVIF images and select them here. These samples are public. Never upload the full ebook or a purchased download URL here. Blank fields hide the preview button. Longlife Storefront Product Content 1.1.0 or newer exposes these samples through the Store API.",
+    "show_in_rest": 1
+  }
+]

@@ -153,7 +153,10 @@ for (const width of [393, 1440]) {
     const addButton = card.getByRole('button', { name: 'Add to Cart', exact: true });
     await expect(addButton).toHaveCount(1);
     await expect(card.getByRole('button', { name: 'View Details', exact: true })).toHaveCount(0);
-    await expect(card.locator('img')).toHaveCount(0);
+    await expect(card.getByRole('img', { name: 'Spreadsheet preview' })).toHaveAttribute(
+      'src',
+      product.images[0].src,
+    );
     await expect(card.getByRole('button', { name: 'Buy Now', exact: true })).toHaveCount(1);
 
     const cardBox = await card.boundingBox();

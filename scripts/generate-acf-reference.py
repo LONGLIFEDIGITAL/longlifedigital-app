@@ -256,6 +256,11 @@ add_group('asset_category', 'Asset category display', [('taxonomy', 'lld_asset_c
     field('lld_order', 'Category display order', 'number', default_value=0),
 ], 'Native term name and description supply category labels and menu descriptions. Native slug identifies each filter. Initial categories: Premium, Brandable, Local, AI-related, Marketing and Real Estate.')
 
+add_group('ebook_preview', 'Ebook preview', [('post_type', 'product')], [
+    media('lld_ebook_preview_page_1', 'Sample page 1'),
+    media('lld_ebook_preview_page_2', 'Sample page 2'),
+], 'For ebook products only. Export one or two selected interior pages as separate JPG, PNG, WebP or AVIF images and select them here. These samples are public. Never upload the full ebook or a purchased download URL here. Blank fields hide the preview button. Longlife Storefront Product Content 1.1.0 or newer exposes these samples through the Store API.')
+
 CPT_DEFS = [
     ('lld_settings', 'Site Settings', 'Site Settings Record', 'lld-settings', 'Public brand/contact/newsletter/chat copy; one record named Storefront with slug storefront.', ['title', 'revisions'], 'dashicons-admin-settings'),
     ('lld_service', 'Services', 'Service', 'lld-services', 'One published record per service or package.', ['title', 'editor', 'excerpt', 'thumbnail', 'revisions', 'page-attributes'], 'dashicons-businessman'),
@@ -315,6 +320,8 @@ assert all(item['show_in_rest'] == 1 for item in GROUPS)
     json.dumps([entry for entry in GROUPS if entry['key'] == 'group_lld_page'], indent=2, ensure_ascii=False) + '\n')
 (OUT / 'Longlife-Digital-ACF-Services-Update.json').write_text(
     json.dumps([entry for entry in GROUPS if entry['key'] in ('group_lld_page', 'group_lld_service')], indent=2, ensure_ascii=False) + '\n')
+(OUT / 'Longlife-Digital-ACF-Ebook-Preview-Update.json').write_text(
+    json.dumps([entry for entry in GROUPS if entry['key'] == 'group_lld_ebook_preview'], indent=2, ensure_ascii=False) + '\n')
 
 # The rest of this generator builds the human reference from these same definitions.
 SECTIONS = []
@@ -357,7 +364,7 @@ section('Inventory and migration decisions', table(['Current source', 'Target / 
     ['constants/data.js BLOG_POSTS; BlogPage.jsx', 'Native posts, excerpts, dates, categories and images. Full articles and a working article route still need implementation; current Read More controls have no handler.'],
     ['ContactPage.jsx; DEFAULT_CONTACT; api/chat.js', 'Consolidate conflicting support emails into one approved Site Settings value. Keep inquiries/subscriber records out of public ACF fields.'],
     ['NewsletterPopup.jsx; AIChat.jsx; api/chat.js', 'Move only public interface copy into settings. Subscription delivery, chatbot grounding and server-owned instructions remain implementation work.'],
-    ['ProductPage.jsx; ProductCard.jsx; catalog.js', 'Reuse WooCommerce data. Add only includes, level, duration, compatibility and public license copy.'],
+    ['ProductPage.jsx; ProductCard.jsx; catalog.js', 'Reuse WooCommerce data. Add includes, level, duration, compatibility, public license copy and up to two public ebook sample images.'],
 ]) + paragraph('Do not automatically migrate sample revenue claims, ratings, customer totals, guarantees, payment methods, coupon promises, domain inventory or dated policies. Populate approved content; keep unsupported statistics and unconfigured promotions absent.'))
 
 section('WordPress content structure', table(['Screen / type key', 'REST collection under /wp-json/wp/v2/', 'Native content'], [
@@ -439,14 +446,14 @@ section('Native fields: avoid duplicate editing', table(['Content', 'Use native 
     ['Articles', 'Title, content, excerpt, published date, categories/tags and featured image. Native sticky flag or Home selected-post list for curation.', 'SEO overrides only. Derive reading time from content if added later.'],
     ['FAQs', 'Title = question; content = answer; Order = display order.', 'Topic placement only.'],
     ['Policy pages', 'Title and full approved text in the page editor.', 'Policy date, callout and shared page/SEO metadata.'],
-    ['Products / courses', 'Catalog text, price/sale dates/currency, stock, sold-individually rules, categories, tags, images, reviews and featured flag.', 'Includes, level, duration, compatibility and license summary only.'],
+    ['Products / courses', 'Catalog text, price/sale dates/currency, stock, sold-individually rules, categories, tags, images, reviews and featured flag.', 'Includes, level, duration, compatibility, license summary and up to two public ebook sample images.'],
     ['Services / assets', 'Title, excerpt, extended content, optional featured media, publication status and Order.', 'Offer-specific display details and optional WooCommerce product relationship.'],
     ['Site links', 'Native record title and excerpt supply link label and description.', 'Destination, area, parent/source and new-tab choice.'],
 ]) + paragraph('For service/asset entries using a linked WooCommerce product, resolve price and purchasing eligibility from that product. Editorial quote fields and monthly wording do not implement payments, subscriptions, stock locks or ownership transfers.'))
 
 section('Import and first content entry', bullets([
-    '<strong>1. Import the package.</strong> In staging WordPress, open <strong>ACF → Tools → Import Field Groups</strong> (the import screen may also mention post types/taxonomies). Select <code>Longlife-Digital-ACF-Import.json</code> and click Import JSON. The file contains all 17 structures, with types before field groups. ACF can identify mixed exports by their keys. [3, 4]',
-    '<strong>2. Confirm the structures.</strong> Expect six custom post types, Asset Categories, and ten Longlife Digital field groups. The import adds definitions only; no Pages, service records or settings values are created.',
+    f'<strong>1. Import the package.</strong> In staging WordPress, open <strong>ACF → Tools → Import Field Groups</strong> (the import screen may also mention post types/taxonomies). Select <code>Longlife-Digital-ACF-Import.json</code> and click Import JSON. The file contains all {len(IMPORT)} structures, with types before field groups. ACF can identify mixed exports by their keys. [3, 4]',
+    f'<strong>2. Confirm the structures.</strong> Expect six custom post types, Asset Categories, and {len(GROUPS)} Longlife Digital field groups. The import adds definitions only; no Pages, service records or settings values are created.',
     '<strong>3. Create shared settings.</strong> Under Site Settings, add a record titled Storefront with slug <code>storefront</code>. Set the confirmed support email and public website URL. Populate brand/social/footer copy. Enable announcements and signup copy only as their corresponding features are ready.',
     '<strong>4. Create the pages.</strong> Use the route table. On each page select its Storefront page key. Add approved title/introduction and applicable sections. Use the native editor for policy text. Publish only content intended for the public staging feed.',
     '<strong>5. Populate collections.</strong> Add approved services, FAQ records, content blocks, verified assets/categories and full blog posts. Add the navigation records below. Then select those records in the Home/About relationships.',

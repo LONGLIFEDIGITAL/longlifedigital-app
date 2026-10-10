@@ -1,4 +1,5 @@
 import PageMetadata from '../components/PageMetadata';
+import { Link } from 'react-router';
 import { formatCompactCount } from '../utils/numbers';
 import { Alert, Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
 import { cardEmoji, cardReviews, heroPreviewStatistics } from '../utils/cardPresentation';
@@ -7,8 +8,10 @@ import HomeEditorial, { EditorialStatistics, SectionHeading } from '../component
 import useHomeHero from '../hooks/useHomeHero';
 import { fmtPrice, stars } from '../utils/helpers';
 import { matchesCategory } from '../services/catalog';
+import { isEbook } from '../utils/ebook';
 import CatalogStatus from '../components/CatalogStatus';
 import ProductCollection from '../components/ProductCollection';
+import LoadingImage from '../components/LoadingImage';
 import FeaturedProductSkeleton from '../components/skeletons/FeaturedProductSkeleton';
 import CategorySkeleton from '../components/skeletons/CategorySkeleton';
 import SkeletonBlock from '../components/skeletons/SkeletonBlock';
@@ -65,6 +68,12 @@ export default function HomePage({
   const loading = catalogStatus === 'loading';
   const featured = products.filter((product) => product.featured);
   const highlighted = featured[0] || products[0];
+  const highlightedImage = highlighted?.image || highlighted?.thumbnail;
+  const highlightedArtwork = highlighted && (
+    <Box aria-hidden="true" className={classes.featuredEmoji}>
+      {cardEmoji(highlighted)}
+    </Box>
+  );
   const highlightedReview = highlighted ? cardReviews(highlighted) : null;
   const previewStats = heroPreviewStatistics(brand.name);
   const heroStatLabels = ['Happy Customers', 'Digital Products', 'Avg Rating'];
@@ -204,7 +213,12 @@ export default function HomePage({
           </Box>
           <Box miw={0}>
             {highlighted ? (
-              <Box className={classes.featuredCard} aria-label="Featured product">
+              <Box
+                component={Link}
+                to={`/products/${encodeURIComponent(highlighted.id)}`}
+                className={classes.featuredCard}
+                aria-label={`View ${highlighted.name}`}
+              >
                 <Box className={classes.featuredContent}>
                   <Box
                     c="#E8C97A"
@@ -222,9 +236,19 @@ export default function HomePage({
                     {highlighted.tag ||
                       (highlighted.featured ? 'Featured Product' : 'Explore Our Products')}
                   </Box>
-                  <Box aria-hidden="true" className={classes.featuredEmoji}>
-                    {cardEmoji(highlighted)}
-                  </Box>
+                  {highlightedImage ? (
+                    <LoadingImage
+                      src={highlightedImage}
+                      alt={highlighted.imageAlt || highlighted.name}
+                      className={classes.featuredProductImage}
+                      imageClassName={classes.featuredArtwork}
+                      data-ebook={isEbook(highlighted) || undefined}
+                      fit="contain"
+                      fallback={highlightedArtwork}
+                    />
+                  ) : (
+                    highlightedArtwork
+                  )}
                   <Box
                     className={classes.featuredTitle}
                     c="#fff"
@@ -297,9 +321,9 @@ export default function HomePage({
                     </Box>
                   )}
                   <Button
-                    className={`btn-h ${classes.featuredButton}`}
+                    component="span"
+                    className={classes.featuredButton}
                     styles={{ root: { paddingBlock: 'var(--hero-button-py)' } }}
-                    onClick={() => goProduct(highlighted)}
                     variant="gradient"
                     color="brand"
                     px="lg"
@@ -309,7 +333,6 @@ export default function HomePage({
                       deg: 135,
                     }}
                     c="#1a0533"
-                    type="button"
                     w="100%"
                     mt={4}
                   >

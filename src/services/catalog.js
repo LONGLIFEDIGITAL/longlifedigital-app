@@ -55,8 +55,19 @@ export function normalizeProduct(product, featuredIds = new Set()) {
   ).map((category) => category.id);
 
   const extras = product.extensions?.['longlife-content'] || {};
+  // Only explicitly published sample images; never use purchased download files.
+  const previewPages = (Array.isArray(extras.ebook_preview_pages) ? extras.ebook_preview_pages : [])
+    .slice(0, 2)
+    .map((page) => ({
+      src: publicUrl(page?.src),
+      alt: plainText(typeof page?.alt === 'string' ? page.alt : ''),
+      width: Number.isInteger(page?.width) && page.width > 0 ? page.width : 0,
+      height: Number.isInteger(page?.height) && page.height > 0 ? page.height : 0,
+    }))
+    .filter((page) => page.src.startsWith('https://'));
   return {
     source: 'woocommerce',
+    previewPages,
     level: plainText(extras.level),
     duration: plainText(extras.duration),
     includesHtml: sanitizeRichText(typeof extras.includes === 'string' ? extras.includes : ''),

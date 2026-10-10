@@ -5,7 +5,7 @@ import PageMetadata from '../components/PageMetadata';
 import CmsFaqs from '../components/CmsFaqs';
 import { Box, Button, Container, Flex, SimpleGrid, Text, Title } from '@mantine/core';
 import LoadingImage from '../components/LoadingImage';
-import EbookCover from '../components/EbookCover';
+import EbookPreview from '../components/EbookPreview';
 import { isEbook } from '../utils/ebook';
 import { stars, fmtPrice, catLabel, getProdTheme } from '../utils/helpers';
 import ProductCard from '../components/ProductCard';
@@ -69,7 +69,7 @@ export default function ProductPage({
         >
           <div>
             {isEbook(p) ? (
-              <EbookCover product={p} />
+              <EbookPreview key={p.id} product={p} />
             ) : (
               <Flex
                 align="center"

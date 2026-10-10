@@ -1,5 +1,5 @@
 import { formatCompactCount } from './numbers';
-// Shared taxonomy-based artwork for listing cards; detail pages retain CMS media.
+// Taxonomy-based artwork for blog cards and products without an available image.
 const emojiRules = [
   [/\b(course|courses|training|learning|education)\b/, '🚀'],
   [/\b(ai|artificial intelligence|prompt|prompts|automation)\b/, '🤖'],

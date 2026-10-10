@@ -1,11 +1,53 @@
 import { useRef, useState } from 'react';
-import { Box, Button, Flex, Text } from '@mantine/core';
+import { AspectRatio, Box, Button, Card, Flex, Text } from '@mantine/core';
 import { stars, fmtPrice, catLabel } from '../utils/helpers';
 import { cardEmoji, cardReviews, cardTheme } from '../utils/cardPresentation';
 import { headlessEnabled } from '../services/checkout';
+import LoadingImage from './LoadingImage';
+import EbookCardMedia from './EbookCardMedia';
+import { isEbook } from '../utils/ebook';
 import classes from './ProductCard.module.css';
 
 const cardButtonStyles = { root: { minHeight: 'max(44px, 2.25rem)', paddingBlock: '0.375rem' } };
+
+function ProductArtwork({ p }) {
+  const theme = cardTheme(p);
+  const emoji = cardEmoji(p);
+  const category = p.categoryLabel || catLabel(p.cat);
+  const onSale = p.oldPrice > p.price && p.price !== null;
+  return (
+    <div
+      className={classes.artwork}
+      style={{ background: theme.bg, '--card-accent': theme.accent }}
+    >
+      <div
+        className={classes.orb}
+        style={{ background: `radial-gradient(circle,${theme.orb1},transparent 70%)` }}
+      />
+      <div className={classes.accent} style={{ background: theme.bar }} />
+      <div className={classes.badges}>
+        <span className={classes.imageCategory}>
+          <span aria-hidden="true">{emoji}</span> {category}
+        </span>
+        {p.tag && <span className={classes.tag}>{p.tag}</span>}
+      </div>
+      <span className={classes.emoji} aria-hidden="true">
+        {emoji}
+      </span>
+      <div className={classes.imagePrice} aria-hidden="true">
+        <span>{fmtPrice(p.price, p.currency, p.minorUnit)}</span>
+        {onSale && (
+          <div>
+            <del>{fmtPrice(p.oldPrice, p.currency, p.minorUnit)}</del>
+            <span className={classes.discount}>
+              -{Math.round((1 - p.price / p.oldPrice) * 100)}%
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function ProductCard({
   p,
@@ -17,8 +59,8 @@ export default function ProductCard({
 }) {
   const [pending, setPending] = useState('');
   const actionLock = useRef(false);
-  const theme = cardTheme(p);
-  const emoji = cardEmoji(p);
+  const image = p.image || p.thumbnail;
+  const ebook = isEbook(p);
   const review = cardReviews(p);
   const category = p.categoryLabel || catLabel(p.cat);
   const onSale = p.oldPrice > p.price && p.price !== null;
@@ -35,42 +77,35 @@ export default function ProductCard({
     }
   };
   return (
-    <Box
+    <Card
       component="article"
+      padding={0}
       className={`pcard ${classes.card}`}
       data-compact={compact || undefined}
       data-peek={peek || undefined}
+      data-kind={ebook ? 'ebook' : 'product'}
     >
-      <div
-        className={classes.media}
-        style={{ background: theme.bg, '--card-accent': theme.accent }}
-      >
-        <div
-          className={classes.orb}
-          style={{ background: `radial-gradient(circle,${theme.orb1},transparent 70%)` }}
-        />
-        <div className={classes.accent} style={{ background: theme.bar }} />
-        <div className={classes.badges}>
-          <span className={classes.imageCategory}>
-            <span aria-hidden="true">{emoji}</span> {category}
-          </span>
-          {p.tag && <span className={classes.tag}>{p.tag}</span>}
-        </div>
-        <span className={classes.emoji} aria-hidden="true">
-          {emoji}
-        </span>
-        <div className={classes.imagePrice} aria-hidden="true">
-          <span>{fmtPrice(p.price, p.currency, p.minorUnit)}</span>
-          {onSale && (
-            <div>
-              <del>{fmtPrice(p.oldPrice, p.currency, p.minorUnit)}</del>
-              <span className={classes.discount}>
-                -{Math.round((1 - p.price / p.oldPrice) * 100)}%
-              </span>
-            </div>
+      <AspectRatio ratio={compact ? 1 : 4 / 3} className={classes.mediaFrame}>
+        <div className={classes.media}>
+          {image ? (
+            ebook ? (
+              <EbookCardMedia product={p} fallback={<ProductArtwork p={p} />} />
+            ) : (
+              <LoadingImage
+                src={image}
+                alt={p.imageAlt || p.name}
+                className={classes.productImage}
+                imageClassName={classes.productArtwork}
+                fit="contain"
+                loading="lazy"
+                fallback={<ProductArtwork p={p} />}
+              />
+            )
+          ) : (
+            <ProductArtwork p={p} />
           )}
         </div>
-      </div>
+      </AspectRatio>
       <Box className={classes.details}>
         <Text component="p" className={classes.category}>
           {category}
@@ -141,6 +176,6 @@ export default function ProductCard({
           </Button>
         </div>
       </Box>
-    </Box>
+    </Card>
   );
 }

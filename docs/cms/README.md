@@ -3,7 +3,8 @@
 - [Digital services setup](SERVICES.md): modern service pages, the five service records, updated ACF fields and quote inquiry delivery.
 
 - [PDF reference](Longlife-Digital-ACF-Field-Definitions.pdf): field definitions, editor instructions, REST mappings and migration decisions.
-- [ACF import package](Longlife-Digital-ACF-Import.json): 10 field groups, 6 custom post types and 1 taxonomy, using ACF Free features.
+- [ACF import package](Longlife-Digital-ACF-Import.json): 11 field groups, 6 custom post types and 1 taxonomy, using ACF Free features.
+- [Ebook previews](EBOOK-PAGE.md#one-or-two-sample-pages-on-product-details): publish one or two sample pages, with a separate ACF import and updated product content plugin.
 - [Editable reference](Longlife-Digital-ACF-Field-Definitions.md) and [print HTML](Longlife-Digital-ACF-Field-Definitions.html).
 
 In the staging WordPress dashboard, import the JSON through **ACF → Tools → Import Field Groups**. The reference explains which records to create afterward. Importing the definitions alone does not populate content or connect the React app.

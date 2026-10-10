@@ -1,0 +1,25 @@
+.stage {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 35%, #fffdf8 0%, #f0e8f6 65%, #e5d9ef 100%);
+}
+
+/* Give portrait artwork its own book-shaped space without cropping the cover. */
+.stage .cover {
+  inset: 8% auto auto 50%;
+  width: auto;
+  height: 82%;
+  max-width: 76%;
+  transform: translateX(-50%) rotate(-4deg);
+  border-radius: 0.125rem 0.375rem 0.375rem 0.125rem;
+  border-right: 0.25rem solid #e5d9c5;
+  background: #2d193c;
+  box-shadow:
+    -1px 0 0 #ffffff80,
+    0.25rem 0.3rem 0 #d6c6df,
+    0.5rem 0.875rem 1.125rem #30174535;
+}
+
+.stage[data-image-state='error'] {
+  background: transparent;
+}

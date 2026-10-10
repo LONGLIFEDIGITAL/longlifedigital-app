@@ -7,8 +7,10 @@ function ImageContent({
   src,
   alt = '',
   className = '',
+  imageClassName = '',
   fit = 'cover',
   loading = 'eager',
+  fallback,
   ...boxProps
 }) {
   const [state, setState] = useState('loading');
@@ -25,32 +27,34 @@ function ImageContent({
       aria-busy={state === 'loading'}
     >
       {state === 'error' ? (
-        <div
-          className={classes.fallback}
-          role={alt ? 'img' : undefined}
-          aria-label={alt ? `${alt} (image unavailable)` : undefined}
-          aria-hidden={!alt || undefined}
-        >
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            aria-hidden="true"
+        (fallback ?? (
+          <div
+            className={classes.fallback}
+            role={alt ? 'img' : undefined}
+            aria-label={alt ? `${alt} (image unavailable)` : undefined}
+            aria-hidden={!alt || undefined}
           >
-            <rect x="3" y="3" width="18" height="18" rx="3" />
-            <circle cx="8" cy="8" r="1.5" />
-            <path d="m3 17 5-5 4 4 3-3 6 6" />
-          </svg>
-        </div>
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              aria-hidden="true"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="3" />
+              <circle cx="8" cy="8" r="1.5" />
+              <path d="m3 17 5-5 4 4 3-3 6 6" />
+            </svg>
+          </div>
+        ))
       ) : (
         <Image
           ref={imageRef}
           src={src}
           alt={alt}
-          className={classes.image}
+          className={`${classes.image} ${imageClassName}`}
           fit={fit}
           loading={loading}
           decoding="async"
