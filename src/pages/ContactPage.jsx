@@ -4,6 +4,7 @@ import RichText from '../components/RichText';
 import { Alert, Box, Button, Container, Flex, Input, SimpleGrid, Text, Title } from '@mantine/core';
 import { useState } from 'react';
 import usePublicForm from '../hooks/usePublicForm';
+import SocialIcon from '../components/SocialIcon';
 import classes from './ContactPage.module.css';
 export default function ContactPage({ fire, contact, settings }) {
   const [cf, setCf] = useState({
@@ -70,19 +71,19 @@ export default function ContactPage({ fire, contact, settings }) {
                   link: '',
                 },
                 ...[
-                  ['instagram', 'Instagram', '◎'],
-                  ['facebook', 'Facebook', 'f'],
-                  ['tiktok', 'TikTok', '♪'],
-                  ['youtube', 'YouTube', '▶'],
-                  ['linkedin', 'LinkedIn', 'in'],
+                  ['instagram', 'Instagram'],
+                  ['facebook', 'Facebook'],
+                  ['tiktok', 'TikTok'],
+                  ['youtube', 'YouTube'],
+                  ['linkedin', 'LinkedIn'],
                 ]
                   .filter(([platform]) => settings.social?.[platform])
-                  .map(([platform, label, icon]) => ({
-                    icon,
+                  .map(([platform, label]) => ({
+                    icon: <SocialIcon platform={platform} />,
                     label,
-                    val: settings.social[platform]
-                      .replace(/^https:\/\/(?:www\.)?/, '')
-                      .replace(/\/$/, ''),
+                    val:
+                      content.data?.contact?.social_handles?.[platform]?.trim() ||
+                      'View our profile',
                     link: settings.social[platform],
                   })),
                 {
@@ -109,6 +110,7 @@ export default function ContactPage({ fire, contact, settings }) {
                     }}
                   >
                     <Flex
+                      aria-hidden="true"
                       align="center"
                       justify="center"
                       wrap="wrap"

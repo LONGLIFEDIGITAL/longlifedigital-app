@@ -933,6 +933,67 @@
             "new_lines": "",
             "maxlength": 1000,
             "key": "field_lld_page_lld_contact_success_body"
+          },
+          {
+            "name": "social_handles",
+            "label": "Social handles",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "instagram",
+                "label": "Instagram handle / profile name",
+                "type": "text",
+                "instructions": "Display text only, for example @longlifedigital. Include @ if wanted. The destination remains the matching URL in Site Settings > Social links. Blank shows View our profile.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 80,
+                "key": "field_lld_page_lld_contact_social_handles_instagram"
+              },
+              {
+                "name": "facebook",
+                "label": "Facebook handle / profile name",
+                "type": "text",
+                "instructions": "Display text only, for example @longlifedigital. Include @ if wanted. The destination remains the matching URL in Site Settings > Social links. Blank shows View our profile.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 80,
+                "key": "field_lld_page_lld_contact_social_handles_facebook"
+              },
+              {
+                "name": "tiktok",
+                "label": "TikTok handle / profile name",
+                "type": "text",
+                "instructions": "Display text only, for example @longlifedigital. Include @ if wanted. The destination remains the matching URL in Site Settings > Social links. Blank shows View our profile.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 80,
+                "key": "field_lld_page_lld_contact_social_handles_tiktok"
+              },
+              {
+                "name": "youtube",
+                "label": "YouTube handle / profile name",
+                "type": "text",
+                "instructions": "Display text only, for example @longlifedigital. Include @ if wanted. The destination remains the matching URL in Site Settings > Social links. Blank shows View our profile.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 80,
+                "key": "field_lld_page_lld_contact_social_handles_youtube"
+              },
+              {
+                "name": "linkedin",
+                "label": "LinkedIn handle / profile name",
+                "type": "text",
+                "instructions": "Display text only, for example @longlifedigital. Include @ if wanted. The destination remains the matching URL in Site Settings > Social links. Blank shows View our profile.",
+                "required": 0,
+                "default_value": "",
+                "maxlength": 80,
+                "key": "field_lld_page_lld_contact_social_handles_linkedin"
+              }
+            ],
+            "key": "field_lld_page_lld_contact_social_handles"
           }
         ],
         "conditional_logic": [

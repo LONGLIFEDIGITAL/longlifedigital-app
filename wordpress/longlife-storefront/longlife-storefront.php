@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Longlife Storefront Product Content
  * Description: Publishes only the approved ACF product display fields through WooCommerce's public Store API.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Requires Plugins: woocommerce
  */
 if (!defined('ABSPATH')) { exit; }
@@ -16,6 +16,8 @@ add_action('woocommerce_blocks_loaded', function () {
             if (!function_exists('get_field') || $product->get_status() !== 'publish' || post_password_required($product->get_id())) { return array(); }
             $read = function ($name) use ($product) { return get_field($name, $product->get_id()); };
             $result = array();
+            $button_label = $read('lld_button_product_label');
+            $result['button_product_label'] = in_array($button_label, array('spreadsheet', 'ebook', 'template', 'course'), true) ? $button_label : 'product';
             foreach (array('level', 'duration', 'compatibility', 'license_summary', 'seo_title', 'meta_description') as $field) {
                 $value = $read('lld_' . $field);
                 $result[$field] = is_string($value) ? sanitize_textarea_field($value) : '';
@@ -55,6 +57,13 @@ add_action('woocommerce_blocks_loaded', function () {
                 $schema[$field] = array('description' => 'Public storefront ' . $field, 'type' => 'string', 'readonly' => true, 'context' => array('view'));
             }
             $schema['noindex'] = array('description' => 'Search indexing preference', 'type' => 'boolean', 'readonly' => true, 'context' => array('view'));
+            $schema['button_product_label'] = array(
+                'description' => 'Short product noun for the homepage hero button.',
+                'type' => 'string',
+                'enum' => array('product', 'spreadsheet', 'ebook', 'template', 'course'),
+                'readonly' => true,
+                'context' => array('view'),
+            );
             $schema['ebook_preview_pages'] = array(
                 'description' => 'Up to two public ebook sample page images, separate from purchased files.',
                 'type' => 'array',

@@ -67,6 +67,11 @@ export function normalizeProduct(product, featuredIds = new Set()) {
     .filter((page) => page.src.startsWith('https://'));
   return {
     source: 'woocommerce',
+    buttonProductLabel: ['spreadsheet', 'ebook', 'template', 'course'].includes(
+      extras.button_product_label,
+    )
+      ? extras.button_product_label
+      : 'product',
     previewPages,
     level: plainText(extras.level),
     duration: plainText(extras.duration),

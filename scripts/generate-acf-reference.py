@@ -149,7 +149,12 @@ add_group('page', 'Page content', [('post_type', 'page')], [
         related('sections', 'Mission, offering and promise cards', ['lld_block'], 6, 'Select Value/story blocks. Native page content can hold additional introductory prose.')], conditional_logic=when(PAGE_KEY, 'about')),
     group('lld_contact', 'Contact page copy', [field('information_heading', 'Contact information heading'),
         field('form_heading', 'Form heading'), field('form_intro', 'Form introduction', 'textarea'),
-        field('success_heading', 'Success heading'), field('success_body', 'Success message', 'textarea', 'Show only after the future submission API confirms receipt, not on a failed request.')], conditional_logic=when(PAGE_KEY, 'contact')),
+        field('success_heading', 'Success heading'), field('success_body', 'Success message', 'textarea', 'Show only after the future submission API confirms receipt, not on a failed request.'),
+        group('social_handles', 'Social handles', [
+            field(name, label + ' handle / profile name', help='Display text only, for example @longlifedigital. Include @ if wanted. The destination remains the matching URL in Site Settings > Social links. Blank shows View our profile.', maxlength=80)
+            for name, label in [('instagram', 'Instagram'), ('facebook', 'Facebook'), ('tiktok', 'TikTok'), ('youtube', 'YouTube'), ('linkedin', 'LinkedIn')]
+        ]),
+    ], conditional_logic=when(PAGE_KEY, 'contact')),
     group('lld_policy', 'Policy details', [field('updated_on', 'Policy effective / updated date', 'date_picker', 'Date of the approved policy text, not the last incidental WordPress edit.', required=True),
         field('callout_heading', 'Optional callout heading'), field('callout_body', 'Optional callout text', 'textarea')], conditional_logic=when(PAGE_KEY, 'privacy', 'refund', 'terms')),
 ], 'Shared page headings and structured sections. Policy prose lives in the native WordPress editor. Collection cards remain separate records. No CSS or React layout code is stored in these fields.')
@@ -237,6 +242,8 @@ add_group('navigation', 'Navigation link', [('post_type', 'lld_nav_item')], [
 ], 'Native title is the label, excerpt is an optional dropdown description, and menu_order controls sibling order. Service/category dropdowns are derived from their records so their names are not copied into multiple lists.')
 
 add_group('product', 'Product display extras', [('post_type', 'product')], [
+    select('lld_button_product_label', 'Button product label', [('product', 'Product (generic)'), ('spreadsheet', 'Spreadsheet'), ('ebook', 'Ebook'), ('template', 'Template'), ('course', 'Course')],
+           'Short noun for the homepage hero button, for example Get this spreadsheet. Independent of product titles and category hierarchy. Empty uses Get this product. Requires Longlife Storefront Product Content 1.2.0 or newer.', default='product', allow_null=1),
     field('lld_includes', 'What is included', 'wysiwyg', 'Optional additional product section; do not repeat the full WooCommerce description.'),
     field('lld_level', 'Audience / skill level', help='For example: Beginner or All levels. Optional.'),
     field('lld_duration', 'Course duration', help='Display text only, for example 10 weeks. No enrollment or entitlement logic.'),
@@ -322,6 +329,8 @@ assert all(item['show_in_rest'] == 1 for item in GROUPS)
     json.dumps([entry for entry in GROUPS if entry['key'] in ('group_lld_page', 'group_lld_service')], indent=2, ensure_ascii=False) + '\n')
 (OUT / 'Longlife-Digital-ACF-Ebook-Preview-Update.json').write_text(
     json.dumps([entry for entry in GROUPS if entry['key'] == 'group_lld_ebook_preview'], indent=2, ensure_ascii=False) + '\n')
+(OUT / 'Longlife-Digital-ACF-Contact-and-Product-Update.json').write_text(
+    json.dumps([entry for entry in GROUPS if entry['key'] in ('group_lld_page', 'group_lld_product')], indent=2, ensure_ascii=False) + '\n')
 
 # The rest of this generator builds the human reference from these same definitions.
 SECTIONS = []

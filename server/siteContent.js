@@ -155,15 +155,23 @@ export async function readSiteContent({
         ...button(acf.lld_cta),
       },
       about: { tagline: text(acf.lld_about?.tagline), sections },
-      contact: Object.fromEntries(
-        [
-          'information_heading',
-          'form_heading',
-          'form_intro',
-          'success_heading',
-          'success_body',
-        ].map((field) => [field, text(acf.lld_contact?.[field])]),
-      ),
+      contact: {
+        ...Object.fromEntries(
+          [
+            'information_heading',
+            'form_heading',
+            'form_intro',
+            'success_heading',
+            'success_body',
+          ].map((field) => [field, text(acf.lld_contact?.[field])]),
+        ),
+        social_handles: Object.fromEntries(
+          ['instagram', 'facebook', 'tiktok', 'youtube', 'linkedin'].map((platform) => [
+            platform,
+            text(acf.lld_contact?.social_handles?.[platform]).slice(0, 80),
+          ]),
+        ),
+      },
       policy: {
         updatedOn: text(acf.lld_policy?.updated_on),
         heading: text(acf.lld_policy?.callout_heading),

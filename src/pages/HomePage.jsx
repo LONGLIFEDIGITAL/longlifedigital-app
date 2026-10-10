@@ -12,6 +12,7 @@ import { isEbook } from '../utils/ebook';
 import CatalogStatus from '../components/CatalogStatus';
 import ProductCollection from '../components/ProductCollection';
 import LoadingImage from '../components/LoadingImage';
+import ArrowIcon from '../components/ArrowIcon';
 import FeaturedProductSkeleton from '../components/skeletons/FeaturedProductSkeleton';
 import CategorySkeleton from '../components/skeletons/CategorySkeleton';
 import SkeletonBlock from '../components/skeletons/SkeletonBlock';
@@ -322,6 +323,7 @@ export default function HomePage({
                   )}
                   <Button
                     component="span"
+                    rightSection={<ArrowIcon direction="right" />}
                     className={classes.featuredButton}
                     styles={{ root: { paddingBlock: 'var(--hero-button-py)' } }}
                     variant="gradient"
@@ -336,10 +338,7 @@ export default function HomePage({
                     w="100%"
                     mt={4}
                   >
-                    {!highlighted.categoryLabel || highlighted.categoryLabel === 'Uncategorized'
-                      ? 'Buy Now'
-                      : `Get this ${highlighted.categoryLabel.replace(/s$/, '')}`}{' '}
-                    →
+                    Get this {highlighted.buttonProductLabel || 'product'}
                   </Button>
                 </Box>
               </Box>
