@@ -11,7 +11,7 @@ The Contact info card uses Font Awesome Free brand SVGs for Instagram, Facebook,
 
 ## Contact info card
 
-Open **Pages → Contact** and confirm **Storefront page → Contact**. Under **Contact page copy → Social handles**, enter the display text for each configured platform, such as `@longlifedigital` or a Facebook profile name. The text is used as entered; include `@` if wanted. Each field is optional and allows up to 80 characters.
+Open **Pages → Contact** and confirm **Storefront page → Contact**. Under **Contact page content → Social handles**, enter the display text for each configured platform, such as `@longlifedigital` or a Facebook profile name. The text is used as entered; include `@` if wanted. Each field is optional and allows up to 80 characters.
 
 Destinations still come from **Site Settings → Storefront → Social links**. A platform with no URL stays hidden even if a handle is supplied. A URL with no handle displays **View our profile**. Existing URLs, including query strings and temporary test URLs, are left unchanged. The icon follows the platform field, not the hostname in the URL.
 

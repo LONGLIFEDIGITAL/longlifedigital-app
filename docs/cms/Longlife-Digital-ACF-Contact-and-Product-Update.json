@@ -874,7 +874,7 @@
       },
       {
         "name": "lld_contact",
-        "label": "Contact page copy",
+        "label": "Contact page content",
         "type": "group",
         "instructions": "",
         "required": 0,

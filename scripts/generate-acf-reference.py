@@ -147,7 +147,7 @@ add_group('page', 'Page content', [('post_type', 'page')], [
     group('lld_home', 'Homepage sections', home_fields, conditional_logic=when(PAGE_KEY, 'home')),
     group('lld_about', 'About page', [field('tagline', 'Brand introduction', 'textarea'),
         related('sections', 'Mission, offering and promise cards', ['lld_block'], 6, 'Select Value/story blocks. Native page content can hold additional introductory prose.')], conditional_logic=when(PAGE_KEY, 'about')),
-    group('lld_contact', 'Contact page copy', [field('information_heading', 'Contact information heading'),
+    group('lld_contact', 'Contact page content', [field('information_heading', 'Contact information heading'),
         field('form_heading', 'Form heading'), field('form_intro', 'Form introduction', 'textarea'),
         field('success_heading', 'Success heading'), field('success_body', 'Success message', 'textarea', 'Show only after the future submission API confirms receipt, not on a failed request.'),
         group('social_handles', 'Social handles', [
