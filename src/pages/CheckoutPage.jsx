@@ -600,7 +600,7 @@ export default function CheckoutPage({ cartState, customer }) {
                       <Group align="end">
                         <TextInput
                           label="Coupon code"
-                          description="For emailed discounts, use the same billing email that received your code."
+                          // description="For emailed discounts, use the same billing email that received your code."
                           value={coupon}
                           onChange={(e) => setCoupon(e.target.value)}
                         />

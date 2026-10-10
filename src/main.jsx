@@ -8,11 +8,14 @@ import '@mantine/core/styles.layer.css';
 import '@mantine/carousel/styles.layer.css';
 import './index.css';
 import App from './App.jsx';
+import RouteErrorPage from './pages/RouteErrorPage.jsx';
 import { theme } from './theme';
 import { createStorefrontQueryClient } from './services/queryClient';
 
 // Keep the shared app (cart, catalog and dialogs) mounted as the URL changes.
-const router = createBrowserRouter([{ path: '*', element: <App /> }]);
+const router = createBrowserRouter([
+  { path: '*', element: <App />, errorElement: <RouteErrorPage /> },
+]);
 const queryClient = createStorefrontQueryClient();
 
 // The published HTML is visible while non-critical CSS and React load.
