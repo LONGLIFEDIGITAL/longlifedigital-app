@@ -1,0 +1,23 @@
+[
+  { "gatewayVersion": "11.0.0", "woocommerceVersion": "11.1.2", "supported": true },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": "11.2.0", "supported": true },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": "11.2.1", "supported": true },
+  { "gatewayVersion": "11.0.2", "woocommerceVersion": "11.2.2", "supported": true },
+  { "gatewayVersion": "11.0.10", "woocommerceVersion": "11.1.10", "supported": true },
+  { "gatewayVersion": "11.0.10", "woocommerceVersion": "11.2.10", "supported": true },
+  { "gatewayVersion": "10.9.9", "woocommerceVersion": "11.2.1", "supported": false },
+  { "gatewayVersion": "11.1.0", "woocommerceVersion": "11.2.1", "supported": false },
+  { "gatewayVersion": "12.0.0", "woocommerceVersion": "11.2.1", "supported": false },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": "11.1.1", "supported": false },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": "11.0.9", "supported": false },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": "11.3.0", "supported": false },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": "12.0.0", "supported": false },
+  { "gatewayVersion": "11.0.2-beta.1", "woocommerceVersion": "11.2.1", "supported": false },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": "11.2.2-rc.1", "supported": false },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": "11.2", "supported": false },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": "11.2.1\n", "supported": false },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": "11.02.1", "supported": false },
+  { "gatewayVersion": "", "woocommerceVersion": "11.2.1", "supported": false },
+  { "gatewayVersion": "11.0.1", "woocommerceVersion": null, "supported": false },
+  { "gatewayVersion": 11, "woocommerceVersion": "11.2.1", "supported": false }
+]

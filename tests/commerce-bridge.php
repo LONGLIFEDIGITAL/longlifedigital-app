@@ -1,7 +1,7 @@
 <?php
 // Unit harness for authorization, duplicate requests, and entitlement projection.
 // Real Woo/Stripe integration is tested separately on the configured WordPress site.
-define('ABSPATH', '/test/'); define('WC_VERSION', getenv('LLD_TEST_WC_VERSION') ?: '11.2.0'); define('WC_STRIPE_VERSION', getenv('LLD_TEST_STRIPE_VERSION') ?: '11.0.1');
+define('ABSPATH', '/test/'); define('WC_VERSION', getenv('LLD_TEST_WC_VERSION') ?: '11.2.1'); define('WC_STRIPE_VERSION', getenv('LLD_TEST_STRIPE_VERSION') ?: '11.0.1');
 $hooks = array();
 function add_filter($name, $callback, ...$args) { global $hooks; $hooks[$name] = $callback; }
 function add_action($name, $callback, ...$args) { add_filter($name, $callback); }
@@ -96,6 +96,10 @@ class Request {
 require __DIR__ . '/../wordpress/longlife-headless-commerce/longlife-headless-commerce.php';
 $count = 0;
 function check($value, $message) { global $count; if (!$value) throw new Exception('FAIL: ' . $message); $count++; echo 'ok ' . $count . ' - ' . $message . "\n"; }
+foreach (json_decode(file_get_contents(__DIR__ . '/fixtures/checkout-versions.json'), true) as $case) {
+    $versions = lld_checkout_version_checks($case['gatewayVersion'], $case['woocommerceVersion']);
+    check(($versions['stripe_version'] && $versions['woocommerce_version']) === $case['supported'], 'version compatibility: ' . json_encode($case));
+}
 $r = new Request('/lld-headless/v1/order');
 check(lld_authenticate_bridge($r) === true, 'signed request accepted');
 check(lld_authenticate_bridge($r)->data['status'] === 409, 'nonce replay rejected');
@@ -103,7 +107,7 @@ $r = new Request('/lld-headless/v1/order'); $r->body = '{"confirm":true}';
 check(lld_authenticate_bridge($r)->data['status'] === 403, 'modified request body rejected');
 $r = new Request('/lld-headless/v1/order'); $r->headers['x-lld-timestamp'] = (string)(time()-121); $r->sign();
 check(lld_authenticate_bridge($r)->data['status'] === 403, 'expired signature rejected');
-check(lld_configuration()['enabled'], 'exact test gateway configuration enabled');
+check(lld_configuration()['enabled'] && lld_configuration()['configurationIssues'] === array(), 'current stable test gateway configuration enabled without configuration issues');
 check(lld_configuration()['publishableKey'] === 'pk_test_example', 'billing field iteration preserves the configured Stripe publishable key');
 check(lld_configuration()['billingFields']['US']['postcode']['required'], 'Woo required postal code exposed');
 check(!lld_configuration()['billingFields']['AE']['postcode']['required'] && lld_configuration()['billingFields']['AE']['postcode']['hidden'], 'Woo hidden postal code not required');

@@ -10,7 +10,7 @@ From. Service inquiries still go to their existing recipient.
 
 1. Upload `docs/cms/Longlife-Headless-Commerce.zip` through WordPress → Plugins →
    Add New → Upload Plugin, and replace the installed plugin. This release is
-   **0.5.8**. Activate WooCommerce and MailPoet.
+   **0.5.9**. Activate WooCommerce and MailPoet.
 2. In MailPoet → Lists, create or choose a regular newsletter list.
 3. In WordPress → Settings → General, select that list under **Longlife storefront
    newsletter**, then save. Choosing “Disabled — select a list” disables signup.

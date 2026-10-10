@@ -1,5 +1,17 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
+function lld_checkout_version_checks($stripe_version, $woo_version) {
+    $in_range = function ($version, $minimum, $maximum) {
+        return is_string($version) && preg_match('/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/D', $version)
+            && version_compare($version, $minimum, '>=') && version_compare($version, $maximum, '<');
+    };
+    // Stable patches in reviewed minor releases must not disable checkout.
+    // Review new minors/majors before widening these ranges; match checkoutConfig.js.
+    return array(
+        'stripe_version' => $in_range($stripe_version, '11.0.0', '11.1.0'),
+        'woocommerce_version' => $in_range($woo_version, '11.1.2', '11.3.0'),
+    );
+}
 function lld_configuration() {
     $settings = get_option('woocommerce_stripe_settings', array());
     $gateway = class_exists('WC_Stripe') ? WC_Stripe::get_instance()->get_main_stripe_gateway() : null;
@@ -12,9 +24,7 @@ function lld_configuration() {
     $secret = $settings[$test ? 'test_secret_key' : 'secret_key'] ?? '';
     // Select the same mode and keys as the official gateway. Never fall back to
     // test credentials when live mode is selected, or expose a secret key.
-    $checks = array(
-        'stripe_version' => in_array($version, array('11.0.0', '11.0.1'), true),
-        'woocommerce_version' => in_array($woo_version, array('11.1.2', '11.2.0'), true),
+    $checks = array_merge(lld_checkout_version_checks($version, $woo_version), array(
         'stripe_gateway' => $upe,
         'stripe_mode' => in_array($settings['testmode'] ?? '', array('yes', 'no'), true) && $upe && $gateway->testmode === $test,
         'card_payments' => $card && $card->is_enabled(),
@@ -23,7 +33,7 @@ function lld_configuration() {
         'automatic_capture' => ($settings['capture'] ?? 'yes') === 'yes',
         'publishable_key' => is_string($key) && preg_match($test ? '/^pk_test_[A-Za-z0-9]+$/D' : '/^pk_live_[A-Za-z0-9]+$/D', $key) && $upe && $key === $gateway->publishable_key,
         'secret_key' => is_string($secret) && preg_match($test ? '/^(?:sk|rk)_test_[A-Za-z0-9]+$/D' : '/^(?:sk|rk)_live_[A-Za-z0-9]+$/D', $secret) && $upe && $secret === $gateway->secret_key,
-    );
+    ));
     $issues = array_keys(array_filter($checks, function ($passed) { return !$passed; }));
     $compatible = !$issues;
     if (get_option('lld_checkout_enabled') !== '1') $issues[] = 'headless_checkout_disabled';

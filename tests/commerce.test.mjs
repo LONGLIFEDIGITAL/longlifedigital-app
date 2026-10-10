@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { createCommerceHandler, checkoutResult } from '../api/commerce.js';
 import { seal, unseal } from '../server/commerce/session.js';
 const env = {
@@ -276,28 +277,30 @@ test('unreviewed versions and mismatched Stripe mode or keys block payment submi
     assert.equal(result.body.retrySafe, true);
   }
 });
-test('reviewed gateway versions accept matching test and live modes through the signed Woo checkout', async () => {
-  for (const gatewayVersion of ['11.0.0', '11.0.1']) {
-    for (const woocommerceVersion of ['11.1.2', '11.2.0']) {
-      for (const testMode of [true, false]) {
-        let dispatched = false;
-        const result = await call('checkout', payload, async (url, init) => {
-          if (url.endsWith('/config'))
-            return reply({
-              ...config,
-              gatewayVersion,
-              woocommerceVersion,
-              testMode,
-              publishableKey: testMode ? 'pk_test_example' : 'pk_live_example',
-            });
-          dispatched = true;
-          assert.ok(url.endsWith('/wc/store/v1/checkout'));
-          assert.ok(init.headers['X-LLD-Signature']);
-          return reply({ order_id: 45, payment_result: { payment_status: 'success' } });
-        });
-        assert.equal(result.status, 200);
-        assert.equal(dispatched, true);
-      }
+test('shared version boundaries accept stable patches and block unsupported releases in both Stripe modes', async () => {
+  const versions = JSON.parse(
+    readFileSync(new URL('./fixtures/checkout-versions.json', import.meta.url), 'utf8'),
+  );
+  for (const { gatewayVersion, woocommerceVersion, supported } of versions) {
+    for (const testMode of [true, false]) {
+      let dispatched = false;
+      const result = await call('checkout', payload, async (url, init) => {
+        if (url.endsWith('/config'))
+          return reply({
+            ...config,
+            gatewayVersion,
+            woocommerceVersion,
+            testMode,
+            publishableKey: testMode ? 'pk_test_example' : 'pk_live_example',
+          });
+        dispatched = true;
+        assert.ok(url.endsWith('/wc/store/v1/checkout'));
+        assert.ok(init.headers['X-LLD-Signature']);
+        return reply({ order_id: 45, payment_result: { payment_status: 'success' } });
+      });
+      const label = JSON.stringify({ gatewayVersion, woocommerceVersion, testMode });
+      assert.equal(result.status, supported ? 200 : 503, label);
+      assert.equal(dispatched, supported, label);
     }
   }
 });

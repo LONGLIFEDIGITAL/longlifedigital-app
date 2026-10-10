@@ -1,15 +1,29 @@
 # Headless checkout: install and acceptance
 
-Bridge **0.5.8** supports the Stripe test or live mode selected in WooCommerce, with matching credentials. Supported versions are Stripe Gateway **11.0.0 / 11.0.1** and WooCommerce **11.1.2 / 11.2.0**. The user previously completed a Stripe test purchase through React (Woo order 334, 30-Day Social Media Content Pack) and downloaded the product. Live charges have not been exercised by the automated checks; the installation-specific acceptance scenarios below remain relevant.
+Bridge **0.5.9** supports the Stripe test or live mode selected in WooCommerce, with matching credentials. Supported stable versions are Stripe Gateway **11.0.x** and WooCommerce **11.1.x (from 11.1.2) / 11.2.x**, including the installed **11.2.1**. Patch updates within these minor releases are accepted; new minor/major versions and prereleases require review. The user previously completed a Stripe test purchase through React (Woo order 334, 30-Day Social Media Content Pack) and downloaded the product. Live charges have not been exercised by the automated checks; the installation-specific acceptance scenarios below remain relevant.
 
-## Production checkout fix: bridge 0.5.8
+## Checkout remains disabled after an update: bridge 0.5.9
 
-The previous bridge, API and payment form explicitly required test mode/test keys.
-The public WordPress configuration also reported Stripe Gateway 11.0.1 and
-WooCommerce 11.2.0, which the old version checks rejected. Deploy the updated
-app/API and replace the installed WordPress plugin with the current
-[plugin ZIP](cms/Longlife-Headless-Commerce.zip). Pushing to `main` deploys the
-app only; it does not update PHP installed in WordPress.
+The October 9 read-only check returned HTTP 200 with `enabled: false`,
+`woocommerceVersion: "11.2.1"`, and `configurationIssues: ["woocommerce_version"]`.
+Bridge 0.5.8 and the app API accepted only specific patch versions, ending at
+WooCommerce 11.2.0. This disabled checkout after the 11.2.1 update. Switching
+Stripe modes cannot clear that version mismatch. A successful configuration
+request can disable checkout without a browser console error.
+
+Replace the installed WordPress plugin with the current **0.5.9**
+[plugin ZIP](cms/Longlife-Headless-Commerce.zip), choosing **Replace current with
+uploaded**, and deploy the updated app/API by pushing the code to the Vercel
+production branch. Both checks have changed. Pushing to `main` deploys the app
+only; it does not update PHP installed in WordPress. Preserve the existing
+integration secret and checkout enablement setting.
+
+After deployment, inspect `/api/commerce?action=config` on the storefront (or
+the WordPress `/wp-json/lld-headless/v1/config` endpoint). Expect `enabled: true`
+and `configurationIssues: []`. A remaining `woocommerce_version` issue with
+11.2.1 means the responding WordPress site still has the old plugin. Other issue
+names identify the specific setting to address; do not toggle Stripe modes to
+work around an unrelated configuration issue.
 
 The bridge now chooses the active mode's publishable/secret keys, checks that
 they match the gateway's active credentials, and rejects missing or mixed-mode
@@ -23,6 +37,10 @@ The official [Stripe Gateway 11.0.1 source](https://github.com/woocommerce/wooco
 has the same UPE payment gateway and Blocks adapter files as 11.0.0.
 [WooCommerce 11.2.0 checkout](https://github.com/woocommerce/woocommerce/blob/11.2.0/plugins/woocommerce/src/StoreApi/Routes/V1/Checkout.php)
 adds cart-session exception handling without changing the payment handoff used here.
+The [11.2.1 checkout handler](https://github.com/woocommerce/woocommerce/blob/11.2.1/plugins/woocommerce/src/StoreApi/Routes/V1/Checkout.php)
+is byte-for-byte identical to 11.2.0. The API and PHP regression suites share a
+version matrix covering current releases, later patches, range boundaries and
+invalid/prerelease versions, with mocked checkout exercised in both Stripe modes.
 
 All content and commerce now target **https://longlifedigital-zmuro.wpcomstaging.com**. The test product is **318 — Small Business AI Prompt Pack**. Firebase is not used.
 
