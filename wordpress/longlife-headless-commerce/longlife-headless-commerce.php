@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Longlife Headless Commerce
- * Description: Authenticated React checkout bridge for WooCommerce Store API and Stripe Gateway 11.0.0. Test payments only.
- * Version: 0.5.7
+ * Description: Authenticated React checkout bridge for WooCommerce Store API and Stripe card payments.
+ * Version: 0.5.8
  * Requires Plugins: woocommerce
  * Requires PHP: 8.0
  */
@@ -35,8 +35,8 @@ add_action('admin_init', function () {
     register_setting('general', 'lld_checkout_enabled', array('sanitize_callback' => function ($v) { return $v === '1' ? '1' : '0'; }));
     add_settings_field('lld_headless_checkout', 'Longlife headless checkout', function () {
         echo '<input type="hidden" name="lld_checkout_enabled" value="0">';
-        echo '<label><input type="checkbox" name="lld_checkout_enabled" value="1" ' . checked(get_option('lld_checkout_enabled'), '1', false) . '> Enable React test checkout</label>';
-        echo '<p>Requires WooCommerce 11.1.2, official Stripe Gateway 11.0.0, test mode, card payments and automatic capture. Customer accounts use WooCommerce registration settings and verified email password setup.</p>';
+        echo '<label><input type="checkbox" name="lld_checkout_enabled" value="1" ' . checked(get_option('lld_checkout_enabled'), '1', false) . '> Enable React checkout</label>';
+        echo '<p>Supports WooCommerce 11.1.2 / 11.2.0 and official Stripe Gateway 11.0.0 / 11.0.1 with cards, automatic capture and guest checkout enabled. Uses the Stripe mode selected in WooCommerce: live mode charges real payments. Customer accounts use WooCommerce registration settings and verified email password setup.</p>';
         echo '<p>Copy this integration secret into the server-only LLD_COMMERCE_BRIDGE_SECRET environment variable. Do not place it in a VITE_ setting or share it publicly.</p>';
         echo '<input id="lld-integration-secret" type="password" readonly class="large-text" autocomplete="off" spellcheck="false" aria-label="Longlife integration secret" aria-describedby="lld-secret-status" value="' . esc_attr(get_option('lld_bridge_secret')) . '">';
         echo '<p><button id="lld-secret-toggle" type="button" class="button" aria-controls="lld-integration-secret" aria-label="Show integration secret" aria-pressed="false">Show</button> ';

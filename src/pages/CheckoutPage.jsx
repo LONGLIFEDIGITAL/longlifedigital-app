@@ -17,6 +17,7 @@ import {
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js/pure';
 import { Link, Navigate, useNavigate } from 'react-router';
+import { stripeKeyMatchesMode } from '../../shared/checkoutConfig';
 import {
   commerce,
   headlessEnabled,
@@ -48,11 +49,19 @@ function CardPayment(props) {
     />
   );
 }
-function PaymentSession({ publishableKey, options, billing, data, onSubmitted, onBusy, onRetry }) {
+function PaymentSession({
+  publishableKey,
+  testMode,
+  options,
+  billing,
+  data,
+  onSubmitted,
+  onBusy,
+  onRetry,
+}) {
   const [client, setClient] = useState(null);
   const [error, setError] = useState('');
-  const validKey =
-    typeof publishableKey === 'string' && /^pk_test_[A-Za-z0-9]+$/.test(publishableKey);
+  const validKey = stripeKeyMatchesMode(publishableKey, testMode);
   useEffect(() => {
     if (!validKey) return;
     let active = true;
@@ -556,7 +565,9 @@ export default function CheckoutPage({ cartState, customer }) {
                         <Title order={2} size="h3">
                           Payment
                         </Title>
-                        <Alert color="yellow">Test checkout — use a Stripe test card.</Alert>
+                        {config.testMode && (
+                          <Alert color="yellow">Test checkout — use a Stripe test card.</Alert>
+                        )}
                         {Number(reviewed.totals.total_price) === 0 ? (
                           <Button onClick={freeOrder} loading={submittingFree}>
                             Place free order
@@ -564,6 +575,7 @@ export default function CheckoutPage({ cartState, customer }) {
                         ) : (
                           <CardPayment
                             publishableKey={config.publishableKey}
+                            testMode={config.testMode}
                             options={options}
                             key={`${reviewed.totals.currency_code}:${reviewed.totals.total_price}`}
                             billing={billing}

@@ -66,9 +66,25 @@ export default function ContactPage({ fire, contact, settings }) {
                 {
                   icon: '◎',
                   label: 'Social',
-                  val: contact.social,
-                  link: settings.social.instagram,
+                  val: Object.values(settings.social || {}).some(Boolean) ? '' : contact.social,
+                  link: '',
                 },
+                ...[
+                  ['instagram', 'Instagram', '◎'],
+                  ['facebook', 'Facebook', 'f'],
+                  ['tiktok', 'TikTok', '♪'],
+                  ['youtube', 'YouTube', '▶'],
+                  ['linkedin', 'LinkedIn', 'in'],
+                ]
+                  .filter(([platform]) => settings.social?.[platform])
+                  .map(([platform, label, icon]) => ({
+                    icon,
+                    label,
+                    val: settings.social[platform]
+                      .replace(/^https:\/\/(?:www\.)?/, '')
+                      .replace(/\/$/, ''),
+                    link: settings.social[platform],
+                  })),
                 {
                   icon: '🌐',
                   label: 'Website',

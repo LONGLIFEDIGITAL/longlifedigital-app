@@ -1,3 +1,4 @@
+/* global wp */
 /* Keep the block editor's native slug in sync with the headless URL field.
  * Otherwise a later REST save could restore the editor's previous slug.
  */

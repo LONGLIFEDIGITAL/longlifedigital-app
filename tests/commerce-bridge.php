@@ -1,7 +1,7 @@
 <?php
 // Unit harness for authorization, duplicate requests, and entitlement projection.
 // Real Woo/Stripe integration is tested separately on the configured WordPress site.
-define('ABSPATH', '/test/'); define('WC_VERSION', '11.1.2'); define('WC_STRIPE_VERSION', '11.0.0');
+define('ABSPATH', '/test/'); define('WC_VERSION', getenv('LLD_TEST_WC_VERSION') ?: '11.2.0'); define('WC_STRIPE_VERSION', getenv('LLD_TEST_STRIPE_VERSION') ?: '11.0.1');
 $hooks = array();
 function add_filter($name, $callback, ...$args) { global $hooks; $hooks[$name] = $callback; }
 function add_action($name, $callback, ...$args) { add_filter($name, $callback); }
@@ -30,12 +30,18 @@ class DB {
     function delete($table, $where) { unset($this->rows[$where['record_key']]); }
 }
 $wpdb = new DB();
-$options = array('lld_bridge_secret' => str_repeat('s', 64), 'lld_checkout_enabled' => '1', 'woocommerce_enable_guest_checkout' => 'yes', 'woocommerce_stripe_settings' => array('enabled' => 'yes', 'testmode' => 'yes', 'capture' => 'yes', 'test_publishable_key' => 'pk_test_example'));
+$options = array('lld_bridge_secret' => str_repeat('s', 64), 'lld_checkout_enabled' => '1', 'woocommerce_enable_guest_checkout' => 'yes', 'woocommerce_stripe_settings' => array('enabled' => 'yes', 'testmode' => 'yes', 'capture' => 'yes', 'test_publishable_key' => 'pk_test_example', 'test_secret_key' => 'sk_test_example', 'publishable_key' => 'pk_live_example', 'secret_key' => 'sk_live_example'));
 function get_option($key, $default = false) { global $options; return $options[$key] ?? $default; }
 class WC_Stripe_UPE_Payment_Gateway {
-    public $testmode = true; public $publishable_key = 'pk_test_example';
+    public $testmode = true; public $publishable_key; public $secret_key;
     public $payment_methods;
-    function __construct() { $this->payment_methods = array('card' => new class { function is_enabled() { return true; } }); }
+    function __construct() {
+        $settings = get_option('woocommerce_stripe_settings');
+        $this->testmode = $GLOBALS['gateway_testmode'] ?? ($settings['testmode'] === 'yes');
+        $this->publishable_key = $settings[$this->testmode ? 'test_publishable_key' : 'publishable_key'] ?? '';
+        $this->secret_key = $settings[$this->testmode ? 'test_secret_key' : 'secret_key'] ?? '';
+        $this->payment_methods = array('card' => new class { function is_enabled() { return $GLOBALS['card_enabled'] ?? true; } });
+    }
     function verify_intent_after_checkout($order) { $order->verified = true; }
 }
 class WC_Stripe_Order_Helper {
@@ -102,11 +108,36 @@ check(lld_configuration()['publishableKey'] === 'pk_test_example', 'billing fiel
 check(lld_configuration()['billingFields']['US']['postcode']['required'], 'Woo required postal code exposed');
 check(!lld_configuration()['billingFields']['AE']['postcode']['required'] && lld_configuration()['billingFields']['AE']['postcode']['hidden'], 'Woo hidden postal code not required');
 $options['woocommerce_stripe_settings']['testmode'] = 'no';
-check(!lld_configuration()['enabled'], 'live payments rejected');
+check(lld_configuration()['enabled'] && !lld_configuration()['testMode'], 'matching live gateway enabled');
+check(lld_configuration()['publishableKey'] === 'pk_live_example', 'live mode selects the live public key');
+check(!str_contains(json_encode(lld_configuration()), 'sk_live_example'), 'secret keys never exposed in public configuration');
+$options['woocommerce_stripe_settings']['publishable_key'] = 'pk_test_example';
+check(!lld_configuration()['enabled'] && in_array('publishable_key', lld_configuration()['configurationIssues']), 'live mode rejects a test public key');
+$options['woocommerce_stripe_settings']['publishable_key'] = 'pk_live_example';
+$options['woocommerce_stripe_settings']['secret_key'] = 'sk_test_example';
+check(!lld_configuration()['enabled'], 'live mode rejects a test secret key');
+$options['woocommerce_stripe_settings']['secret_key'] = '';
+check(!lld_configuration()['enabled'], 'missing live credentials never fall back to test credentials');
+$options['woocommerce_stripe_settings']['secret_key'] = 'rk_live_example';
+check(lld_configuration()['enabled'], 'matching restricted live key supported by the gateway is accepted');
+$options['woocommerce_stripe_settings']['secret_key'] = 'sk_live_example';
+$gateway_testmode = true;
+check(!lld_configuration()['enabled'] && in_array('stripe_mode', lld_configuration()['configurationIssues']), 'gateway/settings mode disagreement rejected');
+unset($gateway_testmode);
+$options['woocommerce_stripe_settings']['capture'] = 'no';
+check(!lld_configuration()['enabled'], 'manual capture remains unsupported');
+$options['woocommerce_stripe_settings']['capture'] = 'yes';
+$card_enabled = false;
+check(!lld_configuration()['enabled'], 'disabled card payments rejected');
+unset($card_enabled);
+$options['lld_checkout_enabled'] = '0';
+check(!lld_configuration()['enabled'] && in_array('headless_checkout_disabled', lld_configuration()['configurationIssues']), 'explicit checkout opt-in required');
+$options['lld_checkout_enabled'] = '1';
 $options['woocommerce_stripe_settings']['testmode'] = 'yes';
 $options['woocommerce_enable_guest_checkout'] = 'no';
 check(!lld_configuration()['enabled'], 'account-required configuration rejected');
 $options['woocommerce_enable_guest_checkout'] = 'yes';
+$options['woocommerce_stripe_settings']['testmode'] = getenv('LLD_TEST_PAYMENT_MODE') === 'live' ? 'no' : 'yes';
 $pre = $hooks['rest_pre_dispatch']; $post = $hooks['rest_post_dispatch'];
 $r = new Request('/wc/store/v1/checkout', '{"expected_total":"1399"}');
 check($pre(null, null, $r) === null, 'first checkout dispatch allowed');

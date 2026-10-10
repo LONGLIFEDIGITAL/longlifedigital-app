@@ -7,11 +7,26 @@ function lld_configuration() {
     $card = $upe && isset($gateway->payment_methods['card']) ? $gateway->payment_methods['card'] : null;
     $version = defined('WC_STRIPE_VERSION') ? WC_STRIPE_VERSION : '';
     $woo_version = defined('WC_VERSION') ? WC_VERSION : '';
-    $test = ($settings['testmode'] ?? '') === 'yes' && $upe && $gateway->testmode === true;
-    $key = $settings['test_publishable_key'] ?? '';
-    $compatible = $version === '11.0.0' && $woo_version === '11.1.2' && $upe && $test && $card && $card->is_enabled()
-        && get_option('woocommerce_enable_guest_checkout') === 'yes'
-        && ($settings['enabled'] ?? '') === 'yes' && ($settings['capture'] ?? 'yes') === 'yes' && is_string($key) && strpos($key, 'pk_test_') === 0 && $key === $gateway->publishable_key;
+    $test = ($settings['testmode'] ?? '') === 'yes';
+    $key = $settings[$test ? 'test_publishable_key' : 'publishable_key'] ?? '';
+    $secret = $settings[$test ? 'test_secret_key' : 'secret_key'] ?? '';
+    // Select the same mode and keys as the official gateway. Never fall back to
+    // test credentials when live mode is selected, or expose a secret key.
+    $checks = array(
+        'stripe_version' => in_array($version, array('11.0.0', '11.0.1'), true),
+        'woocommerce_version' => in_array($woo_version, array('11.1.2', '11.2.0'), true),
+        'stripe_gateway' => $upe,
+        'stripe_mode' => in_array($settings['testmode'] ?? '', array('yes', 'no'), true) && $upe && $gateway->testmode === $test,
+        'card_payments' => $card && $card->is_enabled(),
+        'guest_checkout' => get_option('woocommerce_enable_guest_checkout') === 'yes',
+        'stripe_enabled' => ($settings['enabled'] ?? '') === 'yes',
+        'automatic_capture' => ($settings['capture'] ?? 'yes') === 'yes',
+        'publishable_key' => is_string($key) && preg_match($test ? '/^pk_test_[A-Za-z0-9]+$/D' : '/^pk_live_[A-Za-z0-9]+$/D', $key) && $upe && $key === $gateway->publishable_key,
+        'secret_key' => is_string($secret) && preg_match($test ? '/^(?:sk|rk)_test_[A-Za-z0-9]+$/D' : '/^(?:sk|rk)_live_[A-Za-z0-9]+$/D', $secret) && $upe && $secret === $gateway->secret_key,
+    );
+    $issues = array_keys(array_filter($checks, function ($passed) { return !$passed; }));
+    $compatible = !$issues;
+    if (get_option('lld_checkout_enabled') !== '1') $issues[] = 'headless_checkout_disabled';
     $billing_fields = array();
     if (function_exists('WC') && WC()->countries) {
         foreach (WC()->countries->get_allowed_countries() as $country => $name) {
@@ -26,6 +41,7 @@ function lld_configuration() {
     return array(
         'gatewayVersion' => $version, 'woocommerceVersion' => $woo_version, 'testMode' => $test,
         'enabled' => $compatible && get_option('lld_checkout_enabled') === '1',
+        'configurationIssues' => $issues,
         'publishableKey' => $compatible ? $key : null,
         'countries' => function_exists('WC') && WC()->countries ? WC()->countries->get_allowed_countries() : array(),
         'states' => function_exists('WC') && WC()->countries ? WC()->countries->get_states() : array(),
@@ -38,7 +54,7 @@ add_filter('rest_pre_dispatch', function ($result, $server, $request) {
     if ($result !== null || $request->get_route() !== '/wc/store/v1/checkout' || $request->get_method() !== 'POST' || !$request->get_header('x-lld-signature')) return $result;
     $auth = lld_authenticate_bridge($request);
     if (is_wp_error($auth)) return $auth;
-    if (!lld_configuration()['enabled']) return lld_error('React test checkout is not enabled for this gateway configuration.', 503);
+    if (!lld_configuration()['enabled']) return lld_error('React checkout is not enabled for this gateway configuration.', 503);
     if (!$request->get_header('cart-token')) return lld_error('Cart session required.', 403);
     $customer_id = 0;
     $account_token = $request->get_param('_lld_account');

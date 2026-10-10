@@ -9,6 +9,7 @@ import {
 import { readSession, writeSession } from '../server/commerce/session.js';
 import { createWoo } from '../server/commerce/woo.js';
 import { readAccount } from '../server/account.js';
+import { checkoutConfigured } from '../shared/checkoutConfig.js';
 
 function attemptId(value) {
   if (
@@ -85,12 +86,7 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
           if (typeof body.expectedTotal !== 'string' || !/^\d{1,12}$/.test(body.expectedTotal))
             throw new CommerceError('Please review your order total.');
           const config = await woo.config();
-          if (
-            !config.enabled ||
-            !config.testMode ||
-            config.gatewayVersion !== '11.0.0' ||
-            config.woocommerceVersion !== '11.1.2'
-          )
+          if (!checkoutConfigured(config))
             throw new CommerceError('Checkout is being configured. Please try again later.', 503);
           const billing = address(body.billing_address, config.billingFields);
           const account = readAccount(req, env);

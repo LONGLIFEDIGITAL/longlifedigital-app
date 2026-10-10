@@ -388,7 +388,7 @@ test('Woo cart quantity changes, removal and checkout stay in React', async ({ p
   await drawer.getByRole('button', { name: 'Proceed to Checkout' }).click();
   await expect(page).toHaveURL(/\/checkout$/);
   await expect(page.getByRole('heading', { name: 'Checkout', exact: true })).toBeVisible();
-  await expect(page.getByText('Continue as a guest. No account is required.')).toBeVisible();
+  await expect(page.getByText(/Continue as a guest, or/)).toBeVisible();
   expect(calls.find((c) => c.action === 'update').body).toEqual({ key: 'cartkey318', quantity: 2 });
   await page.getByRole('button', { name: 'Open cart (2)', exact: true }).click();
   await page.getByRole('button', { name: `Remove ${product.name} from cart` }).click();
@@ -506,7 +506,7 @@ async function mockStripe(page) {
     route.fulfill({
       contentType: 'application/javascript',
       body: `
-    window.Stripe = () => ({
+    window.Stripe = (key) => { window.testStripeKey = key; return ({
       _registerWrapper(){}, registerAppInfo(){}, createToken(){}, confirmCardPayment(){},
       elements(){ return { update(){}, on(){}, off(){}, submit:async()=>({}),
         create(){
@@ -522,7 +522,7 @@ async function mockStripe(page) {
       createPaymentMethod:async(options)=>{window.testBillingDetails=options.params.billing_details;return {paymentMethod:{id:'pm_testCard'}}},
       confirmPayment:async()=>{window.testStripeConfirmed=true;return {paymentIntent:{status:'succeeded'}}},
       confirmSetup:async()=>({})
-    }); window.Stripe.version="dahlia";`,
+    }); }; window.Stripe.version="dahlia";`,
     }),
   );
 }
@@ -538,6 +538,38 @@ test('invalid Stripe configuration never shows an unusable Pay button', async ({
     page.getByText('Payment is temporarily unavailable. Please try again shortly.'),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: /^Pay / })).toHaveCount(0);
+  expect(calls.some((call) => call.action === 'checkout')).toBe(false);
+});
+
+test('live checkout uses the live public key and completes through server verification without test-card copy', async ({
+  page,
+}) => {
+  const calls = await setup(page, {
+    config: { ...defaultConfig, testMode: false, publishableKey: 'pk_live_mock' },
+  });
+  await mockStripe(page);
+  await page.goto('/checkout');
+  await billing(page);
+  await page.getByRole('button', { name: 'Review final total' }).click();
+  await expect(page.getByRole('button', { name: 'Pay $14.99' })).toBeEnabled();
+  await expect(page.getByText(/Test checkout/)).toHaveCount(0);
+  expect(await page.evaluate(() => window.testStripeKey)).toBe('pk_live_mock');
+  await page.getByRole('button', { name: 'Pay $14.99' }).click();
+  await expect(page.getByRole('heading', { name: 'Thank you for your purchase' })).toBeVisible();
+  expect(calls.filter((call) => call.action === 'checkout')).toHaveLength(1);
+  expect(calls.some((call) => call.action === 'order')).toBe(true);
+});
+
+test('live mode cannot mount payment fields with a test key', async ({ page }) => {
+  const calls = await setup(page, { config: { ...defaultConfig, testMode: false } });
+  await mockStripe(page);
+  await page.goto('/checkout');
+  await billing(page);
+  await page.getByRole('button', { name: 'Review final total' }).click();
+  await expect(
+    page.getByText('Payment is temporarily unavailable. Please try again shortly.'),
+  ).toBeVisible();
+  expect(await page.evaluate(() => window.testStripeKey)).toBeUndefined();
   expect(calls.some((call) => call.action === 'checkout')).toBe(false);
 });
 

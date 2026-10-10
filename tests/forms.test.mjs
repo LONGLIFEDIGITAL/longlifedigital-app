@@ -126,3 +126,25 @@ test('provider failures, throttles and timeouts are visible errors rather than f
     502,
   );
 });
+
+test('newsletter ineligibility has support guidance without exposing internal subscriber state', async () => {
+  const failure = () =>
+    Response.json(
+      { code: 'lld_newsletter_ineligible', message: 'private trash details' },
+      { status: 422 },
+    );
+  const result = await call('newsletter', form, failure);
+  assert.equal(result.status, 422);
+  assert.match(result.body.error, /cannot be subscribed through this form/);
+  assert.match(result.body.error, /support@longlifedigital.co/);
+  assert.doesNotMatch(result.body.error, /private|trash|temporarily unavailable/);
+  assert.equal((await call('contact', form, failure)).status, 502);
+  assert.equal(
+    (
+      await call('newsletter', form, () =>
+        Response.json({ code: 'unknown', message: 'private' }, { status: 422 }),
+      )
+    ).status,
+    502,
+  );
+});

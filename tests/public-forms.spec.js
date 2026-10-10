@@ -79,3 +79,27 @@ test('popup newsletter submits to the same provider and closes on success', asyn
   await expect(dialog).toHaveCount(0);
   expect(submitted.consent).toBe(true);
 });
+
+test('newsletter email needing assistance shows support guidance and preserves the form', async ({
+  page,
+}) => {
+  await page.route('**/api/forms?action=newsletter', (route) =>
+    route.fulfill({
+      status: 422,
+      json: {
+        error:
+          'This email address cannot be subscribed through this form. Please contact support@longlifedigital.co for help.',
+      },
+    }),
+  );
+  await page.goto('/');
+  await page.getByPlaceholder('e.g. John', { exact: true }).fill('Alex');
+  await page.getByPlaceholder('e.g. john@email.com').fill('alex@example.test');
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: /Subscribe — It's Free/ }).click();
+  await expect(page.getByRole('alert')).toContainText('contact support@longlifedigital.co');
+  await expect(page.getByPlaceholder('e.g. john@email.com')).toHaveValue('alex@example.test');
+  await expect(
+    page.locator('main').getByText('Check your inbox for any confirmation steps.'),
+  ).toHaveCount(0);
+});

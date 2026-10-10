@@ -288,11 +288,16 @@ test('published footer edits appear on the next poll and page reload without res
   await expect(footer).toContainText('A published footer description.');
 
   cms.origin.record.acf.lld_footer.description = 'Updated while the storefront stays open.';
-  await page.clock.runFor(30_001);
+  // Advance to the next poll, then let its real mocked HTTP response complete
+  // before advancing through the request's virtual timeout too.
+  await page.clock.runFor(15_001);
   await expect(footer).toContainText('Updated while the storefront stays open.');
 
   cms.origin.record.acf.lld_footer.description = 'Published immediately before reload.';
   await page.reload();
+  // A reload reuses the fresh browser snapshot until the next 15-second poll.
+  await expect(footer).toContainText('Updated while the storefront stays open.');
+  await page.clock.runFor(15_001);
   await expect(footer).toContainText('Published immediately before reload.');
 });
 
@@ -351,6 +356,21 @@ test('published brand, logo, footer and contact details appear on the existing p
   await expect(page.getByRole('heading', { name: 'CMS Store', exact: true })).toBeVisible();
   await expect(page.locator('main')).toContainText('help@store.example');
   await expect(page.locator('main')).not.toContainText('support@lldhome.com');
+});
+
+test('contact card shows TikTok from CMS social links without a main social handle', async ({
+  page,
+}) => {
+  const updated = structuredClone(record);
+  updated.acf.lld_social = { tiktok: 'https://www.tiktok.com/@longlifedigital', instagram: '' };
+  const server = await setup(page);
+  server.settings = (await runHandler({ records: [updated] })).body;
+  await page.goto('/contact');
+  const cardLink = page.locator('main').getByRole('link', { name: /TikTok/ });
+  await expect(cardLink).toBeVisible();
+  await expect(cardLink).toHaveAttribute('href', updated.acf.lld_social.tiktok);
+  await expect(cardLink).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(page.locator('main').getByRole('link', { name: /Instagram/ })).toHaveCount(0);
 });
 
 test('first-load skeleton and retry do not replace the product area or show stale announcements', async ({

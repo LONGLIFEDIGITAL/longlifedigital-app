@@ -34,6 +34,7 @@ console.log(
       testMode: config.testMode,
       gatewayVersion: config.gatewayVersion,
       woocommerceVersion: config.woocommerceVersion,
+      configurationIssues: config.configurationIssues,
     },
   }),
 );

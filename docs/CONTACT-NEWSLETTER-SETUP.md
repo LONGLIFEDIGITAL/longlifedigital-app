@@ -10,7 +10,7 @@ From. Service inquiries still go to their existing recipient.
 
 1. Upload `docs/cms/Longlife-Headless-Commerce.zip` through WordPress → Plugins →
    Add New → Upload Plugin, and replace the installed plugin. This release is
-   **0.5.5**. Activate WooCommerce and MailPoet.
+   **0.5.8**. Activate WooCommerce and MailPoet.
 2. In MailPoet → Lists, create or choose a regular newsletter list.
 3. In WordPress → Settings → General, select that list under **Longlife storefront
    newsletter**, then save. Choosing “Disabled — select a list” disables signup.
@@ -153,6 +153,13 @@ not stored in the app database; newsletter subscribers are stored by MailPoet.
 WordPress → WooCommerce → Status → Logs → `lld-forms` records provider failures
 without email addresses, message content or tokens. Missing MailPoet/list
 configuration produces an unavailable response rather than a false success.
+In 0.5.8, trashed or suppressed subscribers receive HTTP 422 with guidance to
+contact support, instead of a temporary-outage message. These contacts are not
+automatically restored or reactivated. Administrators can distinguish
+`trashed_subscriber` from `ineligible_subscriber_status` in `lld-forms`; review
+the record and its consent/delivery history in MailPoet before changing it.
+Unexpected provider errors include the operation stage and numeric error code.
+Deploy both the app/API and plugin ZIP to receive the new customer-facing copy.
 A successful submission means the mail transport/provider accepted it, not that
 an email has reached the recipient’s inbox.
 

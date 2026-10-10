@@ -105,6 +105,7 @@ function lld_newsletter_signup($request) {
     $attempt = lld_begin_public_form($request, 'newsletter', $fields);
     if (is_wp_error($attempt)) return $attempt;
     if ($attempt['accepted']) return lld_response(array('ok' => true));
+    $stage = 'subscriber_lookup';
     try {
         $api = \MailPoet\API\API::MP('v1');
         $subscriber = null;
@@ -114,23 +115,31 @@ function lld_newsletter_signup($request) {
         }
         $options = array('send_confirmation_email' => true, 'schedule_welcome_email' => true, 'skip_subscriber_notification' => false);
         if (!$subscriber) {
+            $stage = 'subscriber_add';
             $subscriber = $api->addSubscriber(array('email' => $fields['email'], 'first_name' => $fields['name']), array($fields['list']), $options);
         } else {
             // Never overwrite existing profiles or reactivate suppressed/trashed contacts.
             if (!empty($subscriber['deleted_at']) || !in_array($subscriber['status'] ?? '', array('subscribed', 'unconfirmed', 'unsubscribed'), true)) {
-                throw new RuntimeException('Subscriber cannot be subscribed through this form.');
+                lld_delete($attempt['key']);
+                $reason = !empty($subscriber['deleted_at']) ? 'trashed_subscriber' : 'ineligible_subscriber_status';
+                wc_get_logger()->notice('MailPoet signup requires assistance: ' . $reason . '.', array('source' => 'lld-forms'));
+                return new WP_Error('lld_newsletter_ineligible', 'This email address cannot be subscribed through this form. Please contact support@longlifedigital.co for help.', array('status' => 422));
             }
             $already_subscribed = false;
             foreach ($subscriber['subscriptions'] ?? array() as $subscription) {
                 if ((int) $subscription['segment_id'] === $fields['list'] && $subscription['status'] === 'subscribed' && $subscriber['status'] === 'subscribed') $already_subscribed = true;
             }
-            if (!$already_subscribed) $subscriber = $api->subscribeToList($fields['email'], $fields['list'], $options);
+            if (!$already_subscribed) {
+                $stage = 'subscriber_subscribe';
+                $subscriber = $api->subscribeToList($fields['email'], $fields['list'], $options);
+            }
         }
+        $stage = 'subscriber_result';
         if (!is_array($subscriber) || empty($subscriber['id']) || !in_array($subscriber['status'] ?? '', array('subscribed', 'unconfirmed'), true)) throw new RuntimeException('Subscription not accepted.');
     } catch (Throwable $error) {
         lld_delete($attempt['key']);
         // API codes aid setup diagnostics without logging subscriber details or tokens.
-        wc_get_logger()->error('MailPoet signup failed (code ' . (int) $error->getCode() . '). Check the selected list and MailPoet sending settings.', array('source' => 'lld-forms'));
+        wc_get_logger()->error('MailPoet signup failed at ' . $stage . ' (code ' . (int) $error->getCode() . '). Check MailPoet sending settings.', array('source' => 'lld-forms'));
         return lld_error('Unable to complete newsletter signup.', 503);
     }
     return lld_accept_public_form($attempt);

@@ -73,6 +73,15 @@ export function createFormsHandler({ env = process.env, fetchImpl = fetch } = {}
       );
       const data = await response.json().catch(() => null);
       if (!response.ok || data?.ok !== true) {
+        if (
+          action === 'newsletter' &&
+          response.status === 422 &&
+          data?.code === 'lld_newsletter_ineligible'
+        )
+          throw new CommerceError(
+            'This email address cannot be subscribed through this form. Please contact support@longlifedigital.co for help.',
+            422,
+          );
         const messages = {
           409: 'Your request is still being processed. Please wait a moment before trying again.',
           429: 'Too many requests. Please wait 15 minutes before trying again.',

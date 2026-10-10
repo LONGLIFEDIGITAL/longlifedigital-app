@@ -1,6 +1,28 @@
 # Headless checkout: install and acceptance
 
-The guest-checkout implementation is **test-only**. The user has completed a Stripe test purchase through React (Woo order 334, 30-Day Social Media Content Pack) and successfully downloaded the product. The exact Stripe Gateway 11.0.0 / WooCommerce 11.1.2 source contract has been reviewed; the remaining installation-specific failure/authentication scenarios below still need acceptance.
+Bridge **0.5.8** supports the Stripe test or live mode selected in WooCommerce, with matching credentials. Supported versions are Stripe Gateway **11.0.0 / 11.0.1** and WooCommerce **11.1.2 / 11.2.0**. The user previously completed a Stripe test purchase through React (Woo order 334, 30-Day Social Media Content Pack) and downloaded the product. Live charges have not been exercised by the automated checks; the installation-specific acceptance scenarios below remain relevant.
+
+## Production checkout fix: bridge 0.5.8
+
+The previous bridge, API and payment form explicitly required test mode/test keys.
+The public WordPress configuration also reported Stripe Gateway 11.0.1 and
+WooCommerce 11.2.0, which the old version checks rejected. Deploy the updated
+app/API and replace the installed WordPress plugin with the current
+[plugin ZIP](cms/Longlife-Headless-Commerce.zip). Pushing to `main` deploys the
+app only; it does not update PHP installed in WordPress.
+
+The bridge now chooses the active mode's publishable/secret keys, checks that
+they match the gateway's active credentials, and rejects missing or mixed-mode
+keys. The API and payment form accept the matching public key for either mode;
+test-card instructions appear only in test mode. Secret keys stay in WordPress.
+Version, card, capture, guest-checkout and explicit enablement checks remain.
+The public configuration includes `configurationIssues` with fixed setting names
+for diagnosis, without exposing credentials.
+
+The official [Stripe Gateway 11.0.1 source](https://github.com/woocommerce/woocommerce-gateway-stripe/tree/11.0.1)
+has the same UPE payment gateway and Blocks adapter files as 11.0.0.
+[WooCommerce 11.2.0 checkout](https://github.com/woocommerce/woocommerce/blob/11.2.0/plugins/woocommerce/src/StoreApi/Routes/V1/Checkout.php)
+adds cart-session exception handling without changing the payment handoff used here.
 
 All content and commerce now target **https://longlifedigital-zmuro.wpcomstaging.com**. The test product is **318 — Small Business AI Prompt Pack**. Firebase is not used.
 
@@ -21,9 +43,9 @@ Order confirmation displays a themed spinner and progress messages, with up to e
 ## Your remaining setup
 
 1. In the **main** WordPress dashboard, open **Plugins → Add New Plugin → Upload Plugin**. Upload [Longlife-Headless-Commerce.zip](cms/Longlife-Headless-Commerce.zip), install and activate **Longlife Headless Commerce**. If an earlier version of this same plugin exists, replace it with this ZIP. This is separate from the `Longlife Storefront` content plugin; keep that plugin.
-2. Open **Settings → General → Longlife headless checkout**. Check **Enable React test checkout** and save.
+2. Open **Settings → General → Longlife headless checkout**. Check **Enable React checkout** and save. An existing enabled setting is preserved on update.
 3. Click **Copy secret** beside the integration secret, then paste it into **`.env.local`** as `LLD_COMMERCE_BRIDGE_SECRET=...`. **Show / Hide** lets you reveal or mask the value. If the browser blocks automatic copying, the plugin reveals and selects the secret for manual copying. Keep it out of chat and Git. A local `COMMERCE_SESSION_SECRET` has already been generated; preserve it. `STOREFRONT_ORIGINS` currently allows `http://localhost:5173` and `http://127.0.0.1:5173`; add the exact origin if you use a different port.
-4. Keep **Stripe in test mode**, with **cards enabled** and **automatic capture**. The bridge deliberately refuses live mode and unreviewed gateway/Woo versions. Keep the gateway's own Stripe webhook connection enabled. Do not point Stripe events at the retired `/api/stripe-webhook` endpoint in React/Vercel.
+4. Select the intended mode under **WooCommerce → Settings → Payments → Stripe**. Use test mode for testing; disable it for real sales with the live account connected. Keep **cards enabled**, **automatic capture**, and the gateway's webhook connection enabled for that mode. Live and test connections are configured separately; see [WooCommerce Stripe settings](https://woocommerce.com/document/stripe/setup-and-configuration/settings-guide/) and [webhooks](https://woocommerce.com/document/stripe/setup-and-configuration/stripe-webhooks/). Do not point Stripe events at the retired `/api/stripe-webhook` endpoint in React/Vercel.
 5. Keep **guest checkout enabled** under WooCommerce → Settings → Accounts & Privacy. Under Products → Downloadable products, **Downloads require login must be off** for guests. Use the host-supported protected delivery method and a real downloadable file on product 318. Confirm a direct file URL cannot bypass purchase permission. No need to recreate ACF or your pages.
 6. Restart Vite once after these environment changes. Tell the developer the plugin is active and the secret is saved. No secrets need to be sent in chat.
 
@@ -60,11 +82,11 @@ If a request times out before an order can be identified, do not clear database 
 
 WordPress/WooCommerce registration, email password setup/recovery, login, revocable account sessions, logout and customer order history are now implemented. Signed checkout requests associate new orders with the verified customer while retaining guest checkout. Follow [Customer accounts setup](CUSTOMER-ACCOUNTS-SETUP.md) to install bridge **0.3.1**, enable registration and verify email delivery. This update sends account emails through WooCommerce's mailer and resends password setup when an unverified registration is retried. Cross-device guest-order recovery and verified guest purchase linking remain future work. Native Woo purchase emails continue to provide guest access.
 
-PayPal, saved cards, subscriptions and physical shipping are outside this first payment adapter. Production/live Stripe enablement requires another validation and release step; do not remove the test-mode guard to launch prematurely.
+PayPal, saved cards, subscriptions and physical shipping are outside this payment adapter. Test failure/authentication scenarios on a staging installation in Stripe test mode. The same Woo gateway owns live payment creation, verification and fulfillment.
 
-## Deployment settings (later)
+## Deployment settings
 
-Configure `VITE_WORDPRESS_API_URL`, `VITE_WOOCOMMERCE_STORE_API_URL`, and `VITE_HEADLESS_COMMERCE=true` in Vercel. Configure the three **server-only** fields from `.env.example` separately. Use a new production cookie secret and exact allowed React origins; no wildcard origin. WordPress administration and gateway credentials stay in WordPress. This work does not deploy Vercel or change DNS.
+Configure `VITE_WORDPRESS_API_URL`, `VITE_WOOCOMMERCE_STORE_API_URL`, and `VITE_HEADLESS_COMMERCE=true` in the **Production** environment in Vercel. Configure `LLD_COMMERCE_BRIDGE_SECRET`, `COMMERCE_SESSION_SECRET`, and `STOREFRONT_ORIGINS` there too; `.env.local` does not configure Vercel. Use a production cookie secret (at least 32 characters) and the exact allowed React origins, including `www` if served; no wildcard origin. The bridge secret must match WordPress. Redeploy after changing environment variables. WordPress administration and gateway credentials stay in WordPress. This work does not deploy Vercel or change DNS.
 
 ## Local checks
 

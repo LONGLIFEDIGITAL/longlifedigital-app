@@ -3,8 +3,8 @@ namespace MailPoet\API\MP\v1 { class APIException extends \Exception {} }
 namespace MailPoet\API { class API { static function MP($version) { return $GLOBALS['mp']; } } }
 namespace {
 define('ABSPATH', __DIR__);
-class WP_Error { function __construct(public $message,public $status=400){} }
-function lld_error($message,$status=400){return new WP_Error($message,$status);}
+class WP_Error { public $status; function __construct(public $code,public $message,public $data){$this->status=$data['status'];} }
+function lld_error($message,$status=400){return new WP_Error('lld_checkout',$message,['status'=>$status]);}
 function is_wp_error($v){return $v instanceof WP_Error;}
 function lld_response($v){return $v;}
 function add_action(...$args){}
@@ -20,7 +20,7 @@ function lld_insert($k,$kind,$data){if(isset($GLOBALS['records'][$k]))return fal
 function lld_save($k,$data){$GLOBALS['records'][$k]=$data;}
 function lld_delete($k){unset($GLOBALS['records'][$k]);}
 function lld_inquiry_rate($client,$email){return $GLOBALS['throttle']?lld_error('Too many',429):true;}
-function wc_get_logger(){return new class {function error(...$args){}};}
+function wc_get_logger(){return new class {function error(...$args){$GLOBALS['logs'][]=$args;} function notice(...$args){$GLOBALS['logs'][]=$args;}};}
 class WC_Emails {
  static function instance(){return new self;}
  function wrap_message($subject,$body){return $body;}
@@ -36,7 +36,7 @@ class MockMailPoet {
 }
 require __DIR__.'/../wordpress/longlife-headless-commerce/forms.php';
 function check($v,$message){if(!$v)throw new \RuntimeException($message);}
-function reset_state(){ $GLOBALS['records']=[];$GLOBALS['mail']=[];$GLOBALS['mail_ok']=true;$GLOBALS['list']=7;$GLOBALS['throttle']=false;$GLOBALS['mp']=new MockMailPoet; }
+function reset_state(){ $GLOBALS['records']=[];$GLOBALS['logs']=[];$GLOBALS['mail']=[];$GLOBALS['mail_ok']=true;$GLOBALS['list']=7;$GLOBALS['throttle']=false;$GLOBALS['mp']=new MockMailPoet; }
 function request($patch=[]){return new Request(array_merge(['requestId'=>'6b030225-d7f1-4695-9e62-8dd372379a41','name'=>'Alex','email'=>'alex@example.test','service'=>'Website & design','message'=>'Hello <script>bad</script>','client'=>str_repeat('a',64),'consent'=>true],$patch));}
 reset_state();
 check(lld_contact_form(request())===['ok'=>true],'contact accepted');
@@ -58,7 +58,16 @@ reset_state();$mp->subscriber=['id'=>1,'status'=>'subscribed','first_name'=>'Ori
 check(lld_newsletter_signup(request())===['ok'=>true] && !$mp->calls,'existing member not duplicated or overwritten');
 reset_state();$mp->subscriber=['id'=>1,'status'=>'unconfirmed'];
 check(lld_newsletter_signup(request())===['ok'=>true] && $mp->calls[0][0]==='subscribe','pending signup uses MailPoet resubscribe');
-reset_state();$mp->subscriber=['id'=>1,'status'=>'bounced'];check(lld_newsletter_signup(request())->status===503 && !$mp->calls,'suppressed member not reactivated');
+foreach ([['id'=>1,'status'=>'subscribed','deleted_at'=>'2026-10-08'],['id'=>1,'status'=>'bounced'],['id'=>1,'status'=>'inactive']] as $subscriber) {
+ reset_state();$mp->subscriber=$subscriber;$result=lld_newsletter_signup(request());
+ check($result->status===422 && $result->code==='lld_newsletter_ineligible','ineligible subscriber gets an actionable validation error');
+ check(str_contains($result->message,'contact support@longlifedigital.co'),'support guidance provided');
+ check(!$mp->calls && !$records,'ineligible member not restored or subscribed and retry record released');
+ check(str_contains($logs[0][0],isset($subscriber['deleted_at'])?'trashed_subscriber':'ineligible_subscriber_status'),'admin log distinguishes known rejection');
+ check(!str_contains(json_encode($logs),'alex@example.test'),'diagnostics do not log subscriber addresses');
+}
+reset_state();$mp->subscriber=['id'=>1,'status'=>'unsubscribed'];check(lld_newsletter_signup(request())===['ok'=>true] && $mp->calls[0][0]==='subscribe','unsubscribed contact can request confirmation with consent');
 reset_state();$mp->fail=true;check(lld_newsletter_signup(request())->status===503 && !$records,'provider failure visible and retryable');
+check(str_contains($logs[0][0],'subscriber_add'),'unexpected failure identifies its stage');
 echo "Contact and MailPoet bridge checks passed.\n";
 }

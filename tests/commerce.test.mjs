@@ -21,6 +21,7 @@ const attempt = '11111111-1111-4111-8111-111111111111';
 const config = {
   enabled: true,
   testMode: true,
+  publishableKey: 'pk_test_example',
   gatewayVersion: '11.0.0',
   woocommerceVersion: '11.1.2',
 };
@@ -257,10 +258,14 @@ test('checkout invokes the pinned Woo gateway, signs exact body, strips PII and 
     authentication: { type: 'pi', clientSecret: 'pi_abc_secret_xyz' },
   });
 });
-test('changed gateway or live Stripe blocks payment submission', async () => {
+test('unreviewed versions and mismatched Stripe mode or keys block payment submission', async () => {
   for (const value of [
     { ...config, testMode: false },
+    { ...config, testMode: undefined },
+    { ...config, publishableKey: 'pk_live_example' },
+    { ...config, publishableKey: null },
     { ...config, gatewayVersion: '12.0.0' },
+    { ...config, woocommerceVersion: '12.0.0' },
     { ...config, enabled: false },
   ]) {
     const result = await call('checkout', payload, async (url) => {
@@ -269,6 +274,31 @@ test('changed gateway or live Stripe blocks payment submission', async () => {
     });
     assert.equal(result.status, 503);
     assert.equal(result.body.retrySafe, true);
+  }
+});
+test('reviewed gateway versions accept matching test and live modes through the signed Woo checkout', async () => {
+  for (const gatewayVersion of ['11.0.0', '11.0.1']) {
+    for (const woocommerceVersion of ['11.1.2', '11.2.0']) {
+      for (const testMode of [true, false]) {
+        let dispatched = false;
+        const result = await call('checkout', payload, async (url, init) => {
+          if (url.endsWith('/config'))
+            return reply({
+              ...config,
+              gatewayVersion,
+              woocommerceVersion,
+              testMode,
+              publishableKey: testMode ? 'pk_test_example' : 'pk_live_example',
+            });
+          dispatched = true;
+          assert.ok(url.endsWith('/wc/store/v1/checkout'));
+          assert.ok(init.headers['X-LLD-Signature']);
+          return reply({ order_id: 45, payment_result: { payment_status: 'success' } });
+        });
+        assert.equal(result.status, 200);
+        assert.equal(dispatched, true);
+      }
+    }
   }
 });
 test('ambiguous payment failures do not suggest it is safe to pay again', async () => {
