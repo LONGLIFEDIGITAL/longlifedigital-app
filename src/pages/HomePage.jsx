@@ -336,7 +336,10 @@ export default function HomePage({
                     w="100%"
                     mt={4}
                   >
-                    View Details →
+                    {!highlighted.categoryLabel || highlighted.categoryLabel === 'Uncategorized'
+                      ? 'Buy Now'
+                      : `Get this ${highlighted.categoryLabel.replace(/s$/, '')}`}{' '}
+                    →
                   </Button>
                 </Box>
               </Box>

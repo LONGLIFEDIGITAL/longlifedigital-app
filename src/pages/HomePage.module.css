@@ -94,7 +94,15 @@
   max-width: 100%;
   max-height: 100%;
 }
+.featuredProductImage:not([data-ebook]) {
+  height: auto;
+}
+.featuredProductImage:not([data-ebook]):not([data-image-state='loaded']) {
+  aspect-ratio: 3 / 2;
+}
 .featuredProductImage:not([data-ebook]) .featuredArtwork {
+  width: 100%;
+  max-height: none;
   border-radius: 0.75rem;
 }
 .featuredProductImage .featuredEmoji {
