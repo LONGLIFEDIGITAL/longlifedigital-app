@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { CommerceError, readBody, requireSameOrigin, send } from '../server/commerce/http.js';
 import { signedHeaders, storeRoot } from '../server/commerce/woo.js';
 import { clientKey } from '../server/account.js';
+import { translationRequestError } from '../shared/translation.js';
 
 function field(body, name, label, max, required = true) {
   const value = body[name] ?? '';
@@ -66,6 +67,28 @@ export function createInquiryHandler({ env = process.env, fetchImpl = fetch } = 
       )
         throw new CommerceError('Please keep your project description under 3,000 characters.');
       payload.message = body.message?.trim() || '';
+      if (body.translation !== undefined) {
+        const error = translationRequestError(body.translation);
+        if (error) throw new CommerceError(error);
+        payload.translation = Object.fromEntries(
+          [
+            'type',
+            'source',
+            'target',
+            'service',
+            'document',
+            'documents',
+            'pages',
+            'rush',
+            'notarized',
+            'delivery',
+            'consent',
+          ].map((key) => [key, body.translation[key]]),
+        );
+        // Translation inquiries contain only contact details and job metadata.
+        // Documents and private document content belong in the secure provider.
+        payload.message = '';
+      }
       const store = storeRoot(env);
       const route = '/lld-headless/v1/inquiry';
       const encoded = JSON.stringify(payload);
@@ -86,14 +109,16 @@ export function createInquiryHandler({ env = process.env, fetchImpl = fetch } = 
       const data = await response.json().catch(() => null);
       if (!response.ok || data?.ok !== true) {
         const messages = {
+          400: 'Please check your inquiry details and try again.',
           404: 'This service is currently unavailable. Please email info@longlifedigital.co.',
           409: 'Your inquiry is still being processed. Please wait a moment before trying again.',
+          422: 'The available document services or document choices have changed. Please reload the page and select your document again.',
           429: 'Too many inquiries. Please wait 15 minutes before trying again.',
         };
         throw new CommerceError(
           messages[response.status] ||
             'We couldn’t send your inquiry. Please try again or email info@longlifedigital.co.',
-          [404, 409, 429].includes(response.status) ? response.status : 502,
+          [400, 404, 409, 422, 429].includes(response.status) ? response.status : 502,
         );
       }
       return send(res, 200, { ok: true });

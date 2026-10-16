@@ -1,0 +1,1005 @@
+.page {
+  color: #281c37;
+  background: #fff;
+}
+.page a {
+  text-underline-offset: 0.22em;
+}
+.page h1,
+.page h2,
+.page h3,
+.page p {
+  margin-top: 0;
+}
+.page h1,
+.sectionHeading h2,
+.trustGrid h2,
+.faqs h2,
+.closing h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1.12;
+}
+.page h1 {
+  font-size: clamp(2.75rem, 5.2vw, 5.25rem);
+  margin-bottom: 1.5rem;
+}
+.page h2 {
+  font-size: clamp(1.65rem, 3.1vw, 3rem);
+}
+.page h3 {
+  font-size: 1.15rem;
+  line-height: 1.4;
+  letter-spacing: -0.025em;
+}
+.page p {
+  line-height: 1.75;
+}
+.hero,
+.requestHero {
+  padding: 1.5rem 0 4.5rem;
+  background: radial-gradient(ellipse at 85% 40%, #e9e0f1, transparent 60%), #faf7f2;
+  border-bottom: 1px solid #ece5ef;
+}
+.hero {
+  /* Rotated decorative documents must not widen the page's scrollable area. */
+  overflow: clip;
+}
+.breadcrumb {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: #71647e;
+  margin-bottom: 3rem;
+}
+.breadcrumb a {
+  color: #673694;
+  text-decoration: none;
+}
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #806037;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.eyebrow > svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+.heroText h1 {
+  max-width: 13ch;
+  white-space: pre-line;
+}
+.heroText em {
+  color: #7840a2;
+  font-style: normal;
+}
+.intro {
+  color: #70617c;
+  max-width: 36rem;
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  margin-bottom: 2rem;
+}
+.specialties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0 0 1.75rem;
+  list-style: none;
+}
+.specialties li {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #dfd1e8;
+  border-radius: 1rem;
+  background: #ffffffa6;
+  color: #583574;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #59307d;
+  text-decoration: none;
+  padding: 0.8rem 0;
+}
+.heroNote {
+  font-size: 0.7rem;
+  color: #82738a;
+  margin: 1.25rem 0 0;
+}
+.artwork {
+  position: relative;
+  isolation: isolate;
+  padding: 3rem 2.2rem 2rem;
+  max-width: 29rem;
+  width: calc(100% - 2rem);
+  margin: auto;
+}
+.artOrbit {
+  position: absolute;
+  z-index: -1;
+  inset: 5% -1% 0;
+  border: 1px solid #cbb7dd;
+  border-radius: 50%;
+  transform: rotate(-25deg);
+}
+.languageTag {
+  position: relative;
+  z-index: 2;
+  margin: 0 0 0.75rem auto;
+  width: max-content;
+  max-width: 100%;
+  border: 1px solid #e6ddee;
+  border-radius: 2rem;
+  background: #fffefa;
+  padding: 0.75rem 1.2rem;
+  color: #66398a;
+  font-size: 0.8rem;
+  box-shadow: 0 0.5rem 1.5rem #3a25400a;
+}
+.languageTag span {
+  color: #bc8f49;
+  margin: 0 0.4rem;
+}
+.documentFront {
+  position: relative;
+  background: #fffefa;
+  border: 1px solid #e4d9d1;
+  border-radius: 0.65rem;
+  padding: clamp(1.5rem, 2.8vw, 2.75rem);
+  box-shadow: 0 1.5rem 3rem #3a214320;
+  transform: rotate(-6deg);
+}
+.documentLabel {
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #8a708f;
+}
+.documentFront > strong {
+  display: block;
+  font:
+    500 clamp(2.4rem, 3.5vw, 3.5rem)/1.2 'Playfair Display',
+    Georgia,
+    serif;
+  letter-spacing: -0.04em;
+  margin: 2rem 0;
+}
+.documentFront em {
+  font-style: normal;
+  color: #8260a5;
+}
+.documentLines {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 2.5rem;
+}
+.documentLines i {
+  display: block;
+  height: 0.25rem;
+  background: #eee7e0;
+  border-radius: 1rem;
+}
+.documentLines i:nth-child(2) {
+  width: 82%;
+}
+.documentLines i:last-child {
+  width: 60%;
+}
+.documentFoot {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid #e5daca;
+  padding-top: 1.2rem;
+  color: #7a5d88;
+  font-size: 0.6rem;
+  line-height: 1.6;
+}
+.documentBack {
+  position: absolute;
+  z-index: -1;
+  background: #3b2058;
+  color: #eddbb0;
+  inset: 5.2rem 0.5rem 1rem 3rem;
+  border-radius: 0.8rem;
+  transform: rotate(9deg);
+  padding: 2rem;
+}
+.documentBack span {
+  font-size: 0.75rem;
+}
+.artSeal {
+  position: absolute;
+  right: 0;
+  bottom: 1rem;
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  color: #67471e;
+  background: #e7cb8b;
+  border: 5px solid #f8edce;
+  box-shadow: 0 0.5rem 1rem #5c3d2720;
+}
+.artSeal svg {
+  width: 2rem;
+}
+.languageStrip {
+  border-bottom: 1px solid #eee8f1;
+  padding: 1.4rem 0;
+}
+.languageStrip > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem 2rem;
+  flex-wrap: wrap;
+}
+.languageStrip > div > span {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #81738a;
+  font-size: 0.625rem;
+}
+.languageStrip > div > div {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.languageStrip svg {
+  color: #ad8850;
+}
+.section {
+  padding-block: clamp(3rem, 5vw, 5.5rem);
+  scroll-margin-top: 6rem;
+}
+.sectionHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.sectionHeading h2 {
+  margin-bottom: 0;
+}
+.sectionHeading > p {
+  color: #776981;
+  font-size: 0.875rem;
+  max-width: 20rem;
+  margin-bottom: 0.2rem;
+}
+.priceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.priceCard,
+.package {
+  position: relative;
+}
+.priceCard > a::after,
+.packageAction a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1.25rem;
+}
+.priceCard > a:focus-visible,
+.packageAction a:focus-visible {
+  outline: none;
+}
+.priceCard > a:focus-visible::after,
+.packageAction a:focus-visible::after {
+  outline: 2px solid #71399b;
+  outline-offset: 4px;
+}
+.priceCard {
+  border: 1px solid #e6dfea;
+  border-radius: 1.25rem;
+  padding: 1.65rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #8759a5;
+  margin-bottom: 1.5rem;
+}
+.cardTop > svg {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+.cardNumber {
+  color: #a591af;
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+}
+.priceCard h3 {
+  margin-bottom: 0.6rem;
+  max-width: 18ch;
+}
+.priceCard > p {
+  color: #7b6d84;
+  font-size: 0.8rem;
+  margin-bottom: 1.4rem;
+}
+.cardPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-bottom: 1.25rem;
+}
+.cardPrice strong {
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+.cardPrice span {
+  font-size: 0.7rem;
+  color: #83728c;
+}
+.priceCard > a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-top: 1px solid #eee7f2;
+  padding-top: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #71399b;
+  text-decoration: none;
+}
+.priceCard > a:hover {
+  text-decoration: underline;
+}
+.customCard {
+  background: #f8f4fb;
+  border-color: #e2d4eb;
+}
+.customCard .eyebrow {
+  color: #956e37;
+  margin-top: 0.2rem;
+}
+.customCard h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.6rem;
+}
+.packages {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.package {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background: #fbf7ed;
+  border: 1px solid #ece0c6;
+  border-radius: 1.25rem;
+  padding: 1.6rem;
+}
+.package .eyebrow {
+  font-size: 0.55rem;
+}
+.package h3 {
+  margin-bottom: 0.4rem;
+}
+.package p:last-child {
+  font-size: 0.75rem;
+  color: #827158;
+  margin-bottom: 0;
+}
+.packageAction {
+  display: grid;
+  justify-items: end;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+.packageAction strong {
+  font-size: 1.5rem;
+  letter-spacing: -0.04em;
+}
+.packageAction a {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: #e8d1a2;
+  color: #4e361a;
+}
+.extrasGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  padding: 2.5rem 0 0;
+}
+.extrasGrid h3 {
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+.extrasGrid strong {
+  color: #775396;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.extrasGrid p {
+  color: #897a90;
+  font-size: 0.7rem;
+  margin: 0.6rem 0 0;
+}
+.process {
+  background: #2b1742;
+  padding-block: clamp(3rem, 5vw, 5rem);
+  color: #f9f2ff;
+}
+.process .eyebrow {
+  color: #dec18a;
+}
+.process .sectionHeading > p {
+  color: #c2adcf;
+}
+.processGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3rem;
+  margin-top: 3rem;
+}
+.processGrid article > span {
+  color: #d7b26b;
+  font-size: 0.7rem;
+  display: block;
+  border-bottom: 1px solid #ffffff25;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.processGrid p {
+  color: #c6b6d1;
+  font-size: 0.8rem;
+  margin-bottom: 0;
+}
+.trustGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 3.5rem;
+}
+.trustIntro {
+  font-size: 1rem;
+  color: #6e5c7b;
+  white-space: pre-line;
+}
+.credentials {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.credentials article {
+  border-left: 2px solid #c3a15c;
+  padding-left: 1rem;
+}
+.credentials h3 {
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+.credentials p {
+  color: #71617e;
+  font-size: 0.8rem;
+  white-space: pre-line;
+}
+.credentials a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #79439d;
+  font-size: 0.75rem;
+}
+.faqs {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr);
+  gap: 3.5rem;
+  padding-block: 4rem;
+  border-top: 1px solid #ece4f1;
+  margin-top: 3rem;
+}
+.faqs p {
+  font-size: 0.875rem;
+  white-space: pre-line;
+}
+.bookCallout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  background: #f8f4fc;
+  border: 1px solid #e9def0;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+.bookCallout p:last-child {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #776583;
+}
+.closing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-radius: 1.5rem;
+  background: #f7f2ea;
+  padding: clamp(2rem, 5vw, 4rem) 1rem;
+}
+.closing .eyebrow {
+  justify-content: center;
+}
+.closing p:not(.eyebrow) {
+  color: #867585;
+  font-size: 0.9rem;
+}
+.closing > a:last-child {
+  margin-top: 1.3rem;
+  font-size: 0.7rem;
+  color: #80628e;
+}
+.requestHero {
+  padding-bottom: 2.5rem;
+}
+.requestHeading {
+  max-width: 45rem;
+}
+.requestHeading h1 {
+  font-size: clamp(2.25rem, 4vw, 3.5rem);
+}
+.requestHeading > p:last-child {
+  color: #796783;
+  font-size: 0.9rem;
+}
+.requestContent {
+  padding-block: 3rem 5rem;
+}
+.requestGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 2rem;
+}
+.formPanel {
+  border: 1px solid #e7dfed;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  border-radius: 1.5rem;
+}
+.formPanel h2 {
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
+  letter-spacing: -0.04em;
+}
+.formPanel h2:focus {
+  outline: none;
+}
+.muted {
+  color: #7e7088;
+  font-size: 0.85rem;
+}
+.fields {
+  border: 0;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  min-width: 0;
+  display: grid;
+  gap: 1.3rem;
+}
+.fields label {
+  font-size: 0.8rem;
+}
+.fields input,
+.fields select {
+  font-size: 1rem;
+}
+.fields select {
+  width: 100%;
+  text-overflow: ellipsis;
+}
+.steps {
+  display: flex;
+  gap: 1.25rem;
+  list-style: none;
+  padding: 0 0 1.5rem;
+  margin: 0 0 1.75rem;
+  border-bottom: 1px solid #eee7f3;
+}
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  color: #94849f;
+}
+.steps li > span {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f1ebf7;
+}
+.steps li[aria-current] {
+  color: #703496;
+  font-weight: 600;
+}
+.steps li[aria-current] > span {
+  background: #733c97;
+  color: white;
+}
+.twoColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.typePicker {
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.typePicker legend,
+.extras legend {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0 0 0.65rem;
+}
+.typePicker > label {
+  cursor: pointer;
+  display: flex;
+  align-items: start;
+  gap: 0.6rem;
+  border: 1px solid #e1d6e8;
+  border-radius: 0.9rem;
+  padding: 1rem;
+}
+.typePicker > label[data-selected='true'] {
+  border-color: #8e58b2;
+  background: #faf6fe;
+}
+.typePicker input {
+  accent-color: #843dc1;
+  margin: 0.2rem 0 0;
+}
+.typePicker strong {
+  font-size: 0.75rem;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+.typePicker small {
+  font-size: 0.65rem;
+  color: #887491;
+  display: block;
+  line-height: 1.6;
+}
+.extras {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: 1.15rem;
+}
+.summary {
+  border-radius: 1.25rem;
+  border: 1px solid #e6daee;
+  background: #f9f5fc;
+  padding: 2rem;
+}
+.summary h2 {
+  font-size: 1.6rem;
+  letter-spacing: -0.035em;
+}
+.languageSummary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  color: #785691;
+  font-size: 0.85rem;
+}
+.summary dl {
+  margin: 1.5rem 0;
+}
+.summary dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e7dced;
+  font-size: 0.75rem;
+}
+.summary dt {
+  color: #82718f;
+}
+.summary dd {
+  margin: 0;
+  text-align: right;
+  max-width: 60%;
+}
+.summary .costBreakdown {
+  padding-top: 0.5rem;
+  border-top: 1px solid #e7dced;
+}
+.costBreakdown dd {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.estimate {
+  display: grid;
+  gap: 0.6rem;
+  margin: 1.5rem 0 0.7rem;
+}
+.estimate span {
+  color: #745786;
+  font-size: 0.7rem;
+}
+.estimate strong {
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+}
+.summaryHelp {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5d9ed;
+}
+.summaryHelp > strong {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.6rem;
+}
+.summaryHelp > a {
+  color: #703d8f;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+.summaryHelp p {
+  margin-top: 0.75rem;
+}
+.small {
+  color: #81718d;
+  font-size: 0.72rem;
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+.small a,
+.fields a {
+  color: #70389a;
+}
+.notice {
+  font-size: 0.8rem;
+  padding: 1rem;
+  border: 1px solid #e8deee;
+  border-radius: 0.7rem;
+  background: #faf7fc;
+  color: #756281;
+  white-space: pre-line;
+}
+.success {
+  max-width: 44rem;
+  margin: auto;
+  border: 1px solid #e7ddec;
+  border-radius: 1.5rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  text-align: center;
+}
+.success .eyebrow {
+  justify-content: center;
+}
+.success h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  line-height: 1.2;
+}
+.success p {
+  color: #796684;
+  overflow-wrap: anywhere;
+}
+.success [role='status']:focus {
+  outline: none;
+}
+.success > a:last-child {
+  color: #703d8f;
+  font-size: 0.8rem;
+}
+.successMark {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: #edf7f1;
+  color: #377654;
+  margin: 0 auto 1.5rem;
+}
+.successMark svg {
+  width: 1.75rem;
+}
+.nextStep {
+  border-top: 1px solid #e8deee;
+  padding: 1.5rem 0;
+  margin-top: 1.5rem;
+}
+.nextStep h3 {
+  font-size: 1.1rem;
+}
+.nextStep p {
+  font-size: 0.85rem;
+}
+@media (max-width: 62em) {
+  .priceGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .requestGrid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .summary {
+    padding: 1.25rem;
+  }
+  .typePicker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 47.99em) {
+  .heroGrid,
+  .requestGrid,
+  .trustGrid,
+  .faqs {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+  .hero {
+    padding-bottom: 2.75rem;
+  }
+  .heroText h1 {
+    max-width: 16ch;
+  }
+  .artwork {
+    max-width: 23rem;
+  }
+  .documentFront > strong {
+    font-size: 3rem;
+  }
+  .sectionHeading {
+    display: block;
+  }
+  .sectionHeading > p {
+    margin-top: 1.25rem;
+    max-width: 28rem;
+  }
+  .packages {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .extrasGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .processGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+  }
+  .processGrid article > span {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+  .processGrid h3 {
+    margin-bottom: 0.5rem;
+  }
+  .bookCallout {
+    align-items: start;
+    flex-direction: column;
+  }
+  .languageStrip > div {
+    gap: 0.85rem 1.5rem;
+  }
+  .languageStrip > div > span {
+    flex-basis: 100%;
+  }
+  .languageStrip > div > div {
+    font-size: 0.75rem;
+  }
+  .formPanel {
+    padding: 1.25rem;
+  }
+  .faqs {
+    padding-block: 2.5rem;
+  }
+  .requestContent {
+    padding-top: 1.5rem;
+  }
+  .typePicker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 34em) {
+  .priceGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .priceCard {
+    padding: 1.5rem;
+  }
+  .priceCard h3 {
+    max-width: none;
+  }
+  .cardTop {
+    margin-bottom: 1rem;
+  }
+  .twoColumns,
+  .typePicker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .formPanel .actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+  .steps {
+    gap: 0.8rem;
+  }
+  .steps li {
+    font-size: 0.65rem;
+  }
+  .steps li > span {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+  }
+  .package {
+    padding: 1.25rem;
+  }
+  .packageAction strong {
+    font-size: 1.25rem;
+  }
+  .artwork {
+    padding-inline: 1rem;
+  }
+  .languageTag {
+    font-size: 0.7rem;
+  }
+  .documentFront > strong {
+    font-size: clamp(2.2rem, 9vw, 3rem);
+  }
+}

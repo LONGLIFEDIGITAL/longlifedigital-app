@@ -30,9 +30,10 @@ export default function useAppNavigation() {
   const postMatch = useMatch('/blog/:postSlug');
   const productMatch = useMatch('/products/:productId');
   const serviceMatch = useMatch('/services/:serviceSlug');
+  const serviceRequestMatch = useMatch('/services/:serviceSlug/request');
   const page = productMatch
     ? 'product'
-    : serviceMatch
+    : serviceMatch || serviceRequestMatch
       ? 'service'
       : postMatch
         ? 'post'
@@ -52,7 +53,8 @@ export default function useAppNavigation() {
     setPage: (id) => visit(PAGE_PATHS[id]),
     postSlug: postMatch?.params.postSlug,
     productId: productMatch?.params.productId,
-    serviceSlug: serviceMatch?.params.serviceSlug,
+    serviceSlug: (serviceMatch || serviceRequestMatch)?.params.serviceSlug,
+    serviceRequest: Boolean(serviceRequestMatch),
     goProduct: (product) => visit(`/products/${encodeURIComponent(product.id)}`),
   };
 }

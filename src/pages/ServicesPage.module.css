@@ -182,6 +182,10 @@
   --accent: #825c2e;
   --tint: #fbf6ec;
 }
+[data-tone='translation'] {
+  --accent: #245f65;
+  --tint: #eef8f6;
+}
 .card {
   background: var(--tint);
   border: 1px solid #e9e2ed;

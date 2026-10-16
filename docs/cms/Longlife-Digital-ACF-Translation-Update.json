@@ -1,0 +1,692 @@
+[
+  {
+    "key": "group_lld_service",
+    "title": "Longlife Digital | Service details",
+    "fields": [
+      {
+        "name": "lld_service_layout",
+        "label": "Service page layout",
+        "type": "select",
+        "instructions": "Translation adds its own pricing, language choices and guided quote page.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "standard": "Standard service",
+          "translation": "Translation service"
+        },
+        "default_value": "standard",
+        "key": "field_lld_service_lld_service_layout"
+      },
+      {
+        "name": "lld_icon",
+        "label": "Icon",
+        "type": "text",
+        "instructions": "A short emoji or symbol; no HTML or SVG.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 12,
+        "key": "field_lld_service_lld_icon"
+      },
+      {
+        "name": "lld_nav_label",
+        "label": "Short menu label",
+        "type": "text",
+        "instructions": "Optional; fallback is the service title.",
+        "required": 0,
+        "default_value": "",
+        "maxlength": 60,
+        "key": "field_lld_service_lld_nav_label"
+      },
+      {
+        "name": "lld_nav_summary",
+        "label": "Menu description",
+        "type": "textarea",
+        "instructions": "",
+        "required": 0,
+        "default_value": "",
+        "rows": 3,
+        "new_lines": "",
+        "maxlength": 160,
+        "key": "field_lld_service_lld_nav_summary"
+      },
+      {
+        "name": "lld_pricing_mode",
+        "label": "Pricing display",
+        "type": "select",
+        "instructions": "A quoted amount is informational only. Purchasable prices always come from the linked WooCommerce product.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "contact": "Contact for pricing",
+          "estimate": "Indicative asking / starting price",
+          "product": "Linked WooCommerce product"
+        },
+        "default_value": "contact",
+        "key": "field_lld_service_lld_pricing_mode"
+      },
+      {
+        "name": "lld_amount",
+        "label": "Indicative amount",
+        "type": "number",
+        "instructions": "Never used to charge a customer.",
+        "required": 1,
+        "min": 0,
+        "step": 0.01,
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_amount"
+      },
+      {
+        "name": "lld_currency",
+        "label": "Quote currency",
+        "type": "select",
+        "instructions": "Initial business currency; expand deliberately if other currencies are supported.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "USD": "USD"
+        },
+        "default_value": "USD",
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_currency"
+      },
+      {
+        "name": "lld_billing_period",
+        "label": "Price wording",
+        "type": "select",
+        "instructions": "Display wording only; this does not create a subscription.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "once": "One time",
+          "month": "Per month",
+          "year": "Per year"
+        },
+        "default_value": "once",
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "estimate"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_billing_period"
+      },
+      {
+        "name": "lld_product",
+        "label": "Linked WooCommerce product",
+        "type": "post_object",
+        "instructions": "Choose a published product. Resolve its ID through the WooCommerce catalog. Checkout remains a later integration.",
+        "required": 1,
+        "return_format": "id",
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "post_type": [
+          "product"
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_pricing_mode",
+              "operator": "==",
+              "value": "product"
+            }
+          ]
+        ],
+        "key": "field_lld_service_lld_product"
+      },
+      {
+        "name": "lld_cta",
+        "label": "Service inquiry / consultation button",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "label",
+            "label": "Button label",
+            "type": "text",
+            "instructions": "Leave both label and destination empty to hide this button.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 60,
+            "key": "field_lld_service_lld_cta_label"
+          },
+          {
+            "name": "destination",
+            "label": "Destination",
+            "type": "text",
+            "instructions": "A storefront path such as /contact, or a complete HTTPS URL. Never a WordPress page permalink.",
+            "required": 0,
+            "default_value": "",
+            "maxlength": 500,
+            "key": "field_lld_service_lld_cta_destination"
+          }
+        ],
+        "key": "field_lld_service_lld_cta"
+      },
+      {
+        "name": "lld_package_details",
+        "label": "Included work / package details",
+        "type": "wysiwyg",
+        "instructions": "",
+        "required": 0,
+        "default_value": "",
+        "tabs": "all",
+        "toolbar": "basic",
+        "media_upload": 0,
+        "delay": 0,
+        "key": "field_lld_service_lld_package_details"
+      },
+      {
+        "name": "lld_specialties",
+        "label": "Service specialties",
+        "type": "textarea",
+        "instructions": "One specialty per line, up to 20. Appears on the card and service detail page.",
+        "required": 0,
+        "default_value": "",
+        "rows": 6,
+        "new_lines": "",
+        "maxlength": 2000,
+        "key": "field_lld_service_lld_specialties"
+      },
+      {
+        "name": "lld_service_visual",
+        "label": "Service illustration and accent",
+        "type": "select",
+        "instructions": "",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "search": "Search / green",
+          "web": "Website / purple",
+          "automation": "Automation / blue",
+          "advertising": "Advertising / rose",
+          "launch": "Business launch / gold",
+          "translation": "Translation / teal"
+        },
+        "default_value": "web",
+        "key": "field_lld_service_lld_service_visual"
+      },
+      {
+        "name": "lld_service_process",
+        "label": "What happens next",
+        "type": "wysiwyg",
+        "instructions": "Describe your consultation, scope and proposal process. Avoid promising a fixed response time unless you can meet it.",
+        "required": 0,
+        "default_value": "",
+        "tabs": "all",
+        "toolbar": "basic",
+        "media_upload": 0,
+        "delay": 0,
+        "key": "field_lld_service_lld_service_process"
+      },
+      {
+        "name": "lld_inquiry_title",
+        "label": "Inquiry form heading",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "default_value": "Tell us about your next step.",
+        "maxlength": 160,
+        "key": "field_lld_service_lld_inquiry_title"
+      },
+      {
+        "name": "lld_inquiry_intro",
+        "label": "Inquiry form introduction",
+        "type": "textarea",
+        "instructions": "",
+        "required": 0,
+        "default_value": "Share a few details and we’ll get back to you to discuss your project and a tailored quote.",
+        "rows": 3,
+        "new_lines": "",
+        "maxlength": 1000,
+        "key": "field_lld_service_lld_inquiry_intro"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_service"
+        }
+      ]
+    ],
+    "menu_order": 2,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Native title is the service name, excerpt is the card description, content is extended copy, featured image is optional and menu_order controls sorting. The same records feed the Services menu and contact form service choices.",
+    "show_in_rest": 1
+  },
+  {
+    "key": "group_lld_translation",
+    "title": "Longlife Digital | Translation service",
+    "fields": [
+      {
+        "name": "lld_translation_offerings",
+        "label": "Documents and packages offered",
+        "type": "textarea",
+        "instructions": "Add, remove, hide or reorder the service groups you handle. Each entry controls its pricing card and quote-form choice. Add Document choices, one per line, for customers to select the exact document within a group. Blank prices mean request a quote. Save with Update. Document choices require Longlife Headless Commerce 0.6.3 or newer; ACF Pro is not required.",
+        "required": 0,
+        "default_value": "[]",
+        "rows": 6,
+        "new_lines": "",
+        "maxlength": 100000,
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_service_layout",
+              "operator": "==",
+              "value": "translation"
+            }
+          ]
+        ],
+        "key": "field_lld_translation_lld_translation_offerings"
+      },
+      {
+        "name": "lld_translation",
+        "label": "Translation page content and quote settings",
+        "type": "group",
+        "instructions": "",
+        "required": 0,
+        "layout": "block",
+        "sub_fields": [
+          {
+            "name": "heading",
+            "label": "Hero heading",
+            "type": "textarea",
+            "instructions": "Plain text. Line breaks are preserved.",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 160,
+            "key": "field_lld_translation_lld_translation_heading"
+          },
+          {
+            "name": "intro",
+            "label": "Hero introduction",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 1000,
+            "key": "field_lld_translation_lld_translation_intro"
+          },
+          {
+            "name": "turnaround",
+            "label": "Standard turnaround wording",
+            "type": "text",
+            "instructions": "Only promise a delivery time the client can meet.",
+            "required": 0,
+            "default_value": "Confirmed with your quote",
+            "maxlength": 300,
+            "key": "field_lld_translation_lld_translation_turnaround"
+          },
+          {
+            "name": "prices",
+            "label": "Additional services and fees (USD)",
+            "type": "group",
+            "instructions": "The estimate includes selected extras. Rush applies to translation and additional-page charges only. Notarization is per document; postage is per request. Standard translations and blank selected rates require a custom quote. Final pricing is confirmed before payment.",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "additional_page",
+                "label": "Additional page",
+                "type": "number",
+                "instructions": "Indicative quote price; does not create a payment or WooCommerce product. Blank means request a quote.",
+                "required": 0,
+                "min": 0,
+                "step": 0.01,
+                "max": 10000,
+                "default_value": 35,
+                "key": "field_lld_translation_lld_translation_prices_additional_page"
+              },
+              {
+                "name": "legal_word",
+                "label": "Long document / word",
+                "type": "number",
+                "instructions": "Indicative quote price; does not create a payment or WooCommerce product. Blank means request a quote.",
+                "required": 0,
+                "min": 0,
+                "step": 0.01,
+                "max": 10000,
+                "default_value": 0.12,
+                "key": "field_lld_translation_lld_translation_prices_legal_word"
+              },
+              {
+                "name": "rush_percent",
+                "label": "24-hour rush surcharge (%)",
+                "type": "number",
+                "instructions": "Indicative quote price; does not create a payment or WooCommerce product. Blank means request a quote.",
+                "required": 0,
+                "min": 0,
+                "step": 0.01,
+                "max": 10000,
+                "default_value": 50,
+                "key": "field_lld_translation_lld_translation_prices_rush_percent"
+              },
+              {
+                "name": "notarization",
+                "label": "Notarization / document",
+                "type": "number",
+                "instructions": "Indicative quote price; does not create a payment or WooCommerce product. Blank means request a quote.",
+                "required": 0,
+                "min": 0,
+                "step": 0.01,
+                "max": 10000,
+                "default_value": 15,
+                "key": "field_lld_translation_lld_translation_prices_notarization"
+              },
+              {
+                "name": "mail_standard",
+                "label": "Tracked USPS hard copy",
+                "type": "number",
+                "instructions": "Indicative quote price; does not create a payment or WooCommerce product. Blank means request a quote.",
+                "required": 0,
+                "min": 0,
+                "step": 0.01,
+                "max": 10000,
+                "default_value": 10,
+                "key": "field_lld_translation_lld_translation_prices_mail_standard"
+              },
+              {
+                "name": "mail_overnight",
+                "label": "Overnight hard copy",
+                "type": "number",
+                "instructions": "Indicative quote price; does not create a payment or WooCommerce product. Blank means request a quote.",
+                "required": 0,
+                "min": 0,
+                "step": 0.01,
+                "max": 10000,
+                "default_value": 40,
+                "key": "field_lld_translation_lld_translation_prices_mail_overnight"
+              }
+            ],
+            "key": "field_lld_translation_lld_translation_prices"
+          },
+          {
+            "name": "secure_form_url",
+            "label": "Secure document and payment form URL",
+            "type": "url",
+            "instructions": "Optional public HTTPS URL for your configured secure provider form. Leave blank for quote-first inquiries. Do not paste admin links, tokens or a public file-upload folder. Review provider privacy settings before collecting documents.",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_translation_lld_translation_secure_form_url"
+          },
+          {
+            "name": "confidentiality",
+            "label": "Confidentiality statement",
+            "type": "textarea",
+            "instructions": "Describe the actual process used to protect client documents.",
+            "required": 0,
+            "default_value": "",
+            "rows": 4,
+            "new_lines": "",
+            "maxlength": 2000,
+            "key": "field_lld_translation_lld_translation_confidentiality"
+          },
+          {
+            "name": "terms",
+            "label": "Quote and service terms summary",
+            "type": "textarea",
+            "instructions": "Shown before the inquiry is sent, alongside links to the Privacy Policy and Terms of Service.",
+            "required": 0,
+            "default_value": "",
+            "rows": 4,
+            "new_lines": "",
+            "maxlength": 2000,
+            "key": "field_lld_translation_lld_translation_terms"
+          },
+          {
+            "name": "show_credentials",
+            "label": "Show credentials on the translation page",
+            "type": "true_false",
+            "instructions": "Off by default. Enter accurate, current credentials below, then turn on when ready.",
+            "required": 0,
+            "default_value": 0,
+            "ui": 1,
+            "key": "field_lld_translation_lld_translation_show_credentials"
+          },
+          {
+            "name": "translator_credentials",
+            "label": "Translator credentials",
+            "type": "textarea",
+            "instructions": "Exact qualifications, issuer and relevant details. Saved text is only displayed when the switch is on.",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 600,
+            "key": "field_lld_translation_lld_translation_translator_credentials"
+          },
+          {
+            "name": "translator_credential_url",
+            "label": "Translator credential or certificate link",
+            "type": "url",
+            "instructions": "Optional public HTTPS verification/certificate link. Do not include private identity or client documents.",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_translation_lld_translation_translator_credential_url"
+          },
+          {
+            "name": "hipaa_credentials",
+            "label": "HIPAA training and credentials",
+            "type": "textarea",
+            "instructions": "Describe the actual credential and issuer; this field does not certify the website or establish regulatory compliance.",
+            "required": 0,
+            "default_value": "",
+            "rows": 3,
+            "new_lines": "",
+            "maxlength": 600,
+            "key": "field_lld_translation_lld_translation_hipaa_credentials"
+          },
+          {
+            "name": "hipaa_credential_url",
+            "label": "HIPAA credential or certificate link",
+            "type": "url",
+            "instructions": "Optional public HTTPS verification/certificate link.",
+            "required": 0,
+            "default_value": "",
+            "key": "field_lld_translation_lld_translation_hipaa_credential_url"
+          },
+          {
+            "name": "book",
+            "label": "Haitian Creole Translation Book",
+            "type": "post_object",
+            "instructions": "Select the published WooCommerce book. Hidden until that product is available in the public catalog.",
+            "required": 0,
+            "return_format": "id",
+            "allow_null": 1,
+            "multiple": 0,
+            "ui": 1,
+            "post_type": [
+              "product"
+            ],
+            "key": "field_lld_translation_lld_translation_book"
+          },
+          {
+            "name": "faqs",
+            "label": "Translation questions and answers",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "layout": "block",
+            "sub_fields": [
+              {
+                "name": "acceptance",
+                "label": "Document acceptance",
+                "type": "group",
+                "instructions": "",
+                "required": 0,
+                "layout": "block",
+                "sub_fields": [
+                  {
+                    "name": "question",
+                    "label": "Question",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "default_value": "",
+                    "maxlength": 200,
+                    "key": "field_lld_translation_lld_translation_faqs_acceptance_question"
+                  },
+                  {
+                    "name": "answer",
+                    "label": "Answer",
+                    "type": "textarea",
+                    "instructions": "",
+                    "required": 0,
+                    "default_value": "",
+                    "rows": 4,
+                    "new_lines": "",
+                    "maxlength": 2000,
+                    "key": "field_lld_translation_lld_translation_faqs_acceptance_answer"
+                  }
+                ],
+                "key": "field_lld_translation_lld_translation_faqs_acceptance"
+              },
+              {
+                "name": "timing",
+                "label": "Turnaround",
+                "type": "group",
+                "instructions": "",
+                "required": 0,
+                "layout": "block",
+                "sub_fields": [
+                  {
+                    "name": "question",
+                    "label": "Question",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "default_value": "",
+                    "maxlength": 200,
+                    "key": "field_lld_translation_lld_translation_faqs_timing_question"
+                  },
+                  {
+                    "name": "answer",
+                    "label": "Answer",
+                    "type": "textarea",
+                    "instructions": "",
+                    "required": 0,
+                    "default_value": "",
+                    "rows": 4,
+                    "new_lines": "",
+                    "maxlength": 2000,
+                    "key": "field_lld_translation_lld_translation_faqs_timing_answer"
+                  }
+                ],
+                "key": "field_lld_translation_lld_translation_faqs_timing"
+              },
+              {
+                "name": "coverage",
+                "label": "Service area",
+                "type": "group",
+                "instructions": "",
+                "required": 0,
+                "layout": "block",
+                "sub_fields": [
+                  {
+                    "name": "question",
+                    "label": "Question",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "default_value": "",
+                    "maxlength": 200,
+                    "key": "field_lld_translation_lld_translation_faqs_coverage_question"
+                  },
+                  {
+                    "name": "answer",
+                    "label": "Answer",
+                    "type": "textarea",
+                    "instructions": "",
+                    "required": 0,
+                    "default_value": "",
+                    "rows": 4,
+                    "new_lines": "",
+                    "maxlength": 2000,
+                    "key": "field_lld_translation_lld_translation_faqs_coverage_answer"
+                  }
+                ],
+                "key": "field_lld_translation_lld_translation_faqs_coverage"
+              }
+            ],
+            "key": "field_lld_translation_lld_translation_faqs"
+          }
+        ],
+        "conditional_logic": [
+          [
+            {
+              "field": "field_lld_service_lld_service_layout",
+              "operator": "==",
+              "value": "translation"
+            }
+          ]
+        ],
+        "key": "field_lld_translation_lld_translation"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "lld_service"
+        }
+      ]
+    ],
+    "menu_order": 11,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [],
+    "active": true,
+    "description": "Dedicated translation service landing page and quote flow. Applies when Service page layout is Translation service. ACF Free compatible; no client files are stored in these fields.",
+    "show_in_rest": 1
+  }
+]

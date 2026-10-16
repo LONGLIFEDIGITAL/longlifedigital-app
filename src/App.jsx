@@ -47,7 +47,8 @@ export default function App() {
   useLayoutEffect(() => {
     document.getElementById('initial-content')?.remove();
   }, []);
-  const { page, setPage, productId, postSlug, serviceSlug, goProduct } = useAppNavigation();
+  const { page, setPage, productId, postSlug, serviceSlug, serviceRequest, goProduct } =
+    useAppNavigation();
   const auth = useCustomer();
   const { products, status: catalogStatus, retry: retryCatalog, categories } = useCatalog();
   const { settings, status: settingsStatus, retry: retrySettings } = useSiteSettings();
@@ -80,6 +81,7 @@ export default function App() {
       !settings.newsletter?.popupEnabled ||
       showCart ||
       leaving ||
+      (page === 'service' && serviceRequest) ||
       page === 'checkout' ||
       page === 'order-confirmation',
   });
@@ -276,7 +278,9 @@ export default function App() {
           {page === 'blog' && <BlogPage />}
           {page === 'post' && <BlogPostPage key={postSlug} slug={postSlug} />}
           {page === 'services' && <ServicesPage />}
-          {page === 'service' && <ServiceDetailPage key={serviceSlug} slug={serviceSlug} />}
+          {page === 'service' && (
+            <ServiceDetailPage key={serviceSlug} slug={serviceSlug} request={serviceRequest} />
+          )}
           {page === 'courses' && (
             <CoursesPage
               openCheckout={openCheckout}
@@ -341,7 +345,9 @@ export default function App() {
           />
         )}
       </Suspense>
-      {page !== 'checkout' && page !== 'order-confirmation' && <AIChat settings={settings} />}
+      {page !== 'checkout' &&
+        page !== 'order-confirmation' &&
+        !(page === 'service' && serviceRequest) && <AIChat settings={settings} />}
       <ScrollRestoration />
     </Box>
   );

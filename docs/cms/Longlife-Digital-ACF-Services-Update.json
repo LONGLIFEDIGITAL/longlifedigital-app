@@ -1099,6 +1099,23 @@
     "title": "Longlife Digital | Service details",
     "fields": [
       {
+        "name": "lld_service_layout",
+        "label": "Service page layout",
+        "type": "select",
+        "instructions": "Translation adds its own pricing, language choices and guided quote page.",
+        "required": 0,
+        "allow_null": 0,
+        "multiple": 0,
+        "ui": 1,
+        "return_format": "value",
+        "choices": {
+          "standard": "Standard service",
+          "translation": "Translation service"
+        },
+        "default_value": "standard",
+        "key": "field_lld_service_lld_service_layout"
+      },
+      {
         "name": "lld_icon",
         "label": "Icon",
         "type": "text",
@@ -1314,7 +1331,8 @@
           "web": "Website / purple",
           "automation": "Automation / blue",
           "advertising": "Advertising / rose",
-          "launch": "Business launch / gold"
+          "launch": "Business launch / gold",
+          "translation": "Translation / teal"
         },
         "default_value": "web",
         "key": "field_lld_service_lld_service_visual"

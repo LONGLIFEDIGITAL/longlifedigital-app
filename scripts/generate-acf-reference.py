@@ -200,13 +200,14 @@ def pricing(prefix):
 
 
 add_group('service', 'Service details', [('post_type', 'lld_service')], [
+    select('lld_service_layout', 'Service page layout', [('standard', 'Standard service'), ('translation', 'Translation service')], 'Translation adds its own pricing, language choices and guided quote page.', default='standard'),
     field('lld_icon', 'Icon', help='A short emoji or symbol; no HTML or SVG.', maxlength=12),
     field('lld_nav_label', 'Short menu label', help='Optional; fallback is the service title.', maxlength=60),
     field('lld_nav_summary', 'Menu description', 'textarea', maxlength=160),
     *pricing('service'), cta('lld_cta', 'Service inquiry / consultation button'),
     field('lld_package_details', 'Included work / package details', 'wysiwyg'),
     field('lld_specialties', 'Service specialties', 'textarea', 'One specialty per line, up to 20. Appears on the card and service detail page.', maxlength=2000, rows=6),
-    select('lld_service_visual', 'Service illustration and accent', [('search', 'Search / green'), ('web', 'Website / purple'), ('automation', 'Automation / blue'), ('advertising', 'Advertising / rose'), ('launch', 'Business launch / gold')], default='web'),
+    select('lld_service_visual', 'Service illustration and accent', [('search', 'Search / green'), ('web', 'Website / purple'), ('automation', 'Automation / blue'), ('advertising', 'Advertising / rose'), ('launch', 'Business launch / gold'), ('translation', 'Translation / teal')], default='web'),
     field('lld_service_process', 'What happens next', 'wysiwyg', 'Describe your consultation, scope and proposal process. Avoid promising a fixed response time unless you can meet it.'),
     field('lld_inquiry_title', 'Inquiry form heading', default_value='Tell us about your next step.'),
     field('lld_inquiry_intro', 'Inquiry form introduction', 'textarea', default_value='Share a few details and we’ll get back to you to discuss your project and a tailored quote.'),
@@ -268,6 +269,38 @@ add_group('ebook_preview', 'Ebook preview', [('post_type', 'product')], [
     media('lld_ebook_preview_page_2', 'Sample page 2'),
 ], 'For ebook products only. Export one or two selected interior pages as separate JPG, PNG, WebP or AVIF images and select them here. These samples are public. Never upload the full ebook or a purchased download URL here. Blank fields hide the preview button. Longlife Storefront Product Content 1.1.0 or newer exposes these samples through the Store API.')
 
+TRANSLATION_PRICES = [
+    ('additional_page', 'Additional page', 35),
+    ('legal_word', 'Long document / word', 0.12), ('rush_percent', '24-hour rush surcharge (%)', 50),
+    ('notarization', 'Notarization / document', 15), ('mail_standard', 'Tracked USPS hard copy', 10),
+    ('mail_overnight', 'Overnight hard copy', 40),
+]
+add_group('translation', 'Translation service', [('post_type', 'lld_service')], [
+    field('lld_translation_offerings', 'Documents and packages offered', 'textarea', 'Add, remove, hide or reorder the service groups you handle. Each entry controls its pricing card and quote-form choice. Add Document choices, one per line, for customers to select the exact document within a group. Blank prices mean request a quote. Save with Update. Document choices require Longlife Headless Commerce 0.6.3 or newer; ACF Pro is not required.', maxlength=100000, rows=6, default_value='[]', conditional_logic=when('field_lld_service_lld_service_layout', 'translation')),
+    group('lld_translation', 'Translation page content and quote settings', [
+        field('heading', 'Hero heading', 'textarea', 'Plain text. Line breaks are preserved.', maxlength=160, rows=3),
+        field('intro', 'Hero introduction', 'textarea', maxlength=1000),
+        field('turnaround', 'Standard turnaround wording', 'text', 'Only promise a delivery time the client can meet.', default_value='Confirmed with your quote', maxlength=300),
+        group('prices', 'Additional services and fees (USD)', [
+            field(name, label, 'number', 'Indicative quote price; does not create a payment or WooCommerce product. Blank means request a quote.', min=0, max=10000, step=0.01, default_value=amount)
+            for name, label, amount in TRANSLATION_PRICES
+        ], 'The estimate includes selected extras. Rush applies to translation and additional-page charges only. Notarization is per document; postage is per request. Standard translations and blank selected rates require a custom quote. Final pricing is confirmed before payment.'),
+        field('secure_form_url', 'Secure document and payment form URL', 'url', 'Optional public HTTPS URL for your configured secure provider form. Leave blank for quote-first inquiries. Do not paste admin links, tokens or a public file-upload folder. Review provider privacy settings before collecting documents.'),
+        field('confidentiality', 'Confidentiality statement', 'textarea', 'Describe the actual process used to protect client documents.', maxlength=2000, rows=4),
+        field('terms', 'Quote and service terms summary', 'textarea', 'Shown before the inquiry is sent, alongside links to the Privacy Policy and Terms of Service.', maxlength=2000, rows=4),
+        field('show_credentials', 'Show credentials on the translation page', 'true_false', 'Off by default. Enter accurate, current credentials below, then turn on when ready.', default_value=0),
+        field('translator_credentials', 'Translator credentials', 'textarea', 'Exact qualifications, issuer and relevant details. Saved text is only displayed when the switch is on.', maxlength=600),
+        field('translator_credential_url', 'Translator credential or certificate link', 'url', 'Optional public HTTPS verification/certificate link. Do not include private identity or client documents.'),
+        field('hipaa_credentials', 'HIPAA training and credentials', 'textarea', 'Describe the actual credential and issuer; this field does not certify the website or establish regulatory compliance.', maxlength=600),
+        field('hipaa_credential_url', 'HIPAA credential or certificate link', 'url', 'Optional public HTTPS verification/certificate link.'),
+        field('book', 'Haitian Creole Translation Book', 'post_object', 'Select the published WooCommerce book. Hidden until that product is available in the public catalog.', post_type=['product']),
+        group('faqs', 'Translation questions and answers', [
+            group(name, title, [field('question', 'Question', maxlength=200), field('answer', 'Answer', 'textarea', maxlength=2000, rows=4)])
+            for name, title in [('acceptance', 'Document acceptance'), ('timing', 'Turnaround'), ('coverage', 'Service area')]
+        ]),
+    ], conditional_logic=when('field_lld_service_lld_service_layout', 'translation')),
+], 'Dedicated translation service landing page and quote flow. Applies when Service page layout is Translation service. ACF Free compatible; no client files are stored in these fields.')
+
 CPT_DEFS = [
     ('lld_settings', 'Site Settings', 'Site Settings Record', 'lld-settings', 'Public brand/contact/newsletter/chat copy; one record named Storefront with slug storefront.', ['title', 'revisions'], 'dashicons-admin-settings'),
     ('lld_service', 'Services', 'Service', 'lld-services', 'One published record per service or package.', ['title', 'editor', 'excerpt', 'thumbnail', 'revisions', 'page-attributes'], 'dashicons-businessman'),
@@ -327,6 +360,8 @@ assert all(item['show_in_rest'] == 1 for item in GROUPS)
     json.dumps([entry for entry in GROUPS if entry['key'] == 'group_lld_page'], indent=2, ensure_ascii=False) + '\n')
 (OUT / 'Longlife-Digital-ACF-Services-Update.json').write_text(
     json.dumps([entry for entry in GROUPS if entry['key'] in ('group_lld_page', 'group_lld_service')], indent=2, ensure_ascii=False) + '\n')
+(OUT / 'Longlife-Digital-ACF-Translation-Update.json').write_text(
+    json.dumps([entry for entry in GROUPS if entry['key'] in ('group_lld_service', 'group_lld_translation')], indent=2, ensure_ascii=False) + '\n')
 (OUT / 'Longlife-Digital-ACF-Ebook-Preview-Update.json').write_text(
     json.dumps([entry for entry in GROUPS if entry['key'] == 'group_lld_ebook_preview'], indent=2, ensure_ascii=False) + '\n')
 (OUT / 'Longlife-Digital-ACF-Contact-and-Product-Update.json').write_text(

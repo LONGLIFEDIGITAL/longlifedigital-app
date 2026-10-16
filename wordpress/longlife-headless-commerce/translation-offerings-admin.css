@@ -1,0 +1,41 @@
+.lld-offerings-editor fieldset {
+  margin: 0 0 16px;
+  padding: 16px;
+  border: 1px solid #ccd0d4;
+  border-radius: 6px;
+  background: #fafafa;
+}
+.lld-offerings-editor legend {
+  font-weight: 600;
+  padding: 0 6px;
+}
+.lld-offering-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 20px;
+}
+.lld-offering-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lld-offering-fields label[hidden] {
+  display: none;
+}
+.lld-offering-fields input[type='checkbox'] {
+  margin: 4px 0;
+}
+.lld-offering-wide {
+  grid-column: 1 / -1;
+}
+.lld-offering-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+@media (max-width: 600px) {
+  .lld-offering-fields {
+    grid-template-columns: 1fr;
+  }
+}

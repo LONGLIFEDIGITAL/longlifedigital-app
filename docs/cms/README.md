@@ -1,9 +1,11 @@
 # WordPress content model
 
+- [Translation service setup](TRANSLATION-SERVICE.md): dedicated landing and quote pages, editable document/package offerings and prices, credential visibility, secure-form connection and focused imports.
+
 - [Digital services setup](SERVICES.md): modern service pages, the five service records, updated ACF fields and quote inquiry delivery.
 
 - [PDF reference](Longlife-Digital-ACF-Field-Definitions.pdf): field definitions, editor instructions, REST mappings and migration decisions.
-- [ACF import package](Longlife-Digital-ACF-Import.json): 11 field groups, 6 custom post types and 1 taxonomy, using ACF Free features.
+- [ACF import package](Longlife-Digital-ACF-Import.json): 12 field groups, 6 custom post types and 1 taxonomy, using ACF Free features.
 - [Ebook previews](EBOOK-PAGE.md#one-or-two-sample-pages-on-product-details): publish one or two sample pages, with a separate ACF import and updated product content plugin.
 - [Contact handles and hero button labels](CONTACT-AND-PRODUCT-LABELS.md): standard social icons, editable profile text and short product labels, with a focused ACF update.
 - [Editable reference](Longlife-Digital-ACF-Field-Definitions.md) and [print HTML](Longlife-Digital-ACF-Field-Definitions.html).

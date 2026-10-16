@@ -1,4 +1,5 @@
 import { CONTENT_PAGES } from '../src/contentPages.js';
+import { translationContent } from './translationContent.js';
 
 const text = (value) => (typeof value === 'string' ? value.trim() : '');
 const id = (value) => (Number.isSafeInteger(value) && value > 0 ? value : null);
@@ -233,14 +234,20 @@ export async function readSiteContent({
                   .map((line) => line.trim())
                   .filter(Boolean)
                   .slice(0, 20),
-                visual: ['search', 'web', 'automation', 'advertising', 'launch'].includes(
-                  acf.lld_service_visual,
-                )
+                visual: [
+                  'search',
+                  'web',
+                  'automation',
+                  'advertising',
+                  'launch',
+                  'translation',
+                ].includes(acf.lld_service_visual)
                   ? acf.lld_service_visual
                   : 'web',
                 process: text(acf.lld_service_process),
                 inquiryTitle: text(acf.lld_inquiry_title),
                 inquiryIntro: text(acf.lld_inquiry_intro),
+                translation: translationContent(acf),
               }
             : {
                 assetType: acf.lld_asset_type === 'website' ? 'website' : 'domain',

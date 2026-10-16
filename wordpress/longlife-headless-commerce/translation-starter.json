@@ -1,0 +1,65 @@
+[
+  {
+    "id": "certificate",
+    "title": "Birth, marriage & death certificates",
+    "unit": "document",
+    "note": "Up to one page, front and back.",
+    "documents": 1,
+    "price": 45,
+    "enabled": true
+  },
+  {
+    "id": "diploma",
+    "title": "Diplomas & degree certificates",
+    "unit": "document",
+    "note": "Academic milestones, clearly translated.",
+    "documents": 1,
+    "price": 55,
+    "enabled": true
+  },
+  {
+    "id": "transcript",
+    "title": "Transcripts & report cards",
+    "unit": "page",
+    "note": "For your next academic chapter.",
+    "documents": 1,
+    "price": 35,
+    "enabled": true
+  },
+  {
+    "id": "court",
+    "title": "Court & legal documents",
+    "unit": "page",
+    "note": "Decrees, judgments, affidavits and police records.",
+    "documents": 1,
+    "price": 40,
+    "enabled": true
+  },
+  {
+    "id": "medical",
+    "title": "Medical records",
+    "unit": "page",
+    "note": "Request a quote without sharing medical details.",
+    "documents": 1,
+    "price": 40,
+    "enabled": true
+  },
+  {
+    "id": "family",
+    "title": "Family Package",
+    "unit": "package",
+    "note": "Any three birth, marriage or death certificates.",
+    "documents": 3,
+    "price": 120,
+    "enabled": true
+  },
+  {
+    "id": "immigration",
+    "title": "Immigration Bundle",
+    "unit": "package",
+    "note": "One birth certificate, one marriage certificate and one diploma.",
+    "documents": 3,
+    "price": 130,
+    "enabled": true
+  }
+]

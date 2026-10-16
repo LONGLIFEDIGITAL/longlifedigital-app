@@ -16,6 +16,27 @@ const plain = (value = '') =>
 const entry = (snapshot, key) => snapshot.entries[key]?.data;
 function routeContent(snapshot, path) {
   const key = Object.keys(CONTENT_PAGES).find((key) => CONTENT_PAGES[key].path === path);
+  const servicePath = path.match(/^\/services\/([^/]+)(\/request)?\/?$/);
+  const service = servicePath
+    ? (entry(snapshot, 'services') || []).find(
+        (item) => encodeURIComponent(item.slug) === servicePath[1],
+      )
+    : null;
+  const serviceContent = servicePath?.[2]
+    ? service?.translation
+      ? {
+          title: 'Request a translation quote',
+          intro: 'Tell us what you need translated. We’ll respond with a personal quote.',
+          seo: { noindex: true },
+        }
+      : null
+    : service?.translation
+      ? {
+          ...service,
+          heading: service.translation.heading || service.title,
+          intro: service.translation.intro || service.description,
+        }
+      : service;
   return {
     key,
     content: key
@@ -23,7 +44,7 @@ function routeContent(snapshot, path) {
       : path.startsWith('/blog/')
         ? entry(snapshot, `post:${path.slice(6)}`)
         : path.startsWith('/services/')
-          ? (entry(snapshot, 'services') || []).find((service) => encodeURIComponent(service.slug) === path.slice(10))
+          ? serviceContent
           : null,
   };
 }

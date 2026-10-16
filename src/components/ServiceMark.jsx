@@ -1,4 +1,5 @@
 const paths = {
+  translation: 'M3 4h12M9 2v2M13 4c-1 6-5 10-10 12M5 8c2 4 5 6 8 7M14 23l5-13 5 13M16 19h6',
   search: 'M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0M6 12l3-3 3 2 3-5',
   web: 'M3 7h18M6 4h.01M9 4h.01M9 11l-3 3 3 3m6-6 3 3-3 3M13 10l-2 8M3 1h18v21H3z',
   automation: 'M12 3v5m-7 5v5m14-5v5M5 13v-3h14v3M9 2h6v6H9zM2 18h6v5H2zM16 18h6v5h-6z',

@@ -275,7 +275,10 @@ export function contentBootstrapPlugin({ handler, cmsUrl, mode, root, subscribe 
             .map((key) => `/blog/${key.slice(5)}`),
           ...(snapshot.entries.services?.data || [])
             .filter((service) => /^[a-z0-9_%~-]+$/i.test(service.slug))
-            .map((service) => `/services/${encodeURIComponent(service.slug)}`),
+            .flatMap((service) => {
+              const path = `/services/${encodeURIComponent(service.slug)}`;
+              return service.translation ? [path, `${path}/request`] : [path];
+            }),
         ];
         for (const path of paths) {
           const html = source

@@ -9,8 +9,9 @@ import ServiceInquiryForm from '../components/ServiceInquiryForm';
 import ArrowIcon from '../components/ArrowIcon';
 import NotFoundPage from './NotFoundPage';
 import classes from './ServicesPage.module.css';
+import TranslationServicePage from './TranslationServicePage';
 
-export default function ServiceDetailPage({ slug }) {
+export default function ServiceDetailPage({ slug, request = false }) {
   const navigate = useNavigate();
   const records = useContent('services');
   const service = records.data?.find((item) => item.slug === slug);
@@ -23,6 +24,8 @@ export default function ServiceDetailPage({ slug }) {
       </Container>
     );
   }
+  if (service.translation) return <TranslationServicePage service={service} request={request} />;
+  if (request) return <NotFoundPage setPage={() => navigate('/services')} />;
   return (
     <div className={classes.page}>
       <PageMetadata

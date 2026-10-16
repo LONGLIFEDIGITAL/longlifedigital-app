@@ -1,0 +1,50 @@
+{
+  "slug": "translation",
+  "title": "Document Translation",
+  "excerpt": "Certified and standard document translation in Haitian Creole, French and Spanish, to and from English.",
+  "acf": {
+    "lld_service_layout": "translation",
+    "lld_nav_label": "Translation",
+    "lld_nav_summary": "Your documents, clearly translated. Haitian Creole, French and Spanish to and from English.",
+    "lld_service_visual": "translation",
+    "lld_specialties": "Certified translations\nHaitian Creole · French · Spanish\nPersonal, academic & official documents",
+    "lld_pricing_mode": "contact",
+    "lld_translation": {
+      "heading": "Your words.\nA world of possibility.",
+      "intro": "Clear communication in Haitian Creole, French, Spanish and English, when it matters most. Thoughtful document translation for your next chapter in life, study or work.",
+      "turnaround": "Confirmed with your quote",
+      "prices": {
+        "additional_page": 35,
+        "legal_word": 0.12,
+        "rush_percent": 50,
+        "notarization": 15,
+        "mail_standard": 10,
+        "mail_overnight": 40
+      },
+      "secure_form_url": "",
+      "confidentiality": "We treat your documents as confidential and use them to prepare your quote and provide the translation you request. We’ll arrange secure document submission and explain the next steps before you share your files.",
+      "terms": "This is a free quote request, not a paid order. We confirm the document scope, certification needs, final price and turnaround before work begins. Rush delivery, notarization and postage are additional and subject to confirmation.",
+      "show_credentials": 0,
+      "translator_credentials": "",
+      "translator_credential_url": "",
+      "hipaa_credentials": "",
+      "hipaa_credential_url": "",
+      "book": "",
+      "faqs": {
+        "acceptance": {
+          "question": "Can I request a translation for USCIS?",
+          "answer": "Yes. Choose certified translation and tell us that the document is for USCIS when we follow up. Foreign-language documents generally require a full English translation with a certification of accuracy, completeness and the translator’s competence. We’ll confirm the certification included in your quote. USCIS decides acceptance; no application outcome is guaranteed."
+        },
+        "timing": {
+          "question": "How long will my translation take?",
+          "answer": "We confirm turnaround after reviewing the document length, readability and language pair. A 24-hour rush can be requested for an additional 50%, subject to availability. Mailing time is separate from translation turnaround."
+        },
+        "coverage": {
+          "question": "Do I need to visit in person?",
+          "answer": "You can start your request online and receive your translation digitally. We translate Haitian Creole, French and Spanish to and from English. Tracked USPS and overnight hard copies are optional; we confirm delivery availability for your address with your quote."
+        }
+      }
+    },
+    "lld_translation_offerings": "[{\"id\": \"certificate\", \"title\": \"Birth, marriage & death certificates\", \"unit\": \"document\", \"note\": \"Up to one page, front and back.\", \"documents\": 1, \"price\": 45, \"enabled\": true}, {\"id\": \"diploma\", \"title\": \"Diplomas & degree certificates\", \"unit\": \"document\", \"note\": \"Academic milestones, clearly translated.\", \"documents\": 1, \"price\": 55, \"enabled\": true}, {\"id\": \"transcript\", \"title\": \"Transcripts & report cards\", \"unit\": \"page\", \"note\": \"For your next academic chapter.\", \"documents\": 1, \"price\": 35, \"enabled\": true}, {\"id\": \"court\", \"title\": \"Court & legal documents\", \"unit\": \"page\", \"note\": \"Decrees, judgments, affidavits and police records.\", \"documents\": 1, \"price\": 40, \"enabled\": true}, {\"id\": \"medical\", \"title\": \"Medical records\", \"unit\": \"page\", \"note\": \"Request a quote without sharing medical details.\", \"documents\": 1, \"price\": 40, \"enabled\": true}, {\"id\": \"family\", \"title\": \"Family Package\", \"unit\": \"package\", \"note\": \"Any three birth, marriage or death certificates.\", \"documents\": 3, \"price\": 120, \"enabled\": true}, {\"id\": \"immigration\", \"title\": \"Immigration Bundle\", \"unit\": \"package\", \"note\": \"One birth certificate, one marriage certificate and one diploma.\", \"documents\": 3, \"price\": 130, \"enabled\": true}]"
+  }
+}

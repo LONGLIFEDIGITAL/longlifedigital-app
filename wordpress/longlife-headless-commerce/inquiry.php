@@ -22,6 +22,8 @@ function lld_service_inquiry($request) {
     $service_id = $request->get_param('serviceId');
     $service = is_int($service_id) && $service_id > 0 ? get_post($service_id) : null;
     if (!$service || $service->post_type !== 'lld_service' || $service->post_status !== 'publish' || $service->post_password !== '') return lld_error('Service unavailable.', 404);
+    $translation = lld_translation_inquiry_fields($request, $service_id);
+    if (is_wp_error($translation)) return $translation;
     $fields = array();
     foreach (array('firstName' => 100, 'lastName' => 100, 'email' => 254, 'businessName' => 160, 'phone' => 40, 'message' => 3000) as $name => $max) {
         $value = $request->get_param($name) ?? '';
@@ -31,6 +33,11 @@ function lld_service_inquiry($request) {
     }
     $digits = preg_replace('/\D/', '', $fields['phone']);
     if (!is_email($fields['email']) || !preg_match('/^[+\d().\s-]+$/D', $fields['phone']) || strlen($digits) < 7 || strlen($digits) > 20) return lld_error('Invalid contact details.');
+    if ($translation) {
+        // No files, file URLs or private document text in inquiry email/storage.
+        $fields['message'] = '';
+        $fields = array_merge($fields, $translation);
+    }
     $request_id = $request->get_param('requestId');
     if (!is_string($request_id) || !preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/iD', $request_id)) return lld_error('Invalid inquiry.');
     // Retain only a keyed fingerprint/status, never the visitor's contact details.
@@ -50,10 +57,16 @@ function lld_service_inquiry($request) {
     $message = '<p>A new service inquiry has been submitted through Longlife Digital.</p><table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="width:100%;border-collapse:collapse">';
     $fields['service'] = $title;
     $labels = array('service' => 'Service', 'firstName' => 'First name', 'lastName' => 'Last name', 'email' => 'Email address', 'businessName' => 'Business name', 'phone' => 'Telephone number', 'message' => 'Project description');
+    if ($translation) {
+        unset($labels['message'], $labels['businessName']);
+        $labels = array_merge($labels, array('translationType' => 'Translation type', 'sourceLanguage' => 'Original language', 'targetLanguage' => 'Translate into', 'documentService' => 'Document service', 'document' => 'Document', 'documents' => 'Documents', 'pages' => 'Total pages', 'rush' => 'Turnaround', 'notarized' => 'Notarization', 'delivery' => 'Delivery', 'consent' => 'Consent'));
+        if ($fields['document'] === '') unset($labels['document']);
+    }
     foreach ($labels as $name => $label) {
         $message .= '<tr><th scope="row" align="left" valign="top" style="padding:8px 16px 8px 0;text-align:left;vertical-align:top;line-height:1.5">' . esc_html($label) . '</th><td align="left" valign="top" style="padding:8px 0;text-align:left;vertical-align:top;line-height:1.5;overflow-wrap:anywhere">' . nl2br(esc_html($fields[$name] ?: 'Not provided')) . '</td></tr>';
     }
     $message .= '</table><table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="width:100%;border-collapse:collapse"><tr><td style="padding:24px 0 0"><p style="margin:0">Reply to this email to contact the visitor.</p></td></tr></table>';
+    if ($translation) $message .= '<p>This is a quote request, not a paid order. Confirm the scope, price, delivery and secure document submission with the visitor. No document files are attached.</p>';
     $mailer = WC_Emails::instance();
     // Keep WooCommerce/FluentSMTP's authenticated sender. The visitor is Reply-To only.
     $sent = $mailer->send('info@longlifedigital.co', $subject, $mailer->wrap_message($subject, $message), "Content-Type: text/html; charset=UTF-8\r\nReply-To: " . $fields['email'] . "\r\n");
