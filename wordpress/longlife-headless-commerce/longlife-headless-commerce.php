@@ -2,12 +2,13 @@
 /**
  * Plugin Name: Longlife Headless Commerce
  * Description: Authenticated React checkout bridge for WooCommerce Store API and Stripe card payments.
- * Version: 0.6.3
+ * Version: 0.6.5
  * Requires Plugins: woocommerce
  * Requires PHP: 8.0
  */
 if (!defined('ABSPATH')) { exit; }
 require_once __DIR__ . '/security.php';
+require_once __DIR__ . '/alerts.php';
 require_once __DIR__ . '/account.php';
 require_once __DIR__ . '/email-links.php';
 require_once __DIR__ . '/translation-offerings.php';
@@ -38,7 +39,8 @@ add_action('admin_init', function () {
     add_settings_field('lld_headless_checkout', 'Longlife headless checkout', function () {
         echo '<input type="hidden" name="lld_checkout_enabled" value="0">';
         echo '<label><input type="checkbox" name="lld_checkout_enabled" value="1" ' . checked(get_option('lld_checkout_enabled'), '1', false) . '> Enable React checkout</label>';
-        echo '<p>Supports stable WooCommerce 11.1.x (from 11.1.2) / 11.2.x and official Stripe Gateway 11.0.x with cards, automatic capture and guest checkout enabled. New minor or major versions require a compatibility review. Uses the Stripe mode selected in WooCommerce: live mode charges real payments. Customer accounts use WooCommerce registration settings and verified email password setup.</p>';
+        echo '<p>Checkout checks the required WooCommerce and Stripe payment, verification and download APIs. New plugin versions produce an administrator warning rather than disabling purchases solely because of their version. Cards, automatic capture, guest checkout and matching Stripe credentials are still required. Uses the Stripe mode selected in WooCommerce: live mode charges real payments. Test updates on staging before production.</p>';
+        echo '<p>Critical checkout alerts go to admin@longlifedigital.com, at most once per category every six hours. Ordinary card declines and customer validation errors do not send alerts.</p>';
         echo '<p>Copy this integration secret into the server-only LLD_COMMERCE_BRIDGE_SECRET environment variable. Do not place it in a VITE_ setting or share it publicly.</p>';
         echo '<input id="lld-integration-secret" type="password" readonly class="large-text" autocomplete="off" spellcheck="false" aria-label="Longlife integration secret" aria-describedby="lld-secret-status" value="' . esc_attr(get_option('lld_bridge_secret')) . '">';
         echo '<p><button id="lld-secret-toggle" type="button" class="button" aria-controls="lld-integration-secret" aria-label="Show integration secret" aria-pressed="false">Show</button> ';
@@ -59,7 +61,10 @@ add_action('before_woocommerce_init', function () {
 add_action('rest_api_init', function () {
     register_rest_route('lld-headless/v1', '/config', array(
         'methods' => 'GET', 'permission_callback' => '__return_true',
-        'callback' => function () { return lld_response(lld_configuration()); },
+        'callback' => function () { return lld_response(lld_checkout_health_check()); },
+    ));
+    register_rest_route('lld-headless/v1', '/alert', array(
+        'methods' => 'POST', 'permission_callback' => 'lld_authenticate_bridge', 'callback' => 'lld_checkout_alert_endpoint',
     ));
     register_rest_route('lld-headless/v1', '/account', array(
         'methods' => 'POST', 'permission_callback' => 'lld_authenticate_bridge', 'callback' => 'lld_account',

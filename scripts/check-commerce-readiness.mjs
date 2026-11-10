@@ -1,6 +1,7 @@
 // No payment/order creation. --cart exercises an isolated guest cart and removes its item.
 import { loadEnv } from 'vite';
 import { createCommerceHandler } from '../api/commerce.js';
+import { checkoutConfigured } from '../shared/checkoutConfig.js';
 const env = { ...process.env, ...loadEnv('development', process.cwd(), '') };
 const root = env.VITE_WOOCOMMERCE_STORE_API_URL?.replace(/\/$/, '');
 if (!root) throw new Error('Configure VITE_WOOCOMMERCE_STORE_API_URL first.');
@@ -26,19 +27,29 @@ const response = await fetch(`${root.replace('/wc/store/v1', '/lld-headless/v1')
   cache: 'no-store',
 });
 const config = await response.json();
+const ready = response.ok && checkoutConfigured(config);
 console.log(
   JSON.stringify({
     bridge: {
       status: response.status,
       enabled: config.enabled ?? false,
+      ready,
       testMode: config.testMode,
       gatewayVersion: config.gatewayVersion,
       woocommerceVersion: config.woocommerceVersion,
       configurationIssues: config.configurationIssues,
+      compatibilityWarnings: config.compatibilityWarnings || [],
     },
   }),
 );
+if (!ready) {
+  process.exitCode = 1;
+  console.error(
+    'Checkout readiness failed. Resolve the reported configuration or API issues before accepting purchases.',
+  );
+}
 if (process.argv.includes('--cart')) {
+  if (!ready) throw new Error('Cart acceptance check stopped because checkout is unavailable.');
   let cookie = '';
   const origin = (env.STOREFRONT_ORIGINS || '').split(',')[0].trim();
   if (!origin) throw new Error('Configure STOREFRONT_ORIGINS first.');

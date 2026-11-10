@@ -10,6 +10,7 @@ import { readSession, writeSession } from '../server/commerce/session.js';
 import { createWoo } from '../server/commerce/woo.js';
 import { readAccount } from '../server/account.js';
 import { checkoutConfigured } from '../shared/checkoutConfig.js';
+import { criticalCommerceAlert, reportCriticalCommerceError } from '../server/commerce/alerts.js';
 
 function attemptId(value) {
   if (
@@ -26,8 +27,14 @@ export function checkoutResult(result, attempt) {
     /^#wc-stripe-confirm-(pi|si):(\d+):((?:pi|seti)_[A-Za-z0-9]+_secret_[A-Za-z0-9]+):[A-Za-z0-9]+$/.exec(
       redirect,
     );
-  if (redirect.startsWith('#') && (!match || Number(match[2]) !== result.order_id))
-    throw new CommerceError('Payment requires verification. Please check your order status.', 409);
+  if (redirect.startsWith('#') && (!match || Number(match[2]) !== result.order_id)) {
+    const error = new CommerceError(
+      'Payment requires verification. Please check your order status.',
+      409,
+    );
+    error.criticalType = 'payment_verification';
+    throw error;
+  }
   return {
     attempt,
     paymentStatus: payment.payment_status,
@@ -35,11 +42,16 @@ export function checkoutResult(result, attempt) {
   };
 }
 
-export function createCommerceHandler({ env = process.env, fetchImpl = fetch } = {}) {
+export function createCommerceHandler({
+  env = process.env,
+  fetchImpl = fetch,
+  reportCritical = reportCriticalCommerceError,
+} = {}) {
   return async (req, res) => {
     let checkoutDispatched = false;
+    let action;
     try {
-      const action = new URL(req.url, 'http://localhost').searchParams.get('action') || 'cart';
+      action = new URL(req.url, 'http://localhost').searchParams.get('action') || 'cart';
       if (!['GET', 'POST'].includes(req.method))
         throw new CommerceError('Method not allowed.', 405);
       if (req.method === 'POST') requireSameOrigin(req, env);
@@ -86,8 +98,14 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
           if (typeof body.expectedTotal !== 'string' || !/^\d{1,12}$/.test(body.expectedTotal))
             throw new CommerceError('Please review your order total.');
           const config = await woo.config();
-          if (!checkoutConfigured(config))
-            throw new CommerceError('Checkout is being configured. Please try again later.', 503);
+          if (!checkoutConfigured(config)) {
+            const error = new CommerceError(
+              'Checkout is being configured. Please try again later.',
+              503,
+            );
+            error.criticalType = 'checkout_configuration';
+            throw error;
+          }
           const billing = address(body.billing_address, config.billingFields);
           const account = readAccount(req, env);
           const paymentData = {
@@ -161,6 +179,14 @@ export function createCommerceHandler({ env = process.env, fetchImpl = fetch } =
       writeSession(res, session, env);
       return send(res, 200, data);
     } catch (error) {
+      const type = criticalCommerceAlert(error, action, checkoutDispatched);
+      if (type) {
+        try {
+          await reportCritical({ type, action, status: error.status || 502, env, fetchImpl });
+        } catch {
+          /* Alert delivery must not change payment retry safety. */
+        }
+      }
       return send(res, error.status || 502, {
         error:
           error instanceof CommerceError

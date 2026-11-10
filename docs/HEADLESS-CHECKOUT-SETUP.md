@@ -1,6 +1,75 @@
 # Headless checkout: install and acceptance
 
-Bridge **0.5.9** supports the Stripe test or live mode selected in WooCommerce, with matching credentials. Supported stable versions are Stripe Gateway **11.0.x** and WooCommerce **11.1.x (from 11.1.2) / 11.2.x**, including the installed **11.2.1**. Patch updates within these minor releases are accepted; new minor/major versions and prereleases require review. The user previously completed a Stripe test purchase through React (Woo order 334, 30-Day Social Media Content Pack) and downloaded the product. Live charges have not been exercised by the automated checks; the installation-specific acceptance scenarios below remain relevant.
+Bridge **0.6.5** determines checkout readiness from the available WooCommerce/Stripe APIs and payment settings. Plugin version numbers no longer disable checkout in either WordPress or the app. Unreviewed releases produce `compatibilityWarnings` and a WordPress administrator notice, while actual missing APIs or invalid settings remain blocking `configurationIssues`. The user previously completed a Stripe test purchase through React (Woo order 334, 30-Day Social Media Content Pack) and downloaded the product. Live charges have not been exercised by the automated checks; the installation-specific acceptance scenarios below remain relevant.
+
+## November 10 checkout fix and critical alerts: bridge 0.6.5
+
+The public WordPress and storefront configuration responses both reported
+`enabled: false`, Stripe Gateway `11.1.1`, WooCommerce `11.3.0-rc.2`, and only
+`stripe_version` / `woocommerce_version` issues. The existing compatibility
+checks caused the outage; plugin activation, credentials and checkout settings
+passed their checks.
+
+Both `shared/checkoutConfig.js` and the WordPress bridge now treat versions as
+diagnostics. The bridge checks that required payment, verification, order,
+download, Store API and billing methods exist, are public, and can be called
+with the arguments this integration supplies. Keys/modes, card enablement,
+automatic capture, guest checkout and the explicit enable switch remain required.
+Install the replacement [plugin ZIP](cms/Longlife-Headless-Commerce.zip)
+using **Plugins → Add New Plugin → Upload Plugin → Replace current with uploaded**,
+and deploy the updated app/API. Preserve the existing integration secret and
+checkout enablement. The archive is built from this checkout's complete plugin
+directory, including existing translation features. A Git push does not install
+the WordPress plugin. Verify `/api/commerce?action=config` returns `enabled: true`
+and `configurationIssues: []` before considering deployment complete.
+
+A newer release can report compatibility warnings while checkout remains enabled.
+Version warnings do not generate critical email. The current review baseline is
+Stripe Gateway 11.0.x/11.1.x and WooCommerce 11.1.2–11.3.x, including the reviewed
+11.3.0-rc.2. This baseline controls administrator notices only.
+
+API presence/signature checks cannot establish identical behavior in a future
+release. Use stable releases in production, test the full checkout and download
+flow on staging before updating, and keep a current backup. This follows
+[WooCommerce's update guidance](https://woocommerce.com/document/how-to-update-woocommerce/).
+After an update, run `node scripts/check-commerce-readiness.mjs`; it prints blocking
+issues separately from review warnings and exits nonzero if checkout is not ready.
+It creates no order or payment. Scheduling external monitoring is separate; this
+change does not modify production plugin auto-update settings.
+
+Critical checkout alerts use WordPress `wp_mail` and its configured mail transport,
+with the fixed recipient **admin@longlifedigital.com**:
+
+- Checkout readiness/configuration failures while React checkout is enabled.
+- Stripe transport failures and HTTP 401, 403, 429, or 5xx responses.
+- Commerce API server failures, rejected bridge authentication, and errors verifying
+  payments. App reports use the authenticated `/lld-headless/v1/alert` endpoint.
+- Signed WordPress checkout responses with HTTP 5xx.
+
+Ordinary card declines, billing/coupon validation, customer authentication failures,
+and intentional checkout disablement do not email. Messages contain fixed issue
+codes, installed versions, mode, operation and HTTP status, never raw errors,
+customer details, request bodies or payment credentials. Each category sends at
+most once per six hours using a shared database lock and cooldown; rejected mail
+is retried after a five-minute backoff on the next observation. Mail transport
+acceptance is not proof of inbox delivery.
+
+Configuration is checked on public config requests and an hourly WP-Cron event
+(subject to WordPress traffic/cron execution). This is not an independent uptime
+monitor: if WordPress, the bridge credentials, or its mail transport are unavailable,
+the app records a sanitized Vercel delivery-failure log and preserves the original
+checkout response. No alert error may make an uncertain payment safe to retry.
+
+Source review covered the [Stripe 11.1.1 Blocks adapter](https://github.com/woocommerce/woocommerce-gateway-stripe/blob/11.1.1/includes/class-wc-stripe-blocks-support.php),
+[UPE gateway](https://github.com/woocommerce/woocommerce-gateway-stripe/blob/11.1.1/includes/payment-methods/class-wc-stripe-upe-payment-gateway.php),
+payment gateway/API/order helpers, and WooCommerce's
+[11.3.0-rc.2 checkout handler](https://github.com/woocommerce/woocommerce/blob/11.3.0-rc.2/plugins/woocommerce/src/StoreApi/Routes/V1/Checkout.php)
+and [checkout trait](https://github.com/woocommerce/woocommerce/blob/11.3.0-rc.2/plugins/woocommerce/src/StoreApi/Utilities/CheckoutTrait.php).
+The payment-data keys, deferred-intent path, confirmation hash and gateway
+verification methods used by this bridge remain supported. Upstream changes add
+order-save checks and recovery after payment; our independent paid-order and
+download-entitlement checks remain in place. Source review and mocked regression
+tests do not establish end-to-end live-payment acceptance.
 
 ## Checkout remains disabled after an update: bridge 0.5.9
 
@@ -110,6 +179,7 @@ Configure `VITE_WORDPRESS_API_URL`, `VITE_WOOCOMMERCE_STORE_API_URL`, and `VITE_
 
 ```sh
 node --test tests/commerce.test.mjs
+php tests/checkout-alerts.php
 npx playwright test --config playwright.checkout.config.js
 npm run test:catalog
 npm run lint

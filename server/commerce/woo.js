@@ -59,7 +59,12 @@ export function createWoo(env, fetchImpl = fetch) {
         response.status < 500 && typeof data.message === 'string'
           ? data.message.replace(/<[^>]*>/g, '').slice(0, 400)
           : 'The store could not complete this request.';
-      throw new CommerceError(message, response.status >= 500 ? 502 : response.status);
+      const error = new CommerceError(message, response.status >= 500 ? 502 : response.status);
+      // Bad bridge signatures return 403. Expired customer sessions return 401
+      // and should not generate administrator alerts.
+      if (response.status === 403 && init?.headers?.['X-LLD-Signature'])
+        error.criticalType = 'bridge_authentication';
+      throw error;
     }
     return { data, response };
   }

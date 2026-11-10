@@ -1,5 +1,15 @@
 # Client handoff review — October 1, 2026
 
+## Favicon update — October 16, 2026
+
+The user still saw Vite's icon while testing locally after adding a version to `/logo.png`. The running Vite server at `http://localhost:5173` served the updated HTML and the correct LD logo, but that logo was a 1 MB, 1254-pixel image and there was no `/favicon.ico` fallback. This confirmed the local files were current; it did not establish why the user's browser retained the Vite icon.
+
+Replaced those favicon references with dedicated assets exported from the existing `public/logo.png`: 16- and 32-pixel PNG favicons, a multi-size `favicon.ico` (16/32/48 pixels), a 180-pixel Apple touch icon, and 192/512-pixel manifest icons. `index.html` declares the icon sizes and uses version `2026101602`; `public/site.webmanifest` uses the same version. The full-size brand logo is unchanged. When replacing the logo, regenerate these assets and increase the version in both files.
+
+Verified in a fresh Chromium context that the homepage and translation request page expose the new icon links, every linked favicon responds with an image, and the 32-pixel PNG decodes correctly. The unversioned `/favicon.ico` fallback and manifest icon requests also pass. The Vite build in test mode passes. Safari's actual tab display has not been verified. Reload or reopen the local dev tab to pick up the new icon declarations; no deployment is needed for localhost. Production still needs the updated files committed and deployed; no production deployment was performed.
+
+## Original launch checklist
+
 The app can be reviewed as a preview. These items remain before a public sales launch:
 
 1. **Checkout compatibility fix (updated in 0.5.9).** The live configuration rejected WooCommerce 11.2.1 because 0.5.8 pinned exact patch versions. The bridge/app now accept stable Stripe Gateway 11.0.x and WooCommerce 11.1.x (from 11.1.2) / 11.2.x releases in either Stripe mode. Replace the WordPress plugin ZIP and deploy the app/API; pushing to Vercel alone cannot update WordPress. Confirm the storefront config returns `enabled: true` with no `configurationIssues`. Automated tests use mocks, not live charges. Complete installation acceptance in `HEADLESS-CHECKOUT-SETUP.md`.

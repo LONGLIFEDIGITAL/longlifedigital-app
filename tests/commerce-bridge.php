@@ -43,22 +43,26 @@ class WC_Stripe_UPE_Payment_Gateway {
         $this->payment_methods = array('card' => new class { function is_enabled() { return $GLOBALS['card_enabled'] ?? true; } });
     }
     function verify_intent_after_checkout($order) { $order->verified = true; }
+    function process_payment($id) {}
 }
 class WC_Stripe_Order_Helper {
-    static function get_instance() { return new self; }
+    static function get_instance() { return $GLOBALS['order_helper_override'] ?? new self; }
     function update_stripe_upe_redirect_processed($order, $v) { $order->meta["redirect_processed"] = $v; }
     function delete_stripe_upe_waiting_for_redirect($order) { unset($order->meta["_stripe_upe_waiting_for_redirect"]); }
 }
 class WC_Stripe {
     static function get_instance() { return new self; }
-    function get_main_stripe_gateway() { return new WC_Stripe_UPE_Payment_Gateway; }
+    function get_main_stripe_gateway() { return $GLOBALS['gateway_override'] ?? new WC_Stripe_UPE_Payment_Gateway; }
 }
 class Countries {
     function get_allowed_countries() { return array('US' => 'United States', 'AE' => 'United Arab Emirates'); }
     function get_states() { return array(); }
     function get_address_fields($country, $type) { return array($type . 'postcode' => array('required' => $country === 'US', 'hidden' => $country === 'AE')); }
 }
-function WC() { return (object) array('countries' => new Countries, 'cart' => true); }
+function WC() { return (object) array('countries' => $GLOBALS['countries_override'] ?? new Countries, 'cart' => true); }
+function wc_load_cart() {}
+class StoreCheckout { function get_response($request) {} }
+class_alias('StoreCheckout', 'Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout');
 $orders = array();
 function wc_get_order($id) { global $orders; return $orders[$id] ?? null; }
 class Order {
@@ -93,13 +97,30 @@ class Request {
     function get_route() { return $this->route; } function get_body() { return $this->body; }
     function get_param($k) { return json_decode($this->body, true)[$k] ?? null; }
 }
+class_alias('Order', 'WC_Order');
 require __DIR__ . '/../wordpress/longlife-headless-commerce/longlife-headless-commerce.php';
 $count = 0;
 function check($value, $message) { global $count; if (!$value) throw new Exception('FAIL: ' . $message); $count++; echo 'ok ' . $count . ' - ' . $message . "\n"; }
 foreach (json_decode(file_get_contents(__DIR__ . '/fixtures/checkout-versions.json'), true) as $case) {
-    $versions = lld_checkout_version_checks($case['gatewayVersion'], $case['woocommerceVersion']);
-    check(($versions['stripe_version'] && $versions['woocommerce_version']) === $case['supported'], 'version compatibility: ' . json_encode($case));
+    $warnings = lld_checkout_version_warnings($case['gatewayVersion'], $case['woocommerceVersion']);
+    check(empty($warnings) === $case['reviewed'], 'version review is advisory: ' . json_encode($case));
 }
+check(lld_configuration()['enabled'], 'available APIs enable checkout regardless of installed version');
+check(lld_configuration()['compatibilityWarnings'] === lld_checkout_version_warnings(WC_STRIPE_VERSION, WC_VERSION), 'version warnings are separate from blocking issues');
+$gateway_override = new class { function process_payment($id) {} };
+check(!lld_configuration()['enabled'] && in_array('stripe_payment_api', lld_configuration()['configurationIssues']), 'missing payment verification method blocks purchases');
+unset($gateway_override);
+$order_helper_override = new stdClass;
+check(!lld_configuration()['enabled'] && in_array('stripe_order_api', lld_configuration()['configurationIssues']), 'missing Stripe order helper methods block purchases');
+$blocked = $hooks['rest_pre_dispatch'](null, null, new Request('/wc/store/v1/checkout'));
+check($blocked instanceof WP_Error && $blocked->data['status'] === 503 && empty($GLOBALS['lld_checkout_context']), 'missing required API blocks dispatch before payment or attempt creation');
+unset($order_helper_override);
+$countries_override = new stdClass;
+check(!lld_configuration()['enabled'] && in_array('billing_api', lld_configuration()['configurationIssues']), 'missing country APIs fail closed without a fatal error');
+unset($countries_override);
+check(!lld_checkout_has_methods(new class { private function process_payment() {} }, array('process_payment' => 1)), 'private methods do not satisfy the payment contract');
+check(!lld_checkout_has_methods(new class { function __call($name, $arguments) {} }, array('process_payment' => 1)), 'magic fallback alone does not satisfy the payment contract');
+check(!lld_checkout_has_methods(new class { function process_payment($order, $new_required_argument) {} }, array('process_payment' => 1)), 'breaking required-argument changes do not satisfy the payment contract');
 $r = new Request('/lld-headless/v1/order');
 check(lld_authenticate_bridge($r) === true, 'signed request accepted');
 check(lld_authenticate_bridge($r)->data['status'] === 409, 'nonce replay rejected');
@@ -107,7 +128,7 @@ $r = new Request('/lld-headless/v1/order'); $r->body = '{"confirm":true}';
 check(lld_authenticate_bridge($r)->data['status'] === 403, 'modified request body rejected');
 $r = new Request('/lld-headless/v1/order'); $r->headers['x-lld-timestamp'] = (string)(time()-121); $r->sign();
 check(lld_authenticate_bridge($r)->data['status'] === 403, 'expired signature rejected');
-check(lld_configuration()['enabled'] && lld_configuration()['configurationIssues'] === array(), 'current stable test gateway configuration enabled without configuration issues');
+check(lld_configuration()['enabled'] && lld_configuration()['configurationIssues'] === array(), 'configured gateway enabled without blocking configuration issues');
 check(lld_configuration()['publishableKey'] === 'pk_test_example', 'billing field iteration preserves the configured Stripe publishable key');
 check(lld_configuration()['billingFields']['US']['postcode']['required'], 'Woo required postal code exposed');
 check(!lld_configuration()['billingFields']['AE']['postcode']['required'] && lld_configuration()['billingFields']['AE']['postcode']['hidden'], 'Woo hidden postal code not required');

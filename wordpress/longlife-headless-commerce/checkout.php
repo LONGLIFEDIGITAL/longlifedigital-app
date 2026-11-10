@@ -1,20 +1,46 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
-function lld_checkout_version_checks($stripe_version, $woo_version) {
+function lld_checkout_version_warnings($stripe_version, $woo_version) {
     $in_range = function ($version, $minimum, $maximum) {
         return is_string($version) && preg_match('/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/D', $version)
             && version_compare($version, $minimum, '>=') && version_compare($version, $maximum, '<');
     };
-    // Stable patches in reviewed minor releases must not disable checkout.
-    // Review new minors/majors before widening these ranges; match checkoutConfig.js.
+    // Reviewed releases inform administrators only. A release number alone must
+    // never disable purchases; required APIs and payment settings decide readiness.
+    $reviewed = array(
+        'stripe_version_unreviewed' => $in_range($stripe_version, '11.0.0', '11.2.0'),
+        'woocommerce_version_unreviewed' => $in_range($woo_version, '11.1.2', '11.4.0') || $woo_version === '11.3.0-rc.2',
+    );
+    return array_keys(array_filter($reviewed, function ($value) { return !$value; }));
+}
+function lld_checkout_has_methods($target, $methods) {
+    if (!is_object($target) && (!is_string($target) || !class_exists($target))) return false;
+    foreach ($methods as $method => $arguments) {
+        if (!method_exists($target, $method)) return false;
+        $reflection = new ReflectionMethod($target, $method);
+        if (!$reflection->isPublic() || $reflection->getNumberOfRequiredParameters() > $arguments) return false;
+    }
+    return true;
+}
+function lld_checkout_order_helper() {
+    return is_callable(array('WC_Stripe_Order_Helper', 'get_instance')) ? WC_Stripe_Order_Helper::get_instance() : null;
+}
+function lld_checkout_capability_checks($gateway, $countries) {
     return array(
-        'stripe_version' => $in_range($stripe_version, '11.0.0', '11.1.0'),
-        'woocommerce_version' => $in_range($woo_version, '11.1.2', '11.3.0'),
+        'stripe_payment_api' => lld_checkout_has_methods($gateway, array('process_payment' => 1, 'verify_intent_after_checkout' => 1)),
+        'stripe_order_api' => lld_checkout_has_methods(lld_checkout_order_helper(), array('update_stripe_upe_redirect_processed' => 2, 'delete_stripe_upe_waiting_for_redirect' => 1)),
+        'woocommerce_store_api' => lld_checkout_has_methods('Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout', array('get_response' => 1)),
+        'woocommerce_order_api' => function_exists('wc_get_order') && function_exists('wc_load_cart')
+            && lld_checkout_has_methods('WC_Order', array('is_paid' => 0, 'get_date_paid' => 0, 'get_transaction_id' => 0, 'is_download_permitted' => 0, 'get_downloadable_items' => 0, 'get_meta' => 1, 'update_meta_data' => 2, 'set_customer_id' => 1, 'save' => 0)),
+        'billing_api' => lld_checkout_has_methods($countries, array('get_allowed_countries' => 0, 'get_states' => 0, 'get_address_fields' => 2)),
     );
 }
 function lld_configuration() {
     $settings = get_option('woocommerce_stripe_settings', array());
-    $gateway = class_exists('WC_Stripe') ? WC_Stripe::get_instance()->get_main_stripe_gateway() : null;
+    $stripe = is_callable(array('WC_Stripe', 'get_instance')) ? WC_Stripe::get_instance() : null;
+    $gateway = is_callable(array($stripe, 'get_main_stripe_gateway')) ? $stripe->get_main_stripe_gateway() : null;
+    $woo = function_exists('WC') ? WC() : null;
+    $countries = $woo->countries ?? null;
     $upe = $gateway instanceof WC_Stripe_UPE_Payment_Gateway;
     $card = $upe && isset($gateway->payment_methods['card']) ? $gateway->payment_methods['card'] : null;
     $version = defined('WC_STRIPE_VERSION') ? WC_STRIPE_VERSION : '';
@@ -24,23 +50,23 @@ function lld_configuration() {
     $secret = $settings[$test ? 'test_secret_key' : 'secret_key'] ?? '';
     // Select the same mode and keys as the official gateway. Never fall back to
     // test credentials when live mode is selected, or expose a secret key.
-    $checks = array_merge(lld_checkout_version_checks($version, $woo_version), array(
+    $checks = array_merge(lld_checkout_capability_checks($gateway, $countries), array(
         'stripe_gateway' => $upe,
-        'stripe_mode' => in_array($settings['testmode'] ?? '', array('yes', 'no'), true) && $upe && $gateway->testmode === $test,
-        'card_payments' => $card && $card->is_enabled(),
+        'stripe_mode' => in_array($settings['testmode'] ?? '', array('yes', 'no'), true) && $upe && ($gateway->testmode ?? null) === $test,
+        'card_payments' => lld_checkout_has_methods($card, array('is_enabled' => 0)) && $card->is_enabled(),
         'guest_checkout' => get_option('woocommerce_enable_guest_checkout') === 'yes',
         'stripe_enabled' => ($settings['enabled'] ?? '') === 'yes',
         'automatic_capture' => ($settings['capture'] ?? 'yes') === 'yes',
-        'publishable_key' => is_string($key) && preg_match($test ? '/^pk_test_[A-Za-z0-9]+$/D' : '/^pk_live_[A-Za-z0-9]+$/D', $key) && $upe && $key === $gateway->publishable_key,
-        'secret_key' => is_string($secret) && preg_match($test ? '/^(?:sk|rk)_test_[A-Za-z0-9]+$/D' : '/^(?:sk|rk)_live_[A-Za-z0-9]+$/D', $secret) && $upe && $secret === $gateway->secret_key,
+        'publishable_key' => is_string($key) && preg_match($test ? '/^pk_test_[A-Za-z0-9]+$/D' : '/^pk_live_[A-Za-z0-9]+$/D', $key) && $upe && $key === ($gateway->publishable_key ?? null),
+        'secret_key' => is_string($secret) && preg_match($test ? '/^(?:sk|rk)_test_[A-Za-z0-9]+$/D' : '/^(?:sk|rk)_live_[A-Za-z0-9]+$/D', $secret) && $upe && $secret === ($gateway->secret_key ?? null),
     ));
     $issues = array_keys(array_filter($checks, function ($passed) { return !$passed; }));
     $compatible = !$issues;
     if (get_option('lld_checkout_enabled') !== '1') $issues[] = 'headless_checkout_disabled';
     $billing_fields = array();
-    if (function_exists('WC') && WC()->countries) {
-        foreach (WC()->countries->get_allowed_countries() as $country => $name) {
-            foreach (WC()->countries->get_address_fields($country, 'billing_') as $field_key => $field) {
+    if ($checks['billing_api']) {
+        foreach ($countries->get_allowed_countries() as $country => $name) {
+            foreach ($countries->get_address_fields($country, 'billing_') as $field_key => $field) {
                 $billing_fields[$country][substr($field_key, 8)] = array(
                     'required' => !empty($field['required']) && empty($field['hidden']),
                     'hidden' => !empty($field['hidden']),
@@ -52,9 +78,10 @@ function lld_configuration() {
         'gatewayVersion' => $version, 'woocommerceVersion' => $woo_version, 'testMode' => $test,
         'enabled' => $compatible && get_option('lld_checkout_enabled') === '1',
         'configurationIssues' => $issues,
+        'compatibilityWarnings' => lld_checkout_version_warnings($version, $woo_version),
         'publishableKey' => $compatible ? $key : null,
-        'countries' => function_exists('WC') && WC()->countries ? WC()->countries->get_allowed_countries() : array(),
-        'states' => function_exists('WC') && WC()->countries ? WC()->countries->get_states() : array(),
+        'countries' => $checks['billing_api'] ? $countries->get_allowed_countries() : array(),
+        'states' => $checks['billing_api'] ? $countries->get_states() : array(),
         'billingFields' => $billing_fields,
     );
 }
@@ -106,6 +133,7 @@ add_filter('rest_post_dispatch', function ($response, $server, $request) {
     $record['response'] = $response->get_data();
     $record['status'] = $response->get_status();
     lld_save($identity['key'], $record);
+    if ($record['status'] >= 500) lld_checkout_critical_alert('checkout_processing', array('status' => $record['status']));
     $order = !empty($record['order']) ? wc_get_order($record['order']) : null;
     // Never expire a lock simply because a network response is late.
     if ((!$order && $record['status'] >= 400) || ($order && ($order->is_paid() || $order->has_status(array('failed', 'cancelled', 'checkout-draft'))))) lld_delete($identity['lock']);

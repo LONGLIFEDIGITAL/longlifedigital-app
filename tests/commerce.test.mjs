@@ -4,6 +4,7 @@ import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createCommerceHandler, checkoutResult } from '../api/commerce.js';
 import { seal, unseal } from '../server/commerce/session.js';
+import { criticalCommerceAlert, reportCriticalCommerceError } from '../server/commerce/alerts.js';
 const env = {
   COMMERCE_SESSION_SECRET: 'test-only-cookie-secret-at-least-32-characters',
   LLD_COMMERCE_BRIDGE_SECRET: 'test-only-bridge-secret-at-least-32-characters',
@@ -42,7 +43,7 @@ const payload = {
   customer_id: 99,
   paid: true,
 };
-async function call(action, body, fetchImpl, overrides = {}) {
+async function call(action, body, fetchImpl, overrides = {}, reportCritical = async () => {}) {
   const req = {
     url: `/api/commerce?action=${action}`,
     method: body === undefined ? 'GET' : 'POST',
@@ -59,7 +60,7 @@ async function call(action, body, fetchImpl, overrides = {}) {
       result.body = JSON.parse(value);
     },
   };
-  await createCommerceHandler({ env, fetchImpl })(req, res);
+  await createCommerceHandler({ env, fetchImpl, reportCritical })(req, res);
   return result;
 }
 const reply = (data, status = 200, headers = {}) =>
@@ -259,14 +260,14 @@ test('checkout invokes the pinned Woo gateway, signs exact body, strips PII and 
     authentication: { type: 'pi', clientSecret: 'pi_abc_secret_xyz' },
   });
 });
-test('unreviewed versions and mismatched Stripe mode or keys block payment submission', async () => {
+test('missing capabilities, disabled checkout, and mismatched Stripe credentials block payment submission', async () => {
   for (const value of [
     { ...config, testMode: false },
     { ...config, testMode: undefined },
     { ...config, publishableKey: 'pk_live_example' },
     { ...config, publishableKey: null },
-    { ...config, gatewayVersion: '12.0.0' },
-    { ...config, woocommerceVersion: '12.0.0' },
+    { ...config, enabled: false, configurationIssues: ['stripe_payment_api'] },
+    { ...config, enabled: false, configurationIssues: ['woocommerce_order_api'] },
     { ...config, enabled: false },
   ]) {
     const result = await call('checkout', payload, async (url) => {
@@ -277,11 +278,11 @@ test('unreviewed versions and mismatched Stripe mode or keys block payment submi
     assert.equal(result.body.retrySafe, true);
   }
 });
-test('shared version boundaries accept stable patches and block unsupported releases in both Stripe modes', async () => {
+test('release numbers and advisory warnings never disable a ready gateway in either Stripe mode', async () => {
   const versions = JSON.parse(
     readFileSync(new URL('./fixtures/checkout-versions.json', import.meta.url), 'utf8'),
   );
-  for (const { gatewayVersion, woocommerceVersion, supported } of versions) {
+  for (const { gatewayVersion, woocommerceVersion, reviewed } of versions) {
     for (const testMode of [true, false]) {
       let dispatched = false;
       const result = await call('checkout', payload, async (url, init) => {
@@ -290,6 +291,9 @@ test('shared version boundaries accept stable patches and block unsupported rele
             ...config,
             gatewayVersion,
             woocommerceVersion,
+            compatibilityWarnings: reviewed
+              ? []
+              : ['stripe_version_unreviewed', 'woocommerce_version_unreviewed'],
             testMode,
             publishableKey: testMode ? 'pk_test_example' : 'pk_live_example',
           });
@@ -299,8 +303,8 @@ test('shared version boundaries accept stable patches and block unsupported rele
         return reply({ order_id: 45, payment_result: { payment_status: 'success' } });
       });
       const label = JSON.stringify({ gatewayVersion, woocommerceVersion, testMode });
-      assert.equal(result.status, supported ? 200 : 503, label);
-      assert.equal(dispatched, supported, label);
+      assert.equal(result.status, 200, label);
+      assert.equal(dispatched, true, label);
     }
   }
 });
@@ -311,6 +315,139 @@ test('ambiguous payment failures do not suggest it is safe to pay again', async 
   });
   assert.equal(result.status, 502);
   assert.equal(result.body.retrySafe, false);
+});
+
+test('critical alerts exclude customer validation, declines, ownership errors, and forbidden browser requests', () => {
+  for (const status of [400, 401, 402, 403, 404, 409, 422, 429]) {
+    assert.equal(criticalCommerceAlert({ status }, 'checkout', true), null);
+  }
+  assert.equal(
+    criticalCommerceAlert({ status: 403, criticalType: 'bridge_authentication' }, 'checkout', true),
+    'bridge_authentication',
+  );
+  assert.equal(criticalCommerceAlert({ status: 502 }, 'order', false), 'payment_verification');
+  assert.equal(criticalCommerceAlert({ status: 502 }, 'config', false), 'store_unavailable');
+  assert.equal(
+    criticalCommerceAlert(new Error('network timeout'), 'checkout', true),
+    'checkout_processing',
+  );
+  assert.throws(
+    () => checkoutResult({ order_id: 5, payment_result: { redirect_url: '#invalid' } }, attempt),
+    (error) => {
+      assert.equal(criticalCommerceAlert(error, 'checkout', true), 'payment_verification');
+      return true;
+    },
+  );
+});
+
+test('checkout failures notify admin without changing payment retry safety, even when alerts fail', async () => {
+  const alerts = [];
+  const result = await call(
+    'checkout',
+    payload,
+    async (url) => {
+      if (url.endsWith('/config')) return reply(config);
+      throw new Error('private upstream details');
+    },
+    {},
+    async ({ type, action, status }) => {
+      alerts.push({ type, action, status });
+      throw new Error('mail failed');
+    },
+  );
+  assert.deepEqual(alerts, [{ type: 'checkout_processing', action: 'checkout', status: 502 }]);
+  assert.equal(result.status, 502);
+  assert.equal(result.body.retrySafe, false);
+  assert.ok(!JSON.stringify(result).includes('private upstream'));
+  alerts.length = 0;
+  await call(
+    'checkout',
+    payload,
+    async () => reply({ ...config, enabled: false }),
+    {},
+    async ({ type }) => alerts.push(type),
+  );
+  assert.deepEqual(alerts, ['checkout_configuration']);
+  alerts.length = 0;
+  await call(
+    'checkout',
+    { ...payload, billing_address: {} },
+    async () => reply(config),
+    {},
+    async () => alerts.push('unexpected'),
+  );
+  assert.deepEqual(alerts, []);
+});
+
+test('critical alerts use a signed bounded request containing only diagnostic codes', async () => {
+  let sent;
+  await reportCriticalCommerceError({
+    type: 'checkout_processing',
+    action: 'checkout',
+    status: 502,
+    env,
+    fetchImpl: async (url, init) => {
+      sent = { url, init };
+      return reply({ ok: true });
+    },
+  });
+  assert.equal(sent.url, 'https://wp.example.test/wp-json/lld-headless/v1/alert');
+  const { init } = sent;
+  assert.deepEqual(JSON.parse(init.body), {
+    type: 'checkout_processing',
+    action: 'checkout',
+    status: 502,
+  });
+  assert.ok(init.signal instanceof AbortSignal);
+  assert.equal(init.redirect, 'error');
+  const h = init.headers;
+  const canonical = [
+    'POST',
+    '/lld-headless/v1/alert',
+    h['X-LLD-Session'],
+    h['X-LLD-Attempt'],
+    h['X-LLD-Timestamp'],
+    h['X-LLD-Nonce'],
+    '',
+    init.body,
+  ].join('\n');
+  assert.equal(
+    h['X-LLD-Signature'],
+    createHmac('sha256', env.LLD_COMMERCE_BRIDGE_SECRET).update(canonical).digest('hex'),
+  );
+});
+
+test('expired customer sessions stay quiet while rejected bridge signatures alert', async () => {
+  for (const status of [401, 403]) {
+    const alerts = [];
+    const result = await call(
+      'checkout',
+      payload,
+      async (url) => {
+        if (url.endsWith('/config')) return reply(config);
+        return reply(
+          {
+            code: 'lld_checkout',
+            message: status === 401 ? 'Please log in again.' : 'Request not authorized.',
+          },
+          status,
+        );
+      },
+      {},
+      async ({ type }) => alerts.push(type),
+    );
+    assert.equal(result.status, status);
+    assert.deepEqual(alerts, status === 403 ? ['bridge_authentication'] : []);
+  }
+  const alerts = [];
+  await call(
+    'cart',
+    undefined,
+    async () => reply({ message: 'Expired cart token.' }, 403),
+    {},
+    async ({ type }) => alerts.push(type),
+  );
+  assert.deepEqual(alerts, []);
 });
 test('order ownership uses the signed browser session, never a supplied customer/order ID', async () => {
   const result = await call(
