@@ -99,6 +99,9 @@ home_fields = [
     field('hero_prefix', 'Hero opening line', help='For example: Beautifully Crafted.'),
     field('hero_highlight', 'Hero highlighted words', help='For example: Digital Products. Gradient styling remains in React.'),
     field('hero_suffix', 'Hero closing line', help='For example: for Life & Business.'),
+    field('hero_product', 'Hero featured product', 'post_object',
+          'Choose the product shown in the homepage hero. Leave empty to show the newest product in the public catalog. If the selected product is removed or no longer public, the newest product is shown instead. This does not change the Featured Products collection.',
+          post_type=['product'], post_status=['publish']),
     cta('primary_cta', 'Primary hero button'), cta('secondary_cta', 'Secondary hero button'),
     field('catalog_title', 'Catalog heading', default_value='Explore Our Products'),
     field('catalog_intro', 'Catalog introduction', 'textarea'),
@@ -357,6 +360,8 @@ for item in CPTS:
 assert all(item['show_in_rest'] == 1 for item in GROUPS)
 (OUT / 'Longlife-Digital-ACF-Import.json').write_text(json.dumps(IMPORT, indent=2, ensure_ascii=False) + '\n')
 (OUT / 'Longlife-Digital-ACF-Collection-Pages-Update.json').write_text(
+    json.dumps([entry for entry in GROUPS if entry['key'] == 'group_lld_page'], indent=2, ensure_ascii=False) + '\n')
+(OUT / 'Longlife-Digital-ACF-Home-Hero-Update.json').write_text(
     json.dumps([entry for entry in GROUPS if entry['key'] == 'group_lld_page'], indent=2, ensure_ascii=False) + '\n')
 (OUT / 'Longlife-Digital-ACF-Services-Update.json').write_text(
     json.dumps([entry for entry in GROUPS if entry['key'] in ('group_lld_page', 'group_lld_service')], indent=2, ensure_ascii=False) + '\n')

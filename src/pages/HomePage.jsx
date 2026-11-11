@@ -69,7 +69,8 @@ export default function HomePage({
   const more = content?.collections?.more;
   const loading = catalogStatus === 'loading';
   const featured = products.filter((product) => product.featured);
-  const highlighted = featured[0] || products[0];
+  const highlighted =
+    products.find((product) => product.id === content?.hero?.productId) || products[0];
   const highlightedImage = highlighted?.image || highlighted?.thumbnail;
   const highlightedArtwork = highlighted && (
     <Box aria-hidden="true" className={classes.featuredEmoji}>

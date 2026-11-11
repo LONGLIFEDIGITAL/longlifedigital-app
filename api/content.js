@@ -10,6 +10,13 @@ function text(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function productId(value) {
+  if (!['number', 'string'].includes(typeof value) || !/^[1-9]\d*$/.test(String(value)))
+    return null;
+  const id = Number(value);
+  return Number.isSafeInteger(id) ? id : null;
+}
+
 function httpsUrl(value) {
   try {
     const url = new URL(text(value));
@@ -241,6 +248,7 @@ export function createContentHandler({
               prefix: text(home.hero_prefix),
               highlight: text(home.hero_highlight),
               suffix: text(home.hero_suffix),
+              productId: productId(home.hero_product),
               primaryCta: button(home.primary_cta),
               secondaryCta: button(home.secondary_cta),
             },

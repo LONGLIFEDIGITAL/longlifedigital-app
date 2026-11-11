@@ -32,7 +32,8 @@ export function createCatalogHandler({
       try {
         const url = new URL(`${baseUrl.trim().replace(/\/+$/, '')}/products`);
         if (url.protocol !== 'https:') throw new Error('HTTPS is required.');
-        url.search = new URLSearchParams({ per_page: '100', page });
+        // Keep the catalog newest-first so the homepage's automatic choice is explicit.
+        url.search = new URLSearchParams({ per_page: '100', page, orderby: 'date', order: 'desc' });
         if (query.get('featured') === 'true') url.searchParams.set('featured', 'true');
         const response = await requestWordPress(url, {
           signal: AbortSignal.timeout(CONTENT_SYNC.upstreamTimeoutMs),

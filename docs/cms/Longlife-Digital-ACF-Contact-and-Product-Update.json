@@ -403,6 +403,24 @@
             "key": "field_lld_page_lld_home_hero_suffix"
           },
           {
+            "name": "hero_product",
+            "label": "Hero featured product",
+            "type": "post_object",
+            "instructions": "Choose the product shown in the homepage hero. Leave empty to show the newest product in the public catalog. If the selected product is removed or no longer public, the newest product is shown instead. This does not change the Featured Products collection.",
+            "required": 0,
+            "return_format": "id",
+            "allow_null": 1,
+            "multiple": 0,
+            "ui": 1,
+            "post_type": [
+              "product"
+            ],
+            "post_status": [
+              "publish"
+            ],
+            "key": "field_lld_page_lld_home_hero_product"
+          },
+          {
             "name": "primary_cta",
             "label": "Primary hero button",
             "type": "group",

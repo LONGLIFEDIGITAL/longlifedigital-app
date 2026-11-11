@@ -827,7 +827,7 @@ test('Vercel endpoint restricts requests and forwards only public pagination', a
     expect(requested.searchParams.get('_lld_refresh')).toBeTruthy();
     requested.searchParams.delete('_lld_refresh');
     expect(requested.href).toBe(
-      'https://store.example.test/wp-json/wc/store/v1/products?per_page=100&page=2&featured=true',
+      'https://store.example.test/wp-json/wc/store/v1/products?per_page=100&page=2&orderby=date&order=desc&featured=true',
     );
     process.env.VERCEL_ENV = 'preview';
     expect((await invoke('GET', '/api/catalog')).headers['Cache-Control']).toBe('no-store');
