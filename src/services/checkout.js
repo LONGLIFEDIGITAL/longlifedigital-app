@@ -3,7 +3,7 @@ import { plainText } from './catalog';
 export const headlessEnabled = import.meta.env.VITE_HEADLESS_COMMERCE === 'true';
 let sessionQueue = Promise.resolve();
 export function commerce(action, body) {
-  if (action === 'config') return request(action, body);
+  if (action === 'config' || action === 'fraud-config') return request(action, body);
   // Cart, checkout and order verification share one cookie. Serialize their responses,
   // including across tabs where Web Locks is available, so older cookies cannot win.
   const run = () =>
@@ -19,7 +19,9 @@ async function request(action, body) {
     method: body === undefined ? 'GET' : 'POST',
     credentials: 'same-origin',
     cache: 'no-store',
-    ...(action === 'order' ? { signal: AbortSignal.timeout(15000) } : {}),
+    ...(['order', 'fraud-config'].includes(action)
+      ? { signal: AbortSignal.timeout(action === 'order' ? 15000 : 5000) }
+      : {}),
     headers: { 'Content-Type': 'application/json', 'X-LLD-Commerce': '1' },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });

@@ -1,6 +1,63 @@
 # Headless checkout: install and acceptance
 
-Bridge **0.6.6** determines checkout readiness from the available WooCommerce/Stripe APIs and payment settings. Plugin version numbers no longer disable checkout in either WordPress or the app. Unreviewed releases produce `compatibilityWarnings` and a WordPress administrator notice, while actual missing APIs or invalid settings remain blocking `configurationIssues`. The user previously completed a Stripe test purchase through React (Woo order 334, 30-Day Social Media Content Pack) and downloaded the product. Live charges have not been exercised by the automated checks; the installation-specific acceptance scenarios below remain relevant.
+Bridge **0.6.7** determines checkout readiness from the available WooCommerce/Stripe APIs and payment settings. Plugin version numbers no longer disable checkout in either WordPress or the app. Unreviewed releases produce `compatibilityWarnings` and a WordPress administrator notice, while actual missing APIs or invalid settings remain blocking `configurationIssues`. The user previously completed a Stripe test purchase through React (Woo order 334, 30-Day Social Media Content Pack) and downloaded the product. Live charges have not been exercised by the automated checks; the installation-specific acceptance scenarios below remain relevant.
+
+## Browser fraud session integration: bridge 0.6.7
+
+The earlier release fixed reporting of a pre-payment block. It did not provide
+the browser data used by Woo Fraud Protection. This release adds that integration:
+
+- Checkout loads the installed Woo browser initializer and Blackbox SDK using
+  the public `BlackboxScriptHandler::request_scripts()` API. A small frontend
+  WordPress route (`?lld_checkout_fraud_bootstrap=1`) exports the registered
+  script URLs and public configuration, because Woo intentionally excludes REST
+  requests from its script loader. `/api/commerce?action=fraud-config` validates
+  those URLs and never creates or overwrites the cart session cookie.
+- Both card and free checkout call the documented
+  `window.wcFraudProtection.acquireSessionId()` immediately before submission.
+  The server forwards the returned ID in the native
+  `woocommerce/fraud-protection` Store API extension. Native `reset()` prepares
+  later attempts; used IDs are not replayed. Missing/slow SDK data is reported
+  as missing, with a bounded wait; the server still decides whether to allow it.
+- The native `wfp_id` cookie is scoped to the storefront origin. Only that
+  validated identity, the browser user agent, and the IP from Vercel's trusted
+  `x-vercel-forwarded-for` header are forwarded in the HMAC-signed request.
+  WordPress applies this context only after successful bridge authentication,
+  then restores it after checkout. Arbitrary client JSON and untrusted forwarded
+  headers cannot select the shopper IP. Other hosts use the direct socket IP;
+  adding another proxy requires an explicit trusted-proxy integration.
+- Woo's fraud verdict, merchant rules, payment ordering, and critical alert
+  suppression stay enforced. An unavailable/malformed installed bootstrap alerts
+  `admin@longlifedigital.com` in the `fraud_configuration` category (six-hour
+  suppression). Individual fraud blocks and content blockers are not emailed.
+
+The adapter reads the installed initializer rather than copying a particular
+plugin release. Its small script-manifest adapter still depends on the native
+script handles and localized JSON format: changes there produce a diagnostic,
+not a plugin-version-only checkout gate. Sources:
+[Woo public integration API](https://github.com/woocommerce/woocommerce-fraud-protection/blob/329f5375b7dbecb7ee19f90391a701e188616e1d/README.md),
+[Vercel request headers](https://vercel.com/docs/headers/request-headers).
+
+Deploy the WordPress ZIP **0.6.7 first**, then the app, and reload checkout.
+Verify `fraud-config` returns `enabled: true` when Woo Fraud Protection is
+installed, both browser scripts load, and a new attempt includes a nonempty
+session ID. In Woo's checkout-attempt screen, check the resulting outcome and
+confirm Stripe/Woo payment completion. Do not copy session IDs, cookies, or
+customer details into issue reports. No live payment has been made by these tests.
+
+There is no per-customer allowlist requirement in this integration. Each new
+attempt is evaluated by Woo. An exact email allow rule can be a merchant-reviewed
+exception for a confirmed false positive, but it does not change a previous
+blocked order. Supplying the missing browser context addresses an integration
+gap; it does not guarantee that Woo will allow a particular shopper. Its private
+fraud decision and live acceptance still need verification after deployment.
+
+Validation for this release: 33 commerce server tests, 5 isolated browser-adapter
+tests (Node VM, no actual browser), lint, and the development-mode app build pass.
+The PHP and Playwright regression cases are included but could not be run in this
+session: the sandbox denied their local sockets and escalation requests were
+declined. Run `tests/fraud-protection.php` in PHP 8+ and the checkout Playwright
+suite in a permitted environment before treating this as production acceptance.
 
 ## Pre-payment fraud rejection: bridge 0.6.6
 
@@ -18,12 +75,11 @@ matching attempt. Woo's [merchant documentation](https://woocommerce.com/documen
 explains the difference between **Blocked** and **Allowed + Flagged**, and warns
 that headless/custom checkout coverage needs verification.
 
-Our React checkout currently does not load the Blackbox browser integration or
-send its session data in the Store API extensions. The WordPress request also
-comes through the storefront server. Missing browser data or proxy context is a
-possible cause of false positives; the service does not publish the exact
-signals behind this decision. This release does **not** integrate that SDK,
-disable fraud protection, override a verdict, or change WordPress settings.
+At the time of the 0.6.6 release, React did not load the Blackbox browser integration
+or send its session data, and WordPress saw the storefront server's IP. Missing
+browser data or proxy context was a possible cause of false positives; the service
+does not publish the exact signals behind this decision. Version 0.6.7 adds those
+signals as described above, while retaining Woo's fraud protection and verdicts.
 
 The app now retains the original customer-facing submission/authentication error
 on the confirmation page, including after a refresh, and clears it after verified

@@ -112,6 +112,7 @@ add_filter('rest_pre_dispatch', function ($result, $server, $request) {
     if (!lld_insert($identity['lock'], 'lock', array('attempt' => $identity['attempt']))) return lld_error('A previous checkout is still processing. Check its order status.', 409);
     if (!lld_insert($identity['key'], 'attempt', array('hash' => $hash, 'order' => 0, 'session' => $identity['session'], 'payment_started' => false))) return lld_error('Checkout is already processing.', 409);
     $GLOBALS['lld_checkout_context'] = $identity;
+    lld_checkout_shopper_context($request);
     return $result;
 }, 5, 3);
 add_action('woocommerce_store_api_checkout_update_order_meta', function ($order) {
@@ -141,6 +142,7 @@ add_filter('rest_post_dispatch', function ($response, $server, $request) {
     $identity = $GLOBALS['lld_checkout_context'] ?? null;
     if (!$identity || $request->get_route() !== '/wc/store/v1/checkout') return $response;
     unset($GLOBALS['lld_checkout_context']);
+    lld_restore_shopper_context();
     $record = lld_record($identity['key']);
     $record['response'] = $response->get_data();
     $record['status'] = $response->get_status();

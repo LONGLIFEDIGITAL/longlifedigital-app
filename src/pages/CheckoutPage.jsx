@@ -19,6 +19,11 @@ import { loadStripe } from '@stripe/stripe-js/pure';
 import { Link, Navigate, useNavigate } from 'react-router';
 import { stripeKeyMatchesMode } from '../../shared/checkoutConfig';
 import {
+  acquireCheckoutFraud,
+  prepareCheckoutFraud,
+  resetCheckoutFraud,
+} from '../services/fraudProtection';
+import {
   commerce,
   headlessEnabled,
   moneyMinor,
@@ -170,6 +175,7 @@ function PaymentForm({ billing, data, onSubmitted, onBusy, onRetry }) {
         },
       });
       if (method.error) throw method.error;
+      const fraud = await acquireCheckoutFraud();
       attempt = crypto.randomUUID();
       saveAttempt({ attempt, pending: true });
       const result = await commerce('checkout', {
@@ -177,6 +183,7 @@ function PaymentForm({ billing, data, onSubmitted, onBusy, onRetry }) {
         billing_address: billing,
         paymentMethod: method.paymentMethod.id,
         expectedTotal: data.totals.total_price,
+        fraud,
       });
       let confirmationError = '';
       if (result.authentication) {
@@ -203,6 +210,7 @@ function PaymentForm({ billing, data, onSubmitted, onBusy, onRetry }) {
       else if (/elements store/i.test(e.message || '')) setLoadFailed(true);
       else setError(e.message || 'Please check your payment details.');
     } finally {
+      if (attempt) resetCheckoutFraud();
       lock.current = false;
       setBusy(false);
       onBusy(false);
@@ -326,6 +334,7 @@ export default function CheckoutPage({ cartState, customer }) {
   const postalRequired = postalRule ? postalRule.required && !postalRule.hidden : true;
   useEffect(() => {
     if (!headlessEnabled) return;
+    prepareCheckoutFraud();
     let active = true;
     commerce('config')
       .then((value) => {
@@ -384,16 +393,19 @@ export default function CheckoutPage({ cartState, customer }) {
   };
   const freeOrder = async () => {
     if (submittingFree) return;
-    const attempt = crypto.randomUUID();
-    try {
-      saveAttempt({ attempt, pending: true });
-    } catch {
-      setError('Enable browser storage to continue securely.');
-      return;
-    }
     setSubmittingFree(true);
+    let attempt;
     try {
-      await commerce('checkout', { attempt, billing_address: billing, expectedTotal: '0' });
+      const fraud = await acquireCheckoutFraud();
+      const id = crypto.randomUUID();
+      try {
+        saveAttempt({ attempt: id, pending: true });
+      } catch {
+        setError('Enable browser storage to continue securely.');
+        return;
+      }
+      attempt = id;
+      await commerce('checkout', { attempt, billing_address: billing, expectedTotal: '0', fraud });
       done(attempt);
     } catch (e) {
       if (e.retrySafe) {
@@ -401,6 +413,7 @@ export default function CheckoutPage({ cartState, customer }) {
         setError(e.message);
       } else done(attempt, e.message);
     } finally {
+      if (attempt) resetCheckoutFraud();
       setSubmittingFree(false);
     }
   };

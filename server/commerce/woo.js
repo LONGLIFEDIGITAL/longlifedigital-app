@@ -2,6 +2,7 @@ import { CommerceError } from './http.js';
 import { createHmac, randomBytes } from 'node:crypto';
 import { sessionKey } from './session.js';
 import { billingErrors, billingErrorMessage } from './validation.js';
+import { fraudBootstrap } from './fraud.js';
 
 export function signedHeaders(env, route, session, attempt, body, token = '') {
   const secret = env.LLD_COMMERCE_BRIDGE_SECRET;
@@ -96,6 +97,17 @@ export function createWoo(env, fetchImpl = fetch) {
       const token = response.headers.get('Cart-Token');
       if (token) session.token = token;
       return data;
+    },
+    async fraudConfig() {
+      const url = new URL(store.replace(/\/wp-json\/wc\/store\/v1$/, '/'));
+      url.searchParams.set('lld_checkout_fraud_bootstrap', '1');
+      try {
+        const { data } = await request(url.href, { headers: { Accept: 'application/json' } });
+        return fraudBootstrap(data, store);
+      } catch (error) {
+        error.criticalType = 'fraud_configuration';
+        throw error;
+      }
     },
     async order(session, attempt, confirm) {
       const body = JSON.stringify({ confirm: confirm === true });

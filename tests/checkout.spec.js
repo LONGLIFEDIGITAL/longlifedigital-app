@@ -66,6 +66,7 @@ async function setup(page, { quantity = 1, config = defaultConfig, order, zero =
     const body = route.request().postDataJSON();
     calls.push({ action, body });
     if (action === 'config') return route.fulfill({ json: config });
+    if (action === 'fraud-config') return route.fulfill({ json: { enabled: false } });
     if (action === 'add') current = state((current.items[0]?.quantity || 0) + body.quantity);
     if (action === 'update') current = state(body.quantity);
     if (action === 'remove') current = state(0);
@@ -117,6 +118,131 @@ async function billing(page) {
   await page.getByRole('combobox', { name: 'State / region', exact: true }).click();
   await page.getByRole('option', { name: 'Illinois', exact: true }).click();
   await page.getByRole('textbox', { name: 'Postal code', exact: true }).fill('60601');
+}
+
+async function mockFraud(page, { unavailable = false, stalled = false } = {}) {
+  await page.route('**/api/commerce?action=fraud-config', (route) =>
+    route.fulfill({
+      json: {
+        enabled: true,
+        scripts: [
+          'https://blackbox-api.wp.com/v1/dist/v.js',
+          'https://wp.example.test/blackbox-init.js?ver=0.1.9',
+        ],
+        config: { apiKey: 'woo:123', identityCookie: { name: 'wfp_id', path: '/', domain: '' } },
+      },
+    }),
+  );
+  await page.route('https://blackbox-api.wp.com/v1/dist/v.js', (route) =>
+    unavailable
+      ? route.abort()
+      : route.fulfill({
+          contentType: 'text/javascript',
+          body: 'window.testFraudSdkLoaded = true;',
+        }),
+  );
+  await page.route('https://wp.example.test/blackbox-init.js?ver=0.1.9', (route) =>
+    route.fulfill({
+      contentType: 'text/javascript',
+      body: `
+    if (!window.testFraudSdkLoaded) throw new Error('SDK dependency not loaded');
+    window.testFraud = { acquired: 0, resets: 0 };
+    document.cookie = 'wfp_id=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; path=/';
+    window.wcFraudProtection.acquireSessionId = async () => {
+      window.testFraud.acquired++;
+      window.testFraud.paymentMethodCreated = Boolean(window.testBillingDetails);
+      ${stalled ? 'return new Promise(() => {});' : "return 'sdk-session-' + window.testFraud.acquired;"}
+    };
+    window.wcFraudProtection.reset = () => { window.testFraud.resets++; };
+  `,
+    }),
+  );
+}
+
+for (const zero of [false, true]) {
+  test(`${zero ? 'free' : 'card'} checkout collects a fresh native fraud session immediately before submission`, async ({
+    page,
+  }) => {
+    const calls = await setup(page, { zero });
+    await mockStripe(page);
+    await mockFraud(page);
+    await page.goto('/checkout');
+    await expect.poll(() => page.evaluate(() => window.testFraud?.acquired)).toBe(0);
+    await billing(page);
+    await page.getByRole('button', { name: 'Review final total' }).click();
+    await page.getByRole('button', { name: zero ? 'Place free order' : 'Pay $14.99' }).click();
+    await expect(page.getByRole('heading', { name: 'Thank you for your purchase' })).toBeVisible();
+    expect(calls.find((call) => call.action === 'checkout').body.fraud).toEqual({
+      sessionId: 'sdk-session-1',
+    });
+    const fraud = await page.evaluate(() => window.testFraud);
+    expect(fraud.acquired).toBe(1);
+    expect(fraud.resets).toBe(1);
+    expect(fraud.paymentMethodCreated).toBe(!zero);
+  });
+}
+
+test('a safe checkout retry collects a new fraud session instead of replaying the first', async ({
+  page,
+}) => {
+  await setup(page);
+  await mockStripe(page);
+  await mockFraud(page);
+  const sessions = [];
+  await page.route('**/api/commerce?action=checkout', (route) => {
+    sessions.push(route.request().postDataJSON().fraud.sessionId);
+    return route.fulfill({
+      status: 409,
+      json: { error: 'Please review your total.', retrySafe: true },
+    });
+  });
+  await page.goto('/checkout');
+  await billing(page);
+  await page.getByRole('button', { name: 'Review final total' }).click();
+  await page.getByRole('button', { name: 'Pay $14.99' }).click();
+  await expect(page.getByText('Please review your total.')).toBeVisible();
+  await page.getByRole('button', { name: 'Pay $14.99' }).click();
+  await expect.poll(() => sessions.length).toBe(2);
+  expect(sessions).toEqual(['sdk-session-1', 'sdk-session-2']);
+});
+
+for (const failure of ['unavailable', 'stalled']) {
+  test(`an ${failure} fraud SDK reports missing context and still respects the server block`, async ({
+    page,
+  }) => {
+    await setup(page, {
+      order: {
+        number: '501',
+        status: 'blocked',
+        failureReason: 'checkout_blocked',
+        paid: false,
+        items: [],
+        downloads: [],
+      },
+    });
+    await mockStripe(page);
+    await mockFraud(page, { [failure]: true });
+    let submitted;
+    await page.route('**/api/commerce?action=checkout', (route) => {
+      submitted = route.request().postDataJSON();
+      return route.fulfill({
+        status: 403,
+        json: { error: 'Please contact support to complete your purchase.', retrySafe: false },
+      });
+    });
+    await page.goto('/checkout');
+    await billing(page);
+    await page.getByRole('button', { name: 'Review final total' }).click();
+    await page.getByRole('button', { name: 'Pay $14.99' }).click();
+    await expect(page.getByText(/stopped before payment was submitted/)).toBeVisible({
+      timeout: 12000,
+    });
+    expect(submitted.fraud).toEqual({
+      sessionId: '',
+      error: failure === 'stalled' ? 'timeout' : 'sdk_unavailable',
+    });
+    await expect(page.getByRole('link', { name: /Download/ })).toHaveCount(0);
+  });
 }
 
 test('billing survives refresh but payment details and reviewed totals are not restored', async ({

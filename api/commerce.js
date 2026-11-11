@@ -11,6 +11,7 @@ import { createWoo } from '../server/commerce/woo.js';
 import { readAccount } from '../server/account.js';
 import { checkoutConfigured } from '../shared/checkoutConfig.js';
 import { criticalCommerceAlert, reportCriticalCommerceError } from '../server/commerce/alerts.js';
+import { fraudExtension, shopperContext } from '../server/commerce/fraud.js';
 
 function attemptId(value) {
   if (
@@ -58,6 +59,8 @@ export function createCommerceHandler({
       const woo = createWoo(env, fetchImpl);
       // Public configuration must never create or overwrite a customer's cart cookie.
       if (req.method === 'GET' && action === 'config') return send(res, 200, await woo.config());
+      if (req.method === 'GET' && action === 'fraud-config')
+        return send(res, 200, await woo.fraudConfig());
       const session = readSession(req, env);
       let data;
       if (req.method === 'GET' && action === 'cart') data = await woo.store('cart', session);
@@ -115,6 +118,7 @@ export function createCommerceHandler({
             save_payment_method: 'no',
           };
           for (const [key, value] of Object.entries(billing)) paymentData[`billing_${key}`] = value;
+          const extensions = fraudExtension(body.fraud);
           checkoutDispatched = true;
           const result = await woo.store(
             'checkout',
@@ -124,6 +128,8 @@ export function createCommerceHandler({
               billing_address: billing,
               payment_method: 'stripe',
               create_account: false,
+              extensions,
+              _lld_shopper: shopperContext(req, env),
               ...(account ? { _lld_account: account.token } : {}),
               expected_total: body.expectedTotal,
               payment_data: Object.entries(paymentData).map(([key, value]) => ({ key, value })),

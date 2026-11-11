@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { createCommerceHandler, checkoutResult } from '../api/commerce.js';
 import { seal, unseal } from '../server/commerce/session.js';
 import { criticalCommerceAlert, reportCriticalCommerceError } from '../server/commerce/alerts.js';
+import { shopperContext } from '../server/commerce/fraud.js';
 const env = {
   COMMERCE_SESSION_SECRET: 'test-only-cookie-secret-at-least-32-characters',
   LLD_COMMERCE_BRIDGE_SECRET: 'test-only-bridge-secret-at-least-32-characters',
@@ -72,6 +73,155 @@ test('configuration never creates or overwrites the cart session cookie', async 
     assert.equal(result.status, 200);
     assert.equal(result.headers['Set-Cookie'], undefined);
   }
+});
+
+const fraudConfig = {
+  enabled: true,
+  scripts: [
+    'https://blackbox-api.wp.com/v1/dist/v.js',
+    'https://wp.example.test/wp-content/plugins/fraud/assets/js/blackbox-init.js?ver=0.1.9',
+  ],
+  config: {
+    apiKey: 'woo:123',
+    identityCookie: { name: 'wfp_id', domain: 'wp.example.test', path: '/wordpress/' },
+    timeout: 3000,
+  },
+};
+test('fraud bootstrap uses the fixed frontend route and exports only validated script locations without a cart cookie', async () => {
+  const result = await call(
+    'fraud-config',
+    undefined,
+    async (url) => {
+      assert.equal(url, 'https://wp.example.test/?lld_checkout_fraud_bootstrap=1');
+      return reply(fraudConfig);
+    },
+    { cookie: '' },
+  );
+  assert.equal(result.status, 200);
+  assert.equal(result.headers['Set-Cookie'], undefined);
+  assert.deepEqual(result.body.config.identityCookie, { name: 'wfp_id', domain: '', path: '/' });
+  for (const bad of [
+    'https://untrusted.test/blackbox-init.js',
+    'javascript:alert(1)',
+    'https://wp.example.test@untrusted.test/blackbox-init.js',
+  ]) {
+    const alerts = [];
+    const rejected = await call(
+      'fraud-config',
+      undefined,
+      async () => reply({ ...fraudConfig, scripts: [fraudConfig.scripts[0], bad] }),
+      {},
+      async ({ type }) => alerts.push(type),
+    );
+    assert.equal(rejected.status, 503);
+    assert.deepEqual(alerts, ['fraud_configuration']);
+  }
+  assert.deepEqual(
+    (await call('fraud-config', undefined, async () => reply({ enabled: false }))).body,
+    { enabled: false },
+  );
+});
+
+test('shopper IP is taken only from the trusted deployment header or direct socket, not client input', () => {
+  const req = {
+    headers: {
+      'x-vercel-forwarded-for': '203.0.113.10',
+      'x-forwarded-for': '1.2.3.4',
+      'user-agent': 'Browser',
+      cookie: `wfp_id=${'a'.repeat(32)}`,
+    },
+    socket: { remoteAddress: '::1' },
+  };
+  assert.deepEqual(shopperContext(req, { VERCEL: '1' }), {
+    ip: '203.0.113.10',
+    userAgent: 'Browser',
+    identity: 'a'.repeat(32),
+  });
+  assert.equal(shopperContext(req, {}).ip, '::1');
+  for (const address of [undefined, '203.0.113.10, 1.2.3.4', 'not-an-IP']) {
+    assert.equal(
+      shopperContext(
+        { ...req, headers: { ...req.headers, 'x-vercel-forwarded-for': address } },
+        { VERCEL: '1' },
+      ).ip,
+      undefined,
+    );
+  }
+  assert.deepEqual(
+    shopperContext({ headers: { 'user-agent': 'bad\r\nheader', cookie: 'wfp_id=invalid' } }, {}),
+    {},
+  );
+});
+
+test('checkout signs native fraud session data and shopper identity while discarding forged security context', async () => {
+  const result = await call(
+    'checkout',
+    {
+      ...payload,
+      fraud: { sessionId: 'blackbox-session', decision: 'allow' },
+      extensions: { attacker: true },
+      _lld_shopper: { ip: '1.2.3.4', identity: 'b'.repeat(32) },
+    },
+    async (url, init) => {
+      if (url.endsWith('/config')) return reply(config);
+      const body = JSON.parse(init.body);
+      assert.deepEqual(body.extensions, {
+        'woocommerce/fraud-protection': {
+          blackbox_session_id: 'blackbox-session',
+          blackbox_session_id_error: '',
+        },
+      });
+      assert.deepEqual(body._lld_shopper, { identity: 'a'.repeat(32), userAgent: 'Test browser' });
+      const headers = init.headers;
+      const canonical = [
+        'POST',
+        '/wc/store/v1/checkout',
+        headers['X-LLD-Session'],
+        payload.attempt,
+        headers['X-LLD-Timestamp'],
+        headers['X-LLD-Nonce'],
+        state.token,
+        init.body,
+      ].join('\n');
+      assert.equal(
+        headers['X-LLD-Signature'],
+        createHmac('sha256', env.LLD_COMMERCE_BRIDGE_SECRET).update(canonical).digest('hex'),
+      );
+      return reply({ order_id: 1 });
+    },
+    {
+      cookie: `${cookie}; wfp_id=${'a'.repeat(32)}`,
+      'user-agent': 'Test browser',
+      'x-forwarded-for': '1.2.3.4',
+    },
+  );
+  assert.equal(result.status, 200);
+});
+
+test('missing SDK session is reported honestly; malformed input cannot be dispatched', async () => {
+  let submitted = 0;
+  const fetchImpl = async (url, init) => {
+    if (url.endsWith('/config')) return reply(config);
+    submitted++;
+    assert.deepEqual(JSON.parse(init.body).extensions['woocommerce/fraud-protection'], {
+      blackbox_session_id: '',
+      blackbox_session_id_error: 'timeout',
+    });
+    return reply({ order_id: 1 });
+  };
+  assert.equal(
+    (await call('checkout', { ...payload, fraud: { sessionId: '', error: 'timeout' } }, fetchImpl))
+      .status,
+    200,
+  );
+  const invalid = await call(
+    'checkout',
+    { ...payload, fraud: { sessionId: ['invalid'] } },
+    fetchImpl,
+  );
+  assert.equal(invalid.status, 400);
+  assert.equal(invalid.body.retrySafe, true);
+  assert.equal(submitted, 1);
 });
 
 test('nested Woo billing errors identify individual fields without forwarding debug data', async () => {

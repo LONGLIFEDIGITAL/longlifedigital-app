@@ -8,6 +8,7 @@ function lld_checkout_alert_types() {
         'checkout_processing' => 'Checkout encountered a server failure',
         'payment_verification' => 'A payment result could not be verified',
         'bridge_authentication' => 'The storefront commerce connection was rejected',
+        'fraud_configuration' => 'Checkout browser fraud verification could not be configured',
         'stripe_service' => 'Stripe reported a service or account connection failure',
     );
 }
@@ -62,7 +63,7 @@ function lld_checkout_critical_alert($type, $details = array()) {
         $status = $details['status'] ?? null;
         if (is_int($status) && $status >= 400 && $status <= 599) $body[] = 'HTTP status: ' . $status;
         $action = $details['action'] ?? '';
-        if (in_array($action, array('config', 'cart', 'add', 'update', 'remove', 'clear', 'customer', 'apply-coupon', 'remove-coupon', 'checkout', 'order'), true)) $body[] = 'Storefront operation: ' . $action;
+        if (in_array($action, array('config', 'fraud-config', 'cart', 'add', 'update', 'remove', 'clear', 'customer', 'apply-coupon', 'remove-coupon', 'checkout', 'order'), true)) $body[] = 'Storefront operation: ' . $action;
         $body[] = '';
         $body[] = 'Check WooCommerce > Status > Logs and the checkout configuration: ' . rest_url('lld-headless/v1/config');
         $body[] = 'Check the WooCommerce order and Stripe payment before retrying any payment with an uncertain outcome.';

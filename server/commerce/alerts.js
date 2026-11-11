@@ -3,6 +3,7 @@ import { signedHeaders, storeRoot } from './woo.js';
 
 const actions = new Set([
   'config',
+  'fraud-config',
   'cart',
   'add',
   'update',

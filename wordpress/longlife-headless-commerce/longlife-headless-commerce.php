@@ -2,13 +2,14 @@
 /**
  * Plugin Name: Longlife Headless Commerce
  * Description: Authenticated React checkout bridge for WooCommerce Store API and Stripe card payments.
- * Version: 0.6.6
+ * Version: 0.6.7
  * Requires Plugins: woocommerce
  * Requires PHP: 8.0
  */
 if (!defined('ABSPATH')) { exit; }
 require_once __DIR__ . '/security.php';
 require_once __DIR__ . '/alerts.php';
+require_once __DIR__ . '/fraud-protection.php';
 require_once __DIR__ . '/account.php';
 require_once __DIR__ . '/email-links.php';
 require_once __DIR__ . '/translation-offerings.php';
