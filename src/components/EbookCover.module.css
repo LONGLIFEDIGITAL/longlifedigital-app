@@ -10,6 +10,15 @@
   border-radius: 1.25rem;
   background: radial-gradient(ellipse at center, #e9def5 0%, #faf7f2 72%);
 }
+.stage[data-tone='dark'] {
+  background: radial-gradient(ellipse at center, #c084fc1f 0%, #c084fc08 72%);
+}
+.stage[data-tone='dark'] .orbit {
+  border-color: #d8b4fe3d;
+}
+.stage[data-tone='dark'] .spark {
+  font-size: 2rem;
+}
 .orbit {
   position: absolute;
   inset: 8%;

@@ -12,6 +12,7 @@ import { isEbook } from '../utils/ebook';
 import CatalogStatus from '../components/CatalogStatus';
 import ProductCollection from '../components/ProductCollection';
 import LoadingImage from '../components/LoadingImage';
+import EbookCover from '../components/EbookCover';
 import ArrowIcon from '../components/ArrowIcon';
 import FeaturedProductSkeleton from '../components/skeletons/FeaturedProductSkeleton';
 import CategorySkeleton from '../components/skeletons/CategorySkeleton';
@@ -222,34 +223,33 @@ export default function HomePage({
               >
                 <Box className={classes.featuredContent}>
                   <Box
+                    className={classes.featuredEyebrow}
                     c="#E8C97A"
                     bg="rgba(201,150,63,0.2)"
-                    fz="var(--hero-small)"
                     fw="700"
-                    p="4px 12px"
-                    style={{
-                      borderRadius: '1.25rem',
-                      display: 'inline-block',
-                      alignSelf: 'flex-start',
-                      border: '1px solid rgba(201,150,63,0.4)',
-                    }}
                   >
                     {highlighted.tag ||
                       (highlighted.featured ? 'Featured Product' : 'Explore Our Products')}
                   </Box>
-                  {highlightedImage ? (
-                    <LoadingImage
-                      src={highlightedImage}
-                      alt={highlighted.imageAlt || highlighted.name}
-                      className={classes.featuredProductImage}
-                      imageClassName={classes.featuredArtwork}
-                      data-ebook={isEbook(highlighted) || undefined}
-                      fit="contain"
-                      fallback={highlightedArtwork}
-                    />
-                  ) : (
-                    highlightedArtwork
-                  )}
+                  <Box className={classes.featuredMedia}>
+                    {isEbook(highlighted) ? (
+                      <EbookCover
+                        product={{ ...highlighted, image: highlightedImage }}
+                        tone="dark"
+                      />
+                    ) : highlightedImage ? (
+                      <LoadingImage
+                        src={highlightedImage}
+                        alt={highlighted.imageAlt || highlighted.name}
+                        className={classes.featuredProductImage}
+                        imageClassName={classes.featuredArtwork}
+                        fit="contain"
+                        fallback={highlightedArtwork}
+                      />
+                    ) : (
+                      highlightedArtwork
+                    )}
+                  </Box>
                   <Box
                     className={classes.featuredTitle}
                     c="#fff"
@@ -259,7 +259,7 @@ export default function HomePage({
                   >
                     {highlighted.name}
                   </Box>
-                  <Flex align="center" gap={10} wrap="wrap">
+                  <Flex align="center" gap="calc(6 * var(--featured-unit))" wrap="wrap">
                     <Text
                       component="span"
                       inherit
@@ -288,7 +288,7 @@ export default function HomePage({
                           bg="#FEF3C7"
                           fz="var(--hero-small)"
                           fw="700"
-                          p="3px 10px"
+                          p="calc(2 * var(--featured-unit)) calc(6 * var(--featured-unit))"
                           style={{
                             borderRadius: '1.25rem',
                           }}
@@ -325,10 +325,15 @@ export default function HomePage({
                     component="span"
                     rightSection={<ArrowIcon direction="right" />}
                     className={classes.featuredButton}
-                    styles={{ root: { paddingBlock: 'var(--hero-button-py)' } }}
+                    styles={{
+                      root: {
+                        minHeight: 'var(--featured-button-height)',
+                        paddingBlock: 'var(--hero-button-py)',
+                      },
+                    }}
                     variant="gradient"
                     color="brand"
-                    px="lg"
+                    px="calc(12 * var(--featured-unit))"
                     gradient={{
                       from: '#C9963F',
                       to: '#E8C97A',
@@ -336,7 +341,7 @@ export default function HomePage({
                     }}
                     c="#1a0533"
                     w="100%"
-                    mt={4}
+                    mt={0}
                   >
                     Get this {highlighted.buttonProductLabel || 'product'}
                   </Button>

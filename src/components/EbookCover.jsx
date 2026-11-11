@@ -1,9 +1,9 @@
 import LoadingImage from './LoadingImage';
 import classes from './EbookCover.module.css';
 
-export default function EbookCover({ product, onPreview }) {
+export default function EbookCover({ product, onPreview, tone = 'light' }) {
   return (
-    <div className={classes.stage}>
+    <div className={classes.stage} data-tone={tone}>
       <div className={classes.orbit} aria-hidden="true" />
       <span className={classes.spark} aria-hidden="true">
         ✦
