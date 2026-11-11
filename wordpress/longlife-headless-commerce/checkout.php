@@ -110,7 +110,7 @@ add_filter('rest_pre_dispatch', function ($result, $server, $request) {
         return lld_error('This checkout is already processing. Check the order status before trying again.', 409);
     }
     if (!lld_insert($identity['lock'], 'lock', array('attempt' => $identity['attempt']))) return lld_error('A previous checkout is still processing. Check its order status.', 409);
-    if (!lld_insert($identity['key'], 'attempt', array('hash' => $hash, 'order' => 0, 'session' => $identity['session']))) return lld_error('Checkout is already processing.', 409);
+    if (!lld_insert($identity['key'], 'attempt', array('hash' => $hash, 'order' => 0, 'session' => $identity['session'], 'payment_started' => false))) return lld_error('Checkout is already processing.', 409);
     $GLOBALS['lld_checkout_context'] = $identity;
     return $result;
 }, 5, 3);
@@ -125,6 +125,18 @@ add_action('woocommerce_store_api_checkout_update_order_meta', function ($order)
     $order->update_meta_data('_lld_checkout_session', $identity['session']);
     $order->update_meta_data('_lld_checkout_attempt', $identity['attempt']);
 });
+add_action('woocommerce_rest_checkout_process_payment_with_context', function ($context) {
+    $identity = $GLOBALS['lld_checkout_context'] ?? null;
+    if (!$identity) return;
+    $record = lld_record($identity['key']);
+    // Persist before any gateway runs. Missing evidence must never make an
+    // uncertain payment safe to repeat, including attempts from older bridges.
+    if (!$record || empty($record['order']) || (int) $record['order'] !== (int) $context->order->get_id()) {
+        throw new RuntimeException('Could not correlate payment processing with checkout.');
+    }
+    $record['payment_started'] = true;
+    lld_save($identity['key'], $record);
+}, PHP_INT_MIN);
 add_filter('rest_post_dispatch', function ($response, $server, $request) {
     $identity = $GLOBALS['lld_checkout_context'] ?? null;
     if (!$identity || $request->get_route() !== '/wc/store/v1/checkout') return $response;
@@ -140,6 +152,17 @@ add_filter('rest_post_dispatch', function ($response, $server, $request) {
     $response->header('Cache-Control', 'no-store, private');
     return $response;
 }, 10, 3);
+function lld_checkout_blocked_before_payment($record, $order) {
+    // Woo's fraud protector throws this 403 during order_processed, before
+    // the payment-context hook. Preserve its decision; never bypass the check.
+    return ($record['payment_started'] ?? null) === false
+        && ($record['status'] ?? 0) === 403
+        && ($record['response']['code'] ?? '') === 'woocommerce_rest_checkout_error'
+        && $order->has_status(array('pending', 'checkout-draft'))
+        && !$order->is_paid() && !$order->get_date_paid() && !$order->get_transaction_id()
+        && !$order->get_meta('_stripe_intent_id') && !$order->get_meta('_stripe_setup_intent')
+        && !$order->get_meta('_stripe_checkout_session_id');
+}
 function lld_order_status($request) {
     $identity = lld_request_identity($request);
     $record = lld_record($identity['key']);
@@ -147,9 +170,10 @@ function lld_order_status($request) {
     if (!$record || empty($record['order'])) return lld_error('No order is available for this checkout attempt yet.', 404);
     $order = wc_get_order($record['order']);
     if (!$order || $order->get_meta('_lld_checkout_session') !== $identity['session'] || $order->get_meta('_lld_checkout_attempt') !== $identity['attempt']) return lld_error('Order not available.', 404);
+    $blocked = lld_checkout_blocked_before_payment($record, $order);
     // Explicitly requested after Stripe authentication. The gateway retrieves its own intent;
     // neither an arbitrary intent ID nor a client-reported payment status is accepted.
-    if ($request->get_param('confirm') === true && lld_configuration()['enabled'] && $order->get_payment_method() === 'stripe' && $order->has_status(array('pending', 'failed'))) {
+    if (!$blocked && $request->get_param('confirm') === true && lld_configuration()['enabled'] && $order->get_payment_method() === 'stripe' && $order->has_status(array('pending', 'failed'))) {
         if (null === WC()->cart) wc_load_cart();
         WC_Stripe::get_instance()->get_main_stripe_gateway()->verify_intent_after_checkout($order);
         $order = wc_get_order($record['order']);
@@ -169,7 +193,7 @@ function lld_order_status($request) {
         $helper->delete_stripe_upe_waiting_for_redirect($order);
         $order->save();
     }
-    if ($paid || $rejected || $order->has_status(array('failed', 'cancelled', 'refunded'))) {
+    if ($paid || $rejected || $blocked || $order->has_status(array('failed', 'cancelled', 'refunded'))) {
         $lock = lld_record($identity['lock']);
         if (($lock['attempt'] ?? '') === $identity['attempt']) lld_delete($identity['lock']);
     }
@@ -210,5 +234,5 @@ function lld_order_status($request) {
     if (!$paid && $order->has_status('pending') && preg_match('/^#wc-stripe-confirm-(pi|si):(\d+):((?:pi|seti)_[A-Za-z0-9]+_secret_[A-Za-z0-9]+):[A-Za-z0-9]+$/D', $redirect, $match) && (int)$match[2] === $order->get_id()) {
         $authentication = array('type' => $match[1], 'clientSecret' => $match[3]);
     }
-    return lld_response(array('number' => $order->get_order_number(), 'status' => $rejected ? 'failed' : $order->get_status(), 'failureReason' => $rejected ? 'checkout_validation' : null, 'paid' => $paid, 'total' => $order->get_total(), 'currency' => $order->get_currency(), 'items' => $items, 'downloads' => $downloads, 'authentication' => $authentication));
+    return lld_response(array('number' => $order->get_order_number(), 'status' => $blocked ? 'blocked' : ($rejected ? 'failed' : $order->get_status()), 'failureReason' => $blocked ? 'checkout_blocked' : ($rejected ? 'checkout_validation' : null), 'paid' => $paid, 'total' => $order->get_total(), 'currency' => $order->get_currency(), 'items' => $items, 'downloads' => $downloads, 'authentication' => $authentication));
 }

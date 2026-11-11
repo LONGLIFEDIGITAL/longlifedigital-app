@@ -1,6 +1,53 @@
 # Headless checkout: install and acceptance
 
-Bridge **0.6.5** determines checkout readiness from the available WooCommerce/Stripe APIs and payment settings. Plugin version numbers no longer disable checkout in either WordPress or the app. Unreviewed releases produce `compatibilityWarnings` and a WordPress administrator notice, while actual missing APIs or invalid settings remain blocking `configurationIssues`. The user previously completed a Stripe test purchase through React (Woo order 334, 30-Day Social Media Content Pack) and downloaded the product. Live charges have not been exercised by the automated checks; the installation-specific acceptance scenarios below remain relevant.
+Bridge **0.6.6** determines checkout readiness from the available WooCommerce/Stripe APIs and payment settings. Plugin version numbers no longer disable checkout in either WordPress or the app. Unreviewed releases produce `compatibilityWarnings` and a WordPress administrator notice, while actual missing APIs or invalid settings remain blocking `configurationIssues`. The user previously completed a Stripe test purchase through React (Woo order 334, 30-Day Social Media Content Pack) and downloaded the product. Live charges have not been exercised by the automated checks; the installation-specific acceptance scenarios below remain relevant.
+
+## Pre-payment fraud rejection: bridge 0.6.6
+
+On November 10, the merchant correlated order 910048 (pending payment, with no
+matching payment found in Stripe) with a Blackbox `block` decision from
+`blocks_checkout`. Woo Fraud Protection verifies on
+`woocommerce_store_api_checkout_order_processed`, before the gateway runs, and
+an enforced block returns HTTP 403 with `woocommerce_rest_checkout_error`.
+See the [official protector implementation](https://github.com/woocommerce/woocommerce-fraud-protection/blob/329f5375b7dbecb7ee19f90391a701e188616e1d/src/Internal/FraudProtectionPlugin/Protectors/BlocksCheckoutProtector.php).
+
+The raw received decision alone is not proof of enforcement: the merchant's
+automatic-blocking setting and rules determine the final outcome. Check
+**WooCommerce → Settings → Fraud prevention → View checkout attempts** for the
+matching attempt. Woo's [merchant documentation](https://woocommerce.com/document/fraud-protection/)
+explains the difference between **Blocked** and **Allowed + Flagged**, and warns
+that headless/custom checkout coverage needs verification.
+
+Our React checkout currently does not load the Blackbox browser integration or
+send its session data in the Store API extensions. The WordPress request also
+comes through the storefront server. Missing browser data or proxy context is a
+possible cause of false positives; the service does not publish the exact
+signals behind this decision. This release does **not** integrate that SDK,
+disable fraud protection, override a verdict, or change WordPress settings.
+
+The app now retains the original customer-facing submission/authentication error
+on the confirmation page, including after a refresh, and clears it after verified
+payment. A fraud-related 403 is no longer mislabeled as rejected bridge credentials.
+
+For new attempts, the bridge records whether the gateway dispatch hook ran.
+Only a recorded pre-gateway 403 with the known checkout error code, a pending/draft
+order, and no payment evidence is reported as `blocked`. The app stops polling,
+shows a support message, and clears the unresolved-attempt flag; the bridge releases
+that attempt's checkout lock. All later attempts still pass through fraud checking.
+No payment is submitted automatically. Older attempts without the dispatch marker,
+other errors, and orders with payment evidence remain protected as uncertain.
+
+This fixes rejection reporting, not the underlying fraud decision. An administrator
+can review the attempt and add an exact email allow rule for a confirmed false
+positive. Temporarily clearing **Automatically block checkout attempts flagged by
+fraud prevention** leaves evaluation and merchant rules active but reduces automatic
+bot blocking; it does not change Stripe's own controls. This is an operational choice,
+not a setting changed by the bridge. Older unpaid orders such as 910048 require
+administrator reconciliation against Stripe and the recorded fraud outcome before
+cancellation; reloading their confirmation page then clears the canceled attempt.
+
+Deploy the app and replace the WordPress plugin with the current ZIP to apply both
+parts of the reporting fix. Passing mocked tests is not live checkout acceptance.
 
 ## November 10 checkout fix and critical alerts: bridge 0.6.5
 

@@ -11,20 +11,25 @@ import {
   Title,
   Divider,
 } from '@mantine/core';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { loadStripe } from '@stripe/stripe-js/pure';
 import { clearBillingDraft, commerce, readAttempt, saveAttempt } from '../services/checkout';
 import OrderDownloads from '../components/OrderDownloads';
 import CmsFaqs from '../components/CmsFaqs';
 
-const terminalStatuses = ['failed', 'cancelled', 'refunded'];
+const terminalStatuses = ['failed', 'cancelled', 'refunded', 'blocked'];
 const maxChecks = 8;
 const maxWait = 60000;
 
 export default function OrderConfirmationPage({ reloadCart }) {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { state } = useLocation();
   const attempt = params.get('attempt') || readAttempt()?.attempt;
+  const checkoutIssue =
+    state?.checkoutIssue?.attempt === attempt && typeof state.checkoutIssue.message === 'string'
+      ? state.checkoutIssue.message
+      : '';
   const [order, setOrder] = useState(null);
   const [exhausted, setExhausted] = useState(false);
   const [checks, setChecks] = useState(0);
@@ -36,9 +41,10 @@ export default function OrderConfirmationPage({ reloadCart }) {
     if (params.has('payment_intent_client_secret') || params.has('setup_intent_client_secret')) {
       navigate(`/order-confirmation?attempt=${encodeURIComponent(attempt || '')}`, {
         replace: true,
+        state,
       });
     }
-  }, [params, attempt, navigate]);
+  }, [params, attempt, navigate, state]);
   const check = useCallback(() => {
     if (inFlight.current) return inFlight.current;
     const task = commerce('order', { attempt, confirm: true });
@@ -150,11 +156,18 @@ export default function OrderConfirmationPage({ reloadCart }) {
             : terminal
               ? order.status === 'refunded'
                 ? 'Purchase refunded'
-                : 'Payment was not completed'
+                : order.status === 'blocked'
+                  ? 'Checkout could not be completed'
+                  : 'Payment was not completed'
               : exhausted
                 ? 'We couldn’t confirm your payment yet'
                 : 'Confirming your purchase'}
         </Title>
+        {checkoutIssue && !order?.paid && order?.status !== 'refunded' && (
+          <Alert color="yellow" title="Checkout reported a problem">
+            {checkoutIssue}
+          </Alert>
+        )}
         {!attempt ? (
           <Alert>
             No checkout was found in this browser. Use your purchase email or contact support.
@@ -186,9 +199,11 @@ export default function OrderConfirmationPage({ reloadCart }) {
           <Alert color={order.status === 'refunded' ? 'violet' : 'red'}>
             {order.status === 'refunded'
               ? 'This order has been refunded. Downloads are no longer available.'
-              : order.failureReason === 'checkout_validation'
-                ? 'Your order could not be submitted. Please review your billing details and try again.'
-                : 'Your payment was declined or canceled. Please return to checkout to review your details or use another payment method.'}
+              : order.status === 'blocked'
+                ? 'This checkout was stopped before payment was submitted. Please contact support to complete your purchase.'
+                : order.failureReason === 'checkout_validation'
+                  ? 'Your order could not be submitted. Please review your billing details and try again.'
+                  : 'Your payment was declined or canceled. Please return to checkout to review your details or use another payment method.'}
           </Alert>
         ) : waiting ? (
           <Paper withBorder radius="lg" p="xl">
@@ -221,7 +236,7 @@ export default function OrderConfirmationPage({ reloadCart }) {
           </Button>
         )}
         {authError && !order?.paid && <Alert color="yellow">{authError}</Alert>}
-        {terminal && order.status !== 'refunded' && (
+        {terminal && !['refunded', 'blocked'].includes(order.status) && (
           <Button component={Link} to="/checkout">
             Return to checkout
           </Button>

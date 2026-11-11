@@ -490,6 +490,96 @@ test('an unverified previous checkout blocks a second payment', async ({ page })
   await expect(page.getByRole('button', { name: /^Pay / })).toHaveCount(0);
   expect(calls.some((c) => c.action === 'checkout')).toBeFalsy();
 });
+
+test('a verified pre-payment block stops polling and clears the pending attempt without resubmitting', async ({
+  page,
+}) => {
+  await page.clock.install();
+  const calls = await setup(page, {
+    order: {
+      number: '910048',
+      status: 'blocked',
+      failureReason: 'checkout_blocked',
+      paid: false,
+      items: [],
+      downloads: [],
+    },
+  });
+  await page.addInitScript(
+    (attempt) =>
+      sessionStorage.setItem(
+        'lld:checkout:https://catalog.example.test/wp-json/wc/store/v1',
+        JSON.stringify({ attempt, pending: true }),
+      ),
+    attempt,
+  );
+  await page.goto(`/order-confirmation?attempt=${attempt}`);
+  await expect(
+    page.getByRole('heading', { name: 'Checkout could not be completed' }),
+  ).toBeVisible();
+  await expect(page.getByText(/stopped before payment was submitted/)).toBeVisible();
+  await expect(page.getByText('Order reference: #910048')).toBeVisible();
+  await expect(page.getByLabel('Confirming payment')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Return to checkout' })).toHaveCount(0);
+  await page.clock.runFor(65000);
+  expect(calls.filter((call) => call.action === 'order')).toHaveLength(1);
+  expect(calls.some((call) => call.action === 'checkout')).toBe(false);
+  expect(
+    await page.evaluate(
+      () =>
+        JSON.parse(
+          sessionStorage.getItem('lld:checkout:https://catalog.example.test/wp-json/wc/store/v1'),
+        ).pending,
+    ),
+  ).toBe(false);
+});
+
+for (const zero of [false, true]) {
+  test(`${zero ? 'free' : 'card'} checkout preserves the submission error while verifying the same order`, async ({
+    page,
+  }) => {
+    await setup(page, { zero });
+    await mockStripe(page);
+    let submissions = 0;
+    let paid = false;
+    const issue = 'The selected payment method is unavailable for this order.';
+    await page.route('**/api/commerce?action=checkout', (route) => {
+      submissions++;
+      return route.fulfill({ status: 400, json: { error: issue, retrySafe: false } });
+    });
+    await page.route('**/api/commerce?action=order', (route) =>
+      route.fulfill({
+        json: {
+          number: '910048',
+          status: paid ? 'completed' : 'pending',
+          paid,
+          items: [],
+          downloads: [],
+        },
+      }),
+    );
+    await page.goto('/checkout');
+    await billing(page);
+    await page.getByRole('button', { name: 'Review final total' }).click();
+    await page.getByRole('button', { name: zero ? 'Place free order' : 'Pay $14.99' }).click();
+    await expect(page).toHaveURL(/\/order-confirmation\?attempt=/);
+    const confirmationUrl = page.url();
+    await expect(page.getByText(issue, { exact: true })).toBeVisible();
+    await expect(page.getByLabel('Confirming payment')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Return to checkout' })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByText(issue, { exact: true })).toBeVisible();
+    await expect(page).toHaveURL(confirmationUrl);
+    expect(submissions).toBe(1);
+    paid = true;
+    await expect(page.getByRole('heading', { name: 'Thank you for your purchase' })).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText(issue, { exact: true })).toHaveCount(0);
+    expect(submissions).toBe(1);
+  });
+}
+
 test('gateway unavailable fails closed without a WordPress checkout redirect', async ({ page }) => {
   await setup(page, { config: { ...defaultConfig, enabled: false } });
   await page.goto('/checkout');
@@ -520,7 +610,7 @@ async function mockStripe(page) {
           }
         } } },
       createPaymentMethod:async(options)=>{window.testBillingDetails=options.params.billing_details;return {paymentMethod:{id:'pm_testCard'}}},
-      confirmPayment:async()=>{window.testStripeConfirmed=true;return {paymentIntent:{status:'succeeded'}}},
+      confirmPayment:async()=>{window.testStripeConfirmed=true;return window.testStripeConfirmationError ? {error:{message:window.testStripeConfirmationError}} : {paymentIntent:{status:'succeeded'}}},
       confirmSetup:async()=>({})
     }); }; window.Stripe.version="dahlia";`,
     }),
@@ -660,6 +750,33 @@ test('Stripe authentication is followed by Woo order verification', async ({ pag
   await page.getByRole('button', { name: 'Pay $14.99' }).click();
   await expect(page.getByRole('heading', { name: 'Thank you for your purchase' })).toBeVisible();
   expect(await page.evaluate(() => window.testStripeConfirmed)).toBe(true);
+});
+
+test('Stripe authentication errors remain visible on the order confirmation page', async ({
+  page,
+}) => {
+  await setup(page, {
+    order: { number: '501', status: 'pending', paid: false, items: [], downloads: [] },
+  });
+  await mockStripe(page);
+  await page.addInitScript(() => {
+    window.testStripeConfirmationError = 'Your bank could not authenticate this payment.';
+  });
+  await page.route('**/api/commerce?action=checkout', (route) =>
+    route.fulfill({
+      json: { authentication: { type: 'pi', clientSecret: 'pi_test_secret_test' } },
+    }),
+  );
+  await page.goto('/checkout');
+  await billing(page);
+  await page.getByRole('button', { name: 'Review final total' }).click();
+  await page.getByRole('button', { name: 'Pay $14.99' }).click();
+  await expect(page).toHaveURL(/\/order-confirmation\?attempt=/);
+  await expect(page.getByText('Your bank could not authenticate this payment.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Return to checkout' })).toHaveCount(0);
+  expect(await page.evaluate(() => JSON.stringify(history.state))).not.toContain(
+    'pi_test_secret_test',
+  );
 });
 
 test('interrupted authentication resumes the existing order without another checkout', async ({

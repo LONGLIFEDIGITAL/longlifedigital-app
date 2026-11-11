@@ -178,6 +178,7 @@ function PaymentForm({ billing, data, onSubmitted, onBusy, onRetry }) {
         paymentMethod: method.paymentMethod.id,
         expectedTotal: data.totals.total_price,
       });
+      let confirmationError = '';
       if (result.authentication) {
         const params = {
           clientSecret: result.authentication.clientSecret,
@@ -191,14 +192,14 @@ function PaymentForm({ billing, data, onSubmitted, onBusy, onRetry }) {
             ? await stripe.confirmPayment(params)
             : await stripe.confirmSetup(params);
         // Even failed/cancelled authentication is resolved from the Woo order.
-        if (confirmed.error) setError(confirmed.error.message);
+        if (confirmed.error) confirmationError = confirmed.error.message;
       }
-      onSubmitted(attempt);
+      onSubmitted(attempt, confirmationError);
     } catch (e) {
       if (attempt && e.retrySafe) {
         saveAttempt(null);
         setError(e.message);
-      } else if (attempt) onSubmitted(attempt);
+      } else if (attempt) onSubmitted(attempt, e.message);
       else if (/elements store/i.test(e.message || '')) setLoadFailed(true);
       else setError(e.message || 'Please check your payment details.');
     } finally {
@@ -348,7 +349,11 @@ export default function CheckoutPage({ cartState, customer }) {
     }),
     [reviewed],
   );
-  const done = (attempt) => navigate(`/order-confirmation?attempt=${encodeURIComponent(attempt)}`);
+  const done = (attempt, message) =>
+    navigate(`/order-confirmation?attempt=${encodeURIComponent(attempt)}`, {
+      // Preserve only customer-facing text, never the payment/error object or its secrets.
+      state: message ? { checkoutIssue: { attempt, message: message.slice(0, 400) } } : null,
+    });
   const review = async (event) => {
     event.preventDefault();
     setError('');
@@ -394,7 +399,7 @@ export default function CheckoutPage({ cartState, customer }) {
       if (e.retrySafe) {
         saveAttempt(null);
         setError(e.message);
-      } else done(attempt);
+      } else done(attempt, e.message);
     } finally {
       setSubmittingFree(false);
     }

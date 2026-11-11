@@ -60,9 +60,13 @@ export function createWoo(env, fetchImpl = fetch) {
           ? data.message.replace(/<[^>]*>/g, '').slice(0, 400)
           : 'The store could not complete this request.';
       const error = new CommerceError(message, response.status >= 500 ? 502 : response.status);
-      // Bad bridge signatures return 403. Expired customer sessions return 401
-      // and should not generate administrator alerts.
-      if (response.status === 403 && init?.headers?.['X-LLD-Signature'])
+      // Woo fraud prevention also returns 403. Only the bridge's own error code
+      // identifies rejected bridge authentication; a fraud decision is not a bad secret.
+      if (
+        response.status === 403 &&
+        data.code === 'lld_checkout' &&
+        init?.headers?.['X-LLD-Signature']
+      )
         error.criticalType = 'bridge_authentication';
       throw error;
     }

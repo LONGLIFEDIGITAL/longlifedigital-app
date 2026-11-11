@@ -462,6 +462,30 @@ test('order ownership uses the signed browser session, never a supplied customer
   );
   assert.equal(result.status, 404);
 });
+
+test('Woo fraud rejection preserves the support message without a false bridge-authentication alert or automatic retry', async () => {
+  const alerts = [];
+  let submissions = 0;
+  const message =
+    'We are unable to process this request online. Please contact support to complete your purchase.';
+  const result = await call(
+    'checkout',
+    payload,
+    async (url) => {
+      if (url.endsWith('/config')) return reply(config);
+      submissions++;
+      return reply({ code: 'woocommerce_rest_checkout_error', message }, 403);
+    },
+    {},
+    async ({ type }) => alerts.push(type),
+  );
+  assert.equal(result.status, 403);
+  assert.equal(result.body.error, message);
+  assert.equal(result.body.retrySafe, false);
+  assert.equal(submissions, 1);
+  assert.deepEqual(alerts, []);
+});
+
 test('invalid authentication references are rejected; WP checkout URLs never leave the BFF', () => {
   assert.throws(() =>
     checkoutResult(

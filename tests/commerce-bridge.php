@@ -174,6 +174,8 @@ check($pre(null, null, $duplicate)->data['status'] === 409, 'duplicate while pro
 $order = new Order(); $orders[12] = $order;
 $hooks['woocommerce_store_api_checkout_update_order_meta']($order);
 check(lld_record($identity['key'])['order'] === 12, 'order associated durably before payment');
+$hooks['woocommerce_rest_checkout_process_payment_with_context']((object) array('order' => $order));
+check(lld_record($identity['key'])['payment_started'] === true, 'payment dispatch is recorded before the gateway runs');
 $post(new WP_REST_Response(array('order_id'=>12, 'payment_result'=>array('payment_status'=>'success'))), null, $r);
 $duplicate = new Request('/wc/store/v1/checkout', $r->body);
 check($pre(null, null, $duplicate)->get_data()['order_id'] === 12, 'completed duplicate returns same result without reprocessing');
@@ -229,4 +231,34 @@ unset($order->meta['_stripe_intent_id']);
 $record['status'] = 200;
 lld_save($identity['key'], $record);
 check(lld_order_status($owned)->data['status'] === 'checkout-draft', 'unresolved draft without a recorded rejection remains unconfirmed');
+
+// A proven pre-gateway block is different from a payment with an uncertain result.
+$order->status = 'pending'; $order->paidDate = false; $order->verified = false;
+$blocked_record = array_merge($record, array('payment_started' => false, 'status' => 403, 'response' => array('code' => 'woocommerce_rest_checkout_error')));
+lld_save($identity['key'], $blocked_record);
+lld_insert($identity['lock'], 'lock', array('attempt' => $identity['attempt']));
+$blocked_response = lld_order_status($confirm)->data;
+check($blocked_response['status'] === 'blocked' && $blocked_response['failureReason'] === 'checkout_blocked', 'pre-gateway fraud rejection resolves a pending order as blocked');
+check(!$blocked_response['paid'] && !$blocked_response['downloads'] && !$order->verified, 'blocked checkout neither verifies a new payment nor grants downloads');
+check($order->status === 'pending', 'reporting a block does not overwrite Woo order status or its fraud decision');
+check(lld_record($identity['lock']) === null, 'known pre-payment rejection releases only the attempt lock');
+
+foreach (array('payment_started', 'legacy', 'other_code', 'server_error', 'intent', 'setup', 'checkout_session', 'paid_date') as $case) {
+    $ambiguous = $blocked_record;
+    if ($case === 'payment_started') $ambiguous['payment_started'] = true;
+    if ($case === 'legacy') unset($ambiguous['payment_started']);
+    if ($case === 'other_code') $ambiguous['response']['code'] = 'another_error';
+    if ($case === 'server_error') $ambiguous['status'] = 500;
+    if ($case === 'intent') $order->meta['_stripe_intent_id'] = 'pi_pending';
+    if ($case === 'setup') $order->meta['_stripe_setup_intent'] = 'seti_pending';
+    if ($case === 'checkout_session') $order->meta['_stripe_checkout_session_id'] = 'cs_pending';
+    if ($case === 'paid_date') $order->paidDate = true;
+    lld_save($identity['key'], $ambiguous);
+    lld_insert($identity['lock'], 'lock', array('attempt' => $identity['attempt']));
+    check(lld_order_status($owned)->data['status'] === 'pending' && lld_record($identity['lock']) !== null, 'uncertain payment remains protected: ' . $case);
+    unset($order->meta['_stripe_intent_id'], $order->meta['_stripe_setup_intent'], $order->meta['_stripe_checkout_session_id']);
+    $order->paidDate = false;
+}
+lld_save($identity['key'], $record);
+lld_delete($identity['lock']);
 echo "Passed $count bridge checks.\n";
